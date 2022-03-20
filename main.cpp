@@ -1,5 +1,6 @@
 #include "common.h"
 #include "chunk.h"
+#include "compiler.h"
 #include "vm.h"
 
 #define EXIT_CMDLINE_HELP 64
@@ -16,12 +17,13 @@ public:
 
     void repl()
     {
+        std::string line;
         for (;;)
         {
             std::cout << "> ";
-            std::string line;
-            std::getline(std::cin, line);
-            if (line == "quit")
+            line.clear();
+            const auto &retVal = std::getline(std::cin, line);
+            if (retVal.eof() || retVal.bad() || line == "quit")
             {
                 break;
             }
@@ -43,6 +45,9 @@ public:
 
     InterpretResult interpret(const std::string &source)
     {
+        Compiler compiler;
+        compiler.compile(source);
+
         Chunk chunk("<main>");
         chunk.disassemble();
 

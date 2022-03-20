@@ -1,5 +1,5 @@
 
-OBJS = main.o chunk.o debug.o value.o lineinfo.o vm.o
+OBJS = main.o chunk.o debug.o value.o lineinfo.o vm.o scanner.o compiler.o
 
 cpplox: $(OBJS)
 	clang++ -std=c++17 $(OBJS) -g -o cpplox
