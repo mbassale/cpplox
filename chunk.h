@@ -23,9 +23,10 @@ private:
 public:
     Chunk(const std::string &name);
     void write(uint8_t byte, size_t line);
-    uint8_t read(size_t offset) const { return code[offset]; }
+    inline uint8_t read(size_t offset) const { return code[offset]; }
     size_t writeConstant(Value value);
-    Value readConstant(size_t offset) const { return constants[offset]; }
+    inline Value readConstant(size_t offset) const { return constants[offset]; }
+    inline uint8_t *data() { return code.data(); }
     size_t size() const { return code.size(); }
 
     void disassemble();
