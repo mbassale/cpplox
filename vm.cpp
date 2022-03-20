@@ -32,6 +32,13 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_ADD:
+        case OP_SUBTRACT:
+        case OP_MULTIPLY:
+        case OP_DIVIDE:
+            binaryOperator(instruction);
+            break;
+
         case OP_NEGATE:
         {
             pushStack(-popStack());

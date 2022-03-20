@@ -44,6 +44,18 @@ size_t Chunk::disassembleInstruction(size_t offset)
     case OP_CONSTANT_LONG:
         return constantLongInstruction("OP_CONSTANT_LONG", *this, offset);
 
+    case OP_ADD:
+        return simpleInstruction("OP_ADD", offset);
+
+    case OP_SUBTRACT:
+        return simpleInstruction("OP_SUBTRACT", offset);
+
+    case OP_MULTIPLY:
+        return simpleInstruction("OP_MULTIPLY", offset);
+
+    case OP_DIVIDE:
+        return simpleInstruction("OP_DIVIDE", offset);
+
     case OP_NEGATE:
         return simpleInstruction("OP_NEGATE", offset);
 
@@ -58,16 +70,6 @@ size_t Chunk::disassembleInstruction(size_t offset)
 
 void Chunk::printLineColumn(size_t offset)
 {
-    if (offset > 0)
-    {
-        const auto previousLine = lines.get(offset - 1);
-        const auto currentLine = lines.get(offset);
-        if (previousLine == currentLine)
-        {
-            std::cout << "   | ";
-            return;
-        }
-    }
     std::cout << std::setfill('0') << std::setw(4) << lines.get(offset) << " ";
 }
 

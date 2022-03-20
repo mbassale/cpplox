@@ -18,6 +18,18 @@ size_t LineInfo::get(size_t offset)
 
 void LineInfo::write(size_t line)
 {
+    if (line == 0)
+    {
+        if (lines.empty())
+        {
+            LineEntry entry;
+            entry.line = 1;
+            entry.count = 1;
+            lines.push_back(entry);
+            return;
+        }
+        line = lines[lines.size() - 1].line;
+    }
     if (lines.size() > 0)
     {
         const auto lastIndex = lines.size() - 1;

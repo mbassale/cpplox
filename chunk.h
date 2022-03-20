@@ -9,6 +9,10 @@ typedef enum
 {
     OP_CONSTANT,
     OP_CONSTANT_LONG,
+    OP_ADD,
+    OP_SUBTRACT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
     OP_NEGATE,
     OP_RETURN,
 } OpCode;
@@ -23,7 +27,7 @@ private:
 
 public:
     Chunk(const std::string &name);
-    void write(uint8_t byte, size_t line);
+    void write(uint8_t byte, size_t line = LINE_INFO_CONTINUE);
     inline uint8_t read(size_t offset) const { return code[offset]; }
     size_t writeConstant(Value value);
     inline Value readConstant(size_t offset) const { return constants[offset]; }

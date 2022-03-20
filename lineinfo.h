@@ -9,6 +9,8 @@ struct LineEntry
     size_t count;
 };
 
+const size_t LINE_INFO_CONTINUE = 0;
+
 class LineInfo
 {
     std::vector<LineEntry> lines;
@@ -16,7 +18,7 @@ class LineInfo
 public:
     LineInfo() : lines() {}
     size_t get(size_t offset);
-    void write(size_t line);
+    void write(size_t line = LINE_INFO_CONTINUE);
     void dump();
 };
 
