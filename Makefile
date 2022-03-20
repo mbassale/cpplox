@@ -1,5 +1,5 @@
 
-OBJS = main.o chunk.o
+OBJS = main.o chunk.o debug.o
 
 cpplox: $(OBJS)
 	clang++ $(OBJS) -g -o cpplox
@@ -11,4 +11,4 @@ cpplox: $(OBJS)
 	clang++ -g -c $< -o $@
 
 clean:
-	rm $(OBJS) cpplox
+	rm -f $(OBJS) cpplox
