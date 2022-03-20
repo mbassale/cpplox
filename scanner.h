@@ -52,6 +52,8 @@ enum TokenType
     TOKEN_EOF
 };
 
+class Scanner;
+
 struct Token
 {
 public:
@@ -59,9 +61,23 @@ public:
     std::string::const_iterator start;
     size_t length;
     size_t line;
+    std::string error;
 
-    Token(TokenType type, std::string::const_iterator start, size_t length, size_t line)
+    explicit Token(TokenType type) : type(type), start(), length(), line() {}
+    explicit Token(TokenType type, std::string::const_iterator start, size_t length, size_t line)
         : type(type), start(start), length(length), line(line) {}
+    const std::string lexeme() const { return std::string(start, start + length); }
+    const std::string str() const
+    {
+        std::ostringstream ss;
+        ss << std::setfill('0') << std::setw(4) << line << " "
+           << std::setfill('0') << std::setw(2) << type
+           << " " << lexeme();
+        return ss.str();
+    }
+
+    static Token make(const Scanner &scanner, TokenType type);
+    static Token makeError(const Scanner &scanner, const std::string &error);
 };
 
 class Scanner
@@ -79,10 +95,38 @@ public:
         line = 1;
     }
 
-    Token next()
+    Token next();
+
+private:
+    friend class Token;
+    inline bool isAtEnd() { return current == source.cend(); }
+    inline char advance()
     {
-        return Token(TokenType::TOKEN_EOF, source.cend(), 1, line);
+        current++;
+        return *(current - 1);
     }
+    inline bool match(char expected)
+    {
+        if (isAtEnd())
+            return false;
+        if (*current != expected)
+            return false;
+        current++;
+        return true;
+    }
+    inline char peek() { return *current; }
+    inline char peekNext()
+    {
+        if (isAtEnd())
+            return '\0';
+        return *(current + 1);
+    }
+    void skipWhitespaceAndComments();
+    Token scanString();
+    Token scanNumber();
+    Token scanIdentifier();
+    TokenType identifierType();
+    TokenType checkKeyword(size_t offset, const std::string &rest, TokenType type);
 };
 
 #endif // __cpplox_scanner_h
