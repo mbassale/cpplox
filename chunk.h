@@ -2,9 +2,11 @@
 #define __cpplox_chunk_h
 
 #include "common.h"
+#include "value.h"
 
 typedef enum
 {
+    OP_CONSTANT,
     OP_RETURN,
 } OpCode;
 
@@ -13,11 +15,15 @@ class Chunk
 private:
     std::string name;
     std::vector<uint8_t> code;
+    std::vector<Value> constants;
 
 public:
     Chunk(const std::string &name);
     void write(uint8_t byte);
-    size_t size() { return code.size(); }
+    uint8_t read(size_t offset) const { return code[offset]; }
+    uint8_t writeConstant(Value value);
+    Value readConstant(uint8_t offset) const { return constants[offset]; }
+    size_t size() const { return code.size(); }
 
     void disassemble();
 
