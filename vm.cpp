@@ -32,6 +32,12 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_NEGATE:
+        {
+            pushStack(-popStack());
+            break;
+        }
+
         case OP_RETURN:
         {
             std::cout << popStack() << std::endl;

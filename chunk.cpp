@@ -44,6 +44,9 @@ size_t Chunk::disassembleInstruction(size_t offset)
     case OP_CONSTANT_LONG:
         return constantLongInstruction("OP_CONSTANT_LONG", *this, offset);
 
+    case OP_NEGATE:
+        return simpleInstruction("OP_NEGATE", offset);
+
     case OP_RETURN:
         return simpleInstruction("OP_RETURN", offset);
 

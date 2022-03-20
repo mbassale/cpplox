@@ -20,7 +20,9 @@ int main(int argc, char *argv[])
     chunk.write(tmp.bytes.b1, 3);
     chunk.write(tmp.bytes.b2, 3);
 
-    chunk.write(OP_RETURN, 2);
+    chunk.write(OP_NEGATE, 4);
+
+    chunk.write(OP_RETURN, 5);
 
     chunk.disassemble();
 
