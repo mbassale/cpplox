@@ -2,6 +2,8 @@
 
 InterpretResult VM::interpret(Chunk &chunk)
 {
+    if (chunk.size() == 0)
+        return InterpretResult::INTERPRET_RUNTIME_ERROR;
     this->chunk = &chunk;
     ip = this->chunk->data();
     return run();

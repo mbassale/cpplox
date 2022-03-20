@@ -2,39 +2,72 @@
 #include "chunk.h"
 #include "vm.h"
 
+#define EXIT_CMDLINE_HELP 64
+
+class Driver
+{
+private:
+    VM vm;
+
+public:
+    Driver() : vm()
+    {
+    }
+
+    void repl()
+    {
+        for (;;)
+        {
+            std::cout << "> ";
+            std::string line;
+            std::getline(std::cin, line);
+            if (line == "quit")
+            {
+                break;
+            }
+            interpret(line);
+        }
+    }
+
+    void runFile(const char *path)
+    {
+        std::ifstream file(path);
+        if (file.bad())
+        {
+            throw std::runtime_error("Cannot open file.");
+        }
+        std::ostringstream sstr;
+        sstr << file.rdbuf();
+        interpret(sstr.str());
+    }
+
+    InterpretResult interpret(const std::string &source)
+    {
+        Chunk chunk("<main>");
+        chunk.disassemble();
+
+        std::cout << "== execution ==" << std::endl;
+        return vm.interpret(chunk);
+    }
+};
+
 int main(int argc, char *argv[])
 {
-    VM vm;
-    Chunk chunk("<main>");
+    Driver driver;
 
-    auto constant = chunk.writeConstant(1.2);
-    chunk.write(OP_CONSTANT);
-    chunk.write(constant);
+    if (argc == 1)
+    {
+        driver.repl();
+    }
+    else if (argc == 2)
+    {
+        driver.runFile(argv[1]);
+    }
+    else
+    {
+        std::cerr << "Usage: cpplox [path]\n";
+        exit(EXIT_CMDLINE_HELP);
+    }
 
-    auto constant2 = chunk.writeConstant(1227);
-    chunk.write(OP_CONSTANT_LONG, 2);
-
-    uint32bytes tmp = {0};
-    tmp.u32 = constant2;
-    chunk.write(tmp.bytes.b0);
-    chunk.write(tmp.bytes.b1);
-    chunk.write(tmp.bytes.b2);
-
-    chunk.write(OP_NEGATE, 3);
-
-    chunk.write(OP_ADD, 3);
-
-    auto constant3 = chunk.writeConstant(2);
-    chunk.write(OP_CONSTANT);
-    chunk.write(constant3);
-
-    chunk.write(OP_DIVIDE);
-
-    chunk.write(OP_RETURN, 3);
-
-    chunk.disassemble();
-
-    std::cout << "== execution ==" << std::endl;
-    vm.interpret(chunk);
     return EXIT_SUCCESS;
 }
