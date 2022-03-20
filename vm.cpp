@@ -12,6 +12,7 @@ InterpretResult VM::run()
     for (;;)
     {
 #ifdef DEBUG_TRACE_EXECUTION
+        traceStack();
         chunk->disassembleInstruction((size_t)(ip - chunk->data()));
 #endif
         uint8_t instruction;
@@ -20,19 +21,20 @@ InterpretResult VM::run()
         case OP_CONSTANT:
         {
             Value constant = readConstant();
-            std::cout << constant << std::endl;
+            pushStack(constant);
             break;
         }
 
         case OP_CONSTANT_LONG:
         {
             Value constant = readConstantLong();
-            std::cout << constant << std::endl;
+            pushStack(constant);
             break;
         }
 
         case OP_RETURN:
         {
+            std::cout << popStack() << std::endl;
             return InterpretResult::INTERPRET_OK;
             break;
         }
@@ -45,4 +47,18 @@ InterpretResult VM::run()
     }
 
     return InterpretResult::INTERPRET_RUNTIME_ERROR;
+}
+
+void VM::traceStack()
+{
+    std::cout << "STCK [";
+    for (Value *slot = stack.data(); slot < stackTop; slot++)
+    {
+        std::cout << *slot;
+        if (slot + 1 < stackTop)
+        {
+            std::cout << "|";
+        }
+    }
+    std::cout << "]" << std::endl;
 }

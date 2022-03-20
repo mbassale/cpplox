@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iomanip>
 #include <memory>
+#include <array>
 #include <vector>
 #include <list>
 
