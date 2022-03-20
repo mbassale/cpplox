@@ -1,6 +1,7 @@
 #ifndef __cpplox_vm_h
 #define __cpplox_vm_h
 
+#include "common.h"
 #include "chunk.h"
 
 typedef enum

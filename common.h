@@ -11,4 +11,6 @@
 #include <vector>
 #include <list>
 
+#define DEBUG_TRACE_EXECUTION
+
 #endif // __cpplox_common_h

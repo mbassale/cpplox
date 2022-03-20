@@ -11,6 +11,9 @@ InterpretResult VM::run()
 {
     for (;;)
     {
+#ifdef DEBUG_TRACE_EXECUTION
+        chunk->disassembleInstruction((size_t)(ip - chunk->data()));
+#endif
         uint8_t instruction;
         switch (instruction = readByte())
         {

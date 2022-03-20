@@ -30,9 +30,9 @@ public:
     size_t size() const { return code.size(); }
 
     void disassemble();
+    size_t disassembleInstruction(size_t offset);
 
 private:
-    size_t disassembleInstruction(size_t offset);
     void printLineColumn(size_t offset);
 };
 

@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 
     chunk.disassemble();
 
+    std::cout << "== execution ==" << std::endl;
     vm.interpret(chunk);
     return EXIT_SUCCESS;
 }
