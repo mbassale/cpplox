@@ -3,13 +3,14 @@
 size_t simpleInstruction(const std::string &name, size_t offset);
 size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset);
 
-Chunk::Chunk(const std::string &name) : name(name), code(), constants()
+Chunk::Chunk(const std::string &name) : name(name), code(), constants(), lines()
 {
 }
 
-void Chunk::write(uint8_t byte)
+void Chunk::write(uint8_t byte, size_t line)
 {
     code.push_back(byte);
+    lines.write(line);
 }
 
 uint8_t Chunk::writeConstant(Value value)
@@ -21,7 +22,7 @@ uint8_t Chunk::writeConstant(Value value)
 void Chunk::disassemble()
 {
     std::cout << "== " << name << " ==\n";
-    for (size_t offset = 0; offset < size(); offset++)
+    for (size_t offset = 0; offset < size();)
     {
         offset = disassembleInstruction(offset);
     }
@@ -30,6 +31,9 @@ void Chunk::disassemble()
 size_t Chunk::disassembleInstruction(size_t offset)
 {
     std::cout << std::setfill('0') << std::setw(4) << offset << " ";
+
+    printLineColumn(offset);
+
     uint8_t instruction = code[offset];
     switch (instruction)
     {
@@ -43,6 +47,21 @@ size_t Chunk::disassembleInstruction(size_t offset)
         std::cout << "Unknown opcode: " << instruction << std::endl;
         return offset + 1;
     }
+}
+
+void Chunk::printLineColumn(size_t offset)
+{
+    if (offset > 0)
+    {
+        const auto previousLine = lines.get(offset - 1);
+        const auto currentLine = lines.get(offset);
+        if (previousLine == currentLine)
+        {
+            std::cout << "   | ";
+            return;
+        }
+    }
+    std::cout << std::setfill('0') << std::setw(4) << lines.get(offset) << " ";
 }
 
 size_t simpleInstruction(const std::string &name, size_t offset)
