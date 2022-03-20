@@ -12,6 +12,15 @@ int main(int argc, char *argv[])
 
     chunk.write(OP_RETURN, 2);
 
+    auto constant2 = chunk.writeConstant(1227);
+    chunk.write(OP_CONSTANT_LONG, 3);
+
+    uint32bytes tmp = {0};
+    tmp.u32 = constant2;
+    chunk.write(tmp.bytes.b0, 3);
+    chunk.write(tmp.bytes.b1, 3);
+    chunk.write(tmp.bytes.b2, 3);
+
     chunk.disassemble();
     return EXIT_SUCCESS;
 }

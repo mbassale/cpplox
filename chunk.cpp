@@ -2,6 +2,7 @@
 
 size_t simpleInstruction(const std::string &name, size_t offset);
 size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset);
+size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t offset);
 
 Chunk::Chunk(const std::string &name) : name(name), code(), constants(), lines()
 {
@@ -13,10 +14,10 @@ void Chunk::write(uint8_t byte, size_t line)
     lines.write(line);
 }
 
-uint8_t Chunk::writeConstant(Value value)
+size_t Chunk::writeConstant(Value value)
 {
     constants.push_back(value);
-    return (uint8_t)(constants.size() - 1);
+    return constants.size() - 1;
 }
 
 void Chunk::disassemble()
@@ -39,6 +40,9 @@ size_t Chunk::disassembleInstruction(size_t offset)
     {
     case OP_CONSTANT:
         return constantInstruction("OP_CONSTANT", *this, offset);
+
+    case OP_CONSTANT_LONG:
+        return constantLongInstruction("OP_CONSTANT_LONG", *this, offset);
 
     case OP_RETURN:
         return simpleInstruction("OP_RETURN", offset);
@@ -72,8 +76,19 @@ size_t simpleInstruction(const std::string &name, size_t offset)
 
 size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset)
 {
-    uint8_t constantOffset = chunk.read(offset);
+    uint8_t constantOffset = chunk.read(offset + 1);
     std::cout << name << " " << std::setfill('0') << std::setw(4) << (size_t)constantOffset << " "
               << chunk.readConstant(constantOffset) << std::endl;
     return offset + 2;
+}
+
+size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t offset)
+{
+    uint32bytes constantOffset = {0};
+    constantOffset.bytes.b0 = chunk.read(offset + 1);
+    constantOffset.bytes.b1 = chunk.read(offset + 2);
+    constantOffset.bytes.b2 = chunk.read(offset + 3);
+    std::cout << name << " " << std::setfill('0') << std::setw(4) << constantOffset.u32 << " "
+              << chunk.readConstant(constantOffset.u32) << std::endl;
+    return offset + 4;
 }
