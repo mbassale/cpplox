@@ -4,6 +4,7 @@
 #include <cstdbool>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <iterator>
 #include <iostream>
