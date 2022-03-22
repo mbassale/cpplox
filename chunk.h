@@ -26,7 +26,7 @@ private:
     LineInfo lines;
 
 public:
-    Chunk(const std::string &name);
+    explicit Chunk(const std::string &name);
     void write(uint8_t byte, size_t line = LINE_INFO_CONTINUE);
     inline uint8_t read(size_t offset) const { return code[offset]; }
     size_t writeConstant(Value value);
@@ -40,5 +40,7 @@ public:
 private:
     void printLineColumn(size_t offset);
 };
+
+typedef std::shared_ptr<Chunk> ChunkPtr;
 
 #endif // __cpplox_chunk_h

@@ -45,14 +45,28 @@ public:
 
     InterpretResult interpret(const std::string &source)
     {
-        Compiler compiler;
-        compiler.compile(source);
+        try
+        {
+            Compiler compiler;
+            auto chunk = compiler.compile(source);
+            if (compiler.hasErrors())
+            {
+                for (const std::string &error : compiler.getErrors())
+                {
+                    std::cerr << error << std::endl;
+                }
+                return InterpretResult::INTERPRET_COMPILE_ERROR;
+            }
+            chunk->disassemble();
 
-        Chunk chunk("<main>");
-        chunk.disassemble();
-
-        std::cout << "== execution ==" << std::endl;
-        return vm.interpret(chunk);
+            std::cout << "== execution ==" << std::endl;
+            return vm.interpret(*chunk);
+        }
+        catch (CompilerError &err)
+        {
+            std::cerr << "CompilerError: " << err.what() << std::endl;
+            return InterpretResult::INTERPRET_COMPILE_ERROR;
+        }
     }
 };
 

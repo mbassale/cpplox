@@ -74,6 +74,7 @@ private:
         stackTop--;
         return *stackTop;
     }
+    inline bool isStackEmpty() { return stackTop == stack.data(); }
     void traceStack();
 };
 

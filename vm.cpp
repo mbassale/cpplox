@@ -49,7 +49,10 @@ InterpretResult VM::run()
 
         case OP_RETURN:
         {
-            std::cout << popStack() << std::endl;
+            if (!isStackEmpty())
+            {
+                std::cout << popStack() << std::endl;
+            }
             return InterpretResult::INTERPRET_OK;
             break;
         }

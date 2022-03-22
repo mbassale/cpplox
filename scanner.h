@@ -5,6 +5,8 @@
 
 enum TokenType
 {
+    TOKEN_EMPTY,
+
     // Single-character tokens.
     TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN,
@@ -63,6 +65,7 @@ public:
     size_t line;
     std::string error;
 
+    explicit Token() : type(TOKEN_EMPTY) {}
     explicit Token(TokenType type) : type(type), start(), length(), line() {}
     explicit Token(TokenType type, std::string::const_iterator start, size_t length, size_t line)
         : type(type), start(start), length(length), line(line) {}
@@ -128,5 +131,7 @@ private:
     TokenType identifierType();
     TokenType checkKeyword(size_t offset, const std::string &rest, TokenType type);
 };
+
+typedef std::unique_ptr<Scanner> ScannerUniquePtr;
 
 #endif // __cpplox_scanner_h
