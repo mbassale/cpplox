@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <variant>
 #include <string>
 #include <iterator>
 #include <iostream>

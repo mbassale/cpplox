@@ -13,6 +13,12 @@ typedef enum
 
 const size_t STACK_MAX = 256;
 
+class VMRuntimeError : public std::runtime_error
+{
+public:
+    VMRuntimeError(const std::string &message) : std::runtime_error(message) {}
+};
+
 class VM
 {
     Chunk *chunk;
@@ -39,30 +45,7 @@ private:
         constantOffset.bytes.b2 = readByte();
         return chunk->readConstant(constantOffset.u32);
     }
-    inline void binaryOperator(uint8_t op)
-    {
-        const auto b = popStack();
-        const auto a = popStack();
-        switch (op)
-        {
-        case OP_ADD:
-            pushStack(a + b);
-            break;
-        case OP_SUBTRACT:
-            pushStack(a - b);
-            break;
-        case OP_MULTIPLY:
-            pushStack(a * b);
-            break;
-        case OP_DIVIDE:
-            pushStack(a / b);
-            break;
-        default:
-            // TODO: throw runtime exception.
-            break;
-        };
-    }
-
+    inline void binaryOperator(uint8_t op);
     inline void resetStack() { stackTop = stack.data(); }
     inline void pushStack(Value value)
     {
@@ -75,6 +58,10 @@ private:
         return *stackTop;
     }
     inline bool isStackEmpty() { return stackTop == stack.data(); }
+    inline Value peekStack(size_t distance)
+    {
+        return stackTop[-1 - distance];
+    }
     void traceStack();
 };
 

@@ -43,7 +43,13 @@ InterpretResult VM::run()
 
         case OP_NEGATE:
         {
-            pushStack(-popStack());
+            if (!std::holds_alternative<double>(peekStack(0)))
+            {
+                throw VMRuntimeError("Operand must be a number.");
+            }
+            const auto topValue = popStack();
+            const auto num = std::get<double>(topValue);
+            pushStack(-num);
             break;
         }
 
@@ -51,7 +57,7 @@ InterpretResult VM::run()
         {
             if (!isStackEmpty())
             {
-                std::cout << popStack() << std::endl;
+                std::cout << (std::string)popStack() << std::endl;
             }
             return InterpretResult::INTERPRET_OK;
             break;
@@ -67,12 +73,40 @@ InterpretResult VM::run()
     return InterpretResult::INTERPRET_RUNTIME_ERROR;
 }
 
+void VM::binaryOperator(uint8_t op)
+{
+    if (!peekStack(0).isDouble() || !peekStack(1).isDouble())
+    {
+        throw VMRuntimeError("Operand must be a number.");
+    }
+    const auto b = (double)popStack();
+    const auto a = (double)popStack();
+    switch (op)
+    {
+    case OP_ADD:
+        pushStack(Value(a + b));
+        break;
+    case OP_SUBTRACT:
+        pushStack(Value(a - b));
+        break;
+    case OP_MULTIPLY:
+        pushStack(Value(a * b));
+        break;
+    case OP_DIVIDE:
+        pushStack(Value(a / b));
+        break;
+    default:
+        // TODO: throw runtime exception.
+        break;
+    };
+}
+
 void VM::traceStack()
 {
     std::cout << "STCK [";
     for (Value *slot = stack.data(); slot < stackTop; slot++)
     {
-        std::cout << *slot;
+        std::cout << (std::string)*slot;
         if (slot + 1 < stackTop)
         {
             std::cout << "|";

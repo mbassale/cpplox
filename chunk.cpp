@@ -83,7 +83,7 @@ size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset)
 {
     uint8_t constantOffset = chunk.read(offset + 1);
     std::cout << name << " " << std::setfill('0') << std::setw(4) << (size_t)constantOffset << " "
-              << chunk.readConstant(constantOffset) << std::endl;
+              << (std::string)chunk.readConstant(constantOffset) << std::endl;
     return offset + 2;
 }
 
@@ -94,6 +94,6 @@ size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t off
     constantOffset.bytes.b1 = chunk.read(offset + 2);
     constantOffset.bytes.b2 = chunk.read(offset + 3);
     std::cout << name << " " << std::setfill('0') << std::setw(4) << constantOffset.u32 << " "
-              << chunk.readConstant(constantOffset.u32) << std::endl;
+              << (std::string)chunk.readConstant(constantOffset.u32) << std::endl;
     return offset + 4;
 }
