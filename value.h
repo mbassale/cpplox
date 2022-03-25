@@ -30,10 +30,12 @@ public:
     Value(const Value &value) : BaseValue(value) {}
     Value(Value &&value) : BaseValue(value) {}
 
-    inline bool isNull() { return std::holds_alternative<nullptr_t>(*this); }
-    inline bool isBool() { return std::holds_alternative<bool>(*this); }
-    inline bool isDouble() { return std::holds_alternative<double>(*this); }
-    inline bool isString() { return std::holds_alternative<std::string>(*this); }
+    inline bool isNull() const { return std::holds_alternative<nullptr_t>(*this); }
+    inline bool isBool() const { return std::holds_alternative<bool>(*this); }
+    inline bool isDouble() const { return std::holds_alternative<double>(*this); }
+    inline bool isString() const { return std::holds_alternative<std::string>(*this); }
+    bool isFalsey() const;
+    bool isTruthy() const;
 
     Value &operator=(const Value &value)
     {

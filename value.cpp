@@ -1,5 +1,39 @@
 #include "value.h"
 
+bool Value::isFalsey() const
+{
+    if (isNull())
+        return true;
+    if (isBool())
+        return !(bool)(*this);
+    // Only 0 is falsey
+    if (isDouble())
+        return (double)(*this) == 0.0;
+    // Empty string is falsey
+    if (isString())
+        return ((std::string)(*this))
+                   .length() == 0;
+
+    throw std::runtime_error("unreachable code.");
+}
+
+bool Value::isTruthy() const
+{
+    if (isNull())
+        return false;
+    if (isBool())
+        return (bool)(*this);
+    // Any number != 0 is Truthy
+    if (isDouble())
+        return (double)(*this) != 0.0;
+    // A non-empty string is truthy
+    if (isString())
+        return ((std::string)(*this))
+                   .length() > 0;
+
+    throw std::runtime_error("unreachable code.");
+}
+
 Value::operator nullptr_t() const
 {
     return std::get<nullptr_t>(*this);

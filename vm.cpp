@@ -59,6 +59,12 @@ InterpretResult VM::run()
             binaryOperator(instruction);
             break;
 
+        case OP_NOT:
+        {
+            pushStack(Value(popStack().isFalsey()));
+            break;
+        }
+
         case OP_NEGATE:
         {
             if (!std::holds_alternative<double>(peekStack(0)))

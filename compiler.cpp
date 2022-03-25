@@ -57,6 +57,9 @@ void Compiler::unary()
     // Emit the operator instruction.
     switch (operatorType)
     {
+    case TOKEN_BANG:
+        emitByte(OP_NOT);
+        break;
     case TOKEN_MINUS:
         emitByte(OP_NEGATE);
         break;
