@@ -17,7 +17,7 @@ public:
 
     void repl()
     {
-        std::cout << "CppLox 0.1 - © 2022 Marco Bassaletti." << std::endl;
+        std::cout << "CppLox v" << CPPLOX_VERSION_MAJOR << "." << CPPLOX_VERSION_MINOR << " - © 2022 Marco Bassaletti." << std::endl;
         std::string line;
         for (;;)
         {

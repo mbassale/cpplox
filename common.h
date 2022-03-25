@@ -1,6 +1,7 @@
 #ifndef __cpplox_common_h
 #define __cpplox_common_h
 
+#include "config.h"
 #include <cstdbool>
 #include <cstddef>
 #include <cstdint>
