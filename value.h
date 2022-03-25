@@ -15,27 +15,33 @@ union uint32bytes
     } bytes;
 };
 
-class Value : public std::variant<nullptr_t, bool, double>
+typedef std::variant<nullptr_t, bool, double, std::string> BaseValue;
+
+class Value : public BaseValue
 {
 public:
     Value() {}
-    Value(double value) : std::variant<nullptr_t, bool, double>(value) {}
-    Value(Value &value) : std::variant<nullptr_t, bool, double>(value) {}
-    Value(Value &&value) : std::variant<nullptr_t, bool, double>(value) {}
+    Value(nullptr_t value) : BaseValue(value) {}
+    Value(bool value) : BaseValue(value) {}
+    Value(double value) : BaseValue(value) {}
 
-    inline bool isDouble() { return std::holds_alternative<double>(*this); }
-    inline bool isBool() { return std::holds_alternative<bool>(*this); }
+    Value(const Value &value) : BaseValue(value) {}
+    Value(Value &&value) : BaseValue(value) {}
+
     inline bool isNull() { return std::holds_alternative<nullptr_t>(*this); }
+    inline bool isBool() { return std::holds_alternative<bool>(*this); }
+    inline bool isDouble() { return std::holds_alternative<double>(*this); }
+    inline bool isString() { return std::holds_alternative<std::string>(*this); }
 
     Value operator=(const Value &value)
     {
-        std::variant<nullptr_t, bool, double>::operator=(value);
+        BaseValue::operator=(value);
         return *this;
     }
-    operator std::string() const;
-    operator double() const;
-    operator bool() const;
     operator nullptr_t() const;
+    operator bool() const;
+    operator double() const;
+    operator std::string() const;
 };
 
 #endif // __cpplox_value_h
