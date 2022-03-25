@@ -91,6 +91,24 @@ void Compiler::binary()
     }
 }
 
+void Compiler::literal()
+{
+    switch (previous.type)
+    {
+    case TOKEN_FALSE:
+        emitByte(OP_FALSE);
+        break;
+    case TOKEN_NIL:
+        emitByte(OP_NIL);
+        break;
+    case TOKEN_TRUE:
+        emitByte(OP_TRUE);
+        break;
+    default: // Unreachable.
+        return;
+    }
+}
+
 void Compiler::parsePrecedence(Precedence precedence)
 {
     advance();

@@ -34,6 +34,24 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_NIL:
+        {
+            pushStack(Value(nullptr));
+            break;
+        }
+
+        case OP_TRUE:
+        {
+            pushStack(Value(true));
+            break;
+        }
+
+        case OP_FALSE:
+        {
+            pushStack(Value(false));
+            break;
+        }
+
         case OP_ADD:
         case OP_SUBTRACT:
         case OP_MULTIPLY:
