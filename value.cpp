@@ -24,7 +24,7 @@ Value::operator std::string() const
     }
     else if (std::holds_alternative<bool>(*this))
     {
-        ss << std::get<bool>(*this);
+        ss << (std::get<bool>(*this) ? "true" : "false");
     }
     else if (std::holds_alternative<double>(*this))
     {

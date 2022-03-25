@@ -14,6 +14,7 @@ TEST(ValueTest, NullPtrAssertions)
     EXPECT_THROW({ const auto boolValue = (bool)value; }, std::bad_variant_access);
     EXPECT_THROW({ const auto doubleValue = (double)value; }, std::bad_variant_access);
     EXPECT_NO_THROW({ const auto stringValue = (std::string)value; });
+    EXPECT_EQ((std::string)value, "<nil>");
 }
 
 TEST(ValueTest, BoolAssertions)
@@ -28,11 +29,14 @@ TEST(ValueTest, BoolAssertions)
     EXPECT_NO_THROW({ const auto boolValue = (bool)value; });
     EXPECT_THROW({ const auto doubleValue = (double)value; }, std::bad_variant_access);
     EXPECT_NO_THROW({ const auto stringValue = (std::string)value; });
+
+    EXPECT_EQ((std::string)value, "true");
+    EXPECT_EQ((std::string)Value(false), "false");
 }
 
 TEST(ValueTest, DoubleAssertions)
 {
-    Value value(1.0);
+    Value value(1.2345);
     EXPECT_FALSE(value.isNull());
     EXPECT_FALSE(value.isBool());
     EXPECT_TRUE(value.isDouble());
@@ -42,6 +46,8 @@ TEST(ValueTest, DoubleAssertions)
     EXPECT_THROW({ const auto boolValue = (bool)value; }, std::bad_variant_access);
     EXPECT_NO_THROW({ const auto doubleValue = (double)value; });
     EXPECT_NO_THROW({ const auto stringValue = (std::string)value; });
+
+    EXPECT_EQ((std::string)value, "1.2345");
 }
 
 TEST(ValueTest, StdStringAssertions)
@@ -56,6 +62,8 @@ TEST(ValueTest, StdStringAssertions)
     EXPECT_THROW({ const auto boolValue = (bool)value; }, std::bad_variant_access);
     EXPECT_THROW({ const auto doubleValue = (double)value; }, std::bad_variant_access);
     EXPECT_NO_THROW({ const auto stringValue = (std::string)value; });
+
+    EXPECT_EQ((std::string)value, "string");
 }
 
 TEST(ValueTest, CStringAssertions)
@@ -70,4 +78,6 @@ TEST(ValueTest, CStringAssertions)
     EXPECT_THROW({ const auto boolValue = (bool)value; }, std::bad_variant_access);
     EXPECT_THROW({ const auto doubleValue = (double)value; }, std::bad_variant_access);
     EXPECT_NO_THROW({ const auto stringValue = (std::string)value; });
+
+    EXPECT_EQ((std::string)value, "string");
 }
