@@ -130,6 +130,11 @@ void Compiler::literal()
     }
 }
 
+void Compiler::string()
+{
+    emitConstant(Value(std::string(previous.start + 1, previous.start + previous.length - 1)));
+}
+
 void Compiler::parsePrecedence(Precedence precedence)
 {
     advance();

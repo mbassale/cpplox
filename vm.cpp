@@ -109,9 +109,22 @@ InterpretResult VM::run()
 
 void VM::binaryOperator(uint8_t op)
 {
+    // String concatenation
+    if (peekStack(0).isString() || peekStack(1).isString())
+    {
+        const auto b = (std::string)popStack();
+        const auto a = (std::string)popStack();
+        if (op == OP_ADD)
+        {
+            pushStack(Value(a + b));
+            return;
+        }
+    }
+
+    // Number operation
     if (!peekStack(0).isDouble() || !peekStack(1).isDouble())
     {
-        throw VMRuntimeError("Operand must be a number.");
+        throw VMRuntimeError("Operands must be numbers or strings.");
     }
     const auto b = (double)popStack();
     const auto a = (double)popStack();
