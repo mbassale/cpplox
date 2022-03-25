@@ -52,6 +52,16 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_EQUAL:
+        {
+            const auto a = popStack();
+            const auto b = popStack();
+            pushStack(Value(a == b));
+            break;
+        }
+
+        case OP_GREATER:
+        case OP_LESS:
         case OP_ADD:
         case OP_SUBTRACT:
         case OP_MULTIPLY:
@@ -107,6 +117,12 @@ void VM::binaryOperator(uint8_t op)
     const auto a = (double)popStack();
     switch (op)
     {
+    case OP_GREATER:
+        pushStack(Value(a > b));
+        break;
+    case OP_LESS:
+        pushStack(Value(a < b));
+        break;
     case OP_ADD:
         pushStack(Value(a + b));
         break;
