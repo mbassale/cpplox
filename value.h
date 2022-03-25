@@ -24,6 +24,7 @@ public:
     Value(nullptr_t value) : BaseValue(value) {}
     Value(bool value) : BaseValue(value) {}
     Value(double value) : BaseValue(value) {}
+    Value(const std::string &value) : BaseValue(value) {}
 
     Value(const Value &value) : BaseValue(value) {}
     Value(Value &&value) : BaseValue(value) {}
