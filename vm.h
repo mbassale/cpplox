@@ -36,8 +36,8 @@ private:
     InterpretResult run();
 
     inline uint8_t readByte() { return *ip++; }
-    inline Value readConstant() { return chunk->readConstant(readByte()); }
-    inline Value readConstantLong()
+    inline Value &readConstant() { return chunk->readConstant(readByte()); }
+    inline Value &readConstantLong()
     {
         uint32bytes constantOffset = {0};
         constantOffset.bytes.b0 = readByte();
@@ -52,13 +52,13 @@ private:
         *stackTop = value;
         stackTop++;
     }
-    inline Value popStack()
+    inline Value &popStack()
     {
         stackTop--;
         return *stackTop;
     }
     inline bool isStackEmpty() { return stackTop == stack.data(); }
-    inline Value peekStack(size_t distance)
+    inline Value &peekStack(size_t distance) const
     {
         return stackTop[-1 - distance];
     }

@@ -44,9 +44,23 @@ TEST(ValueTest, DoubleAssertions)
     EXPECT_NO_THROW({ const auto stringValue = (std::string)value; });
 }
 
-TEST(ValueTest, StringAssertions)
+TEST(ValueTest, StdStringAssertions)
 {
     Value value(std::string("string"));
+    EXPECT_FALSE(value.isNull());
+    EXPECT_FALSE(value.isBool());
+    EXPECT_FALSE(value.isDouble());
+    EXPECT_TRUE(value.isString());
+
+    EXPECT_THROW({ const auto nullValue = (nullptr_t)value; }, std::bad_variant_access);
+    EXPECT_THROW({ const auto boolValue = (bool)value; }, std::bad_variant_access);
+    EXPECT_THROW({ const auto doubleValue = (double)value; }, std::bad_variant_access);
+    EXPECT_NO_THROW({ const auto stringValue = (std::string)value; });
+}
+
+TEST(ValueTest, CStringAssertions)
+{
+    Value value("string");
     EXPECT_FALSE(value.isNull());
     EXPECT_FALSE(value.isBool());
     EXPECT_FALSE(value.isDouble());

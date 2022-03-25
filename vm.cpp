@@ -49,7 +49,7 @@ InterpretResult VM::run()
             }
             const auto topValue = popStack();
             const auto num = std::get<double>(topValue);
-            pushStack(-num);
+            pushStack(Value(-num));
             break;
         }
 

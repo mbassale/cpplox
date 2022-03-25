@@ -30,7 +30,7 @@ public:
     void write(uint8_t byte, size_t line = LINE_INFO_CONTINUE);
     inline uint8_t read(size_t offset) const { return code[offset]; }
     size_t writeConstant(Value value);
-    inline Value readConstant(size_t offset) const { return constants[offset]; }
+    inline Value &readConstant(size_t offset) { return constants[offset]; }
     inline uint8_t *data() { return code.data(); }
     size_t size() const { return code.size(); }
 

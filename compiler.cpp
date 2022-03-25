@@ -38,7 +38,7 @@ void Compiler::expression()
 void Compiler::number()
 {
     double value = std::strtod(previous.lexeme().c_str(), nullptr);
-    emitConstant(value);
+    emitConstant(Value(value));
 }
 
 void Compiler::grouping()
