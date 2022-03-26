@@ -13,6 +13,8 @@ bool Value::isFalsey() const
     if (isString())
         return ((std::string)(*this))
                    .length() == 0;
+    if (isObject())
+        return ((Object) * this).isFalsey();
 
     throw std::runtime_error("unreachable code.");
 }
@@ -30,6 +32,8 @@ bool Value::isTruthy() const
     if (isString())
         return ((std::string)(*this))
                    .length() > 0;
+    if (isObject())
+        return ((Object) * this).isTruthy();
 
     throw std::runtime_error("unreachable code.");
 }
@@ -68,5 +72,14 @@ Value::operator std::string() const
     {
         return std::get<std::string>(*this);
     }
+    else if (std::holds_alternative<Object>(*this))
+    {
+        return std::get<Object>(*this).toString();
+    }
     return ss.str();
+}
+
+Value::operator Object() const
+{
+    return std::get<Object>(*this);
 }

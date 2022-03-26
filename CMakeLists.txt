@@ -36,6 +36,8 @@ set(SOURCES
   lineinfo.cpp
   scanner.h
   scanner.cpp
+  object.h
+  object.cpp
   value.h
   value.cpp
   vm.h

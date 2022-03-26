@@ -2,6 +2,7 @@
 #define __cpplox_value_h
 
 #include "common.h"
+#include "object.h"
 
 union uint32bytes
 {
@@ -15,7 +16,7 @@ union uint32bytes
     } bytes;
 };
 
-typedef std::variant<nullptr_t, bool, double, std::string> BaseValue;
+typedef std::variant<nullptr_t, bool, double, std::string, Object> BaseValue;
 
 class Value : public BaseValue
 {
@@ -26,6 +27,7 @@ public:
     explicit Value(double value) : BaseValue(value) {}
     explicit Value(const char *value) : BaseValue(std::string(value)) {}
     explicit Value(const std::string &value) : BaseValue(value) {}
+    explicit Value(const Object &value) : BaseValue(value) {}
 
     Value(const Value &value) : BaseValue(value) {}
     Value(Value &&value) : BaseValue(value) {}
@@ -34,6 +36,7 @@ public:
     inline bool isBool() const { return std::holds_alternative<bool>(*this); }
     inline bool isDouble() const { return std::holds_alternative<double>(*this); }
     inline bool isString() const { return std::holds_alternative<std::string>(*this); }
+    inline bool isObject() const { return std::holds_alternative<Object>(*this); }
     bool isFalsey() const;
     bool isTruthy() const;
 
@@ -42,10 +45,12 @@ public:
         BaseValue::operator=(value);
         return *this;
     }
+
     operator nullptr_t() const;
     operator bool() const;
     operator double() const;
     operator std::string() const;
+    operator Object() const;
 };
 
 #endif // __cpplox_value_h
