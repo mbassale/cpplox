@@ -18,6 +18,9 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+find_package(Boost 1.7)
+include_directories(${Boost_INCLUDE_DIRS})
+
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
 #------------------------------------------------#

@@ -26,6 +26,7 @@ class VM
     std::array<Value, STACK_MAX> stack;
     Value *stackTop;
     std::forward_list<ObjectPtr> objects;
+    std::unordered_set<Symbol> symbols;
 
 public:
     explicit VM();

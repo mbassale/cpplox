@@ -18,6 +18,8 @@
 #include <vector>
 #include <list>
 #include <forward_list>
+#include <unordered_set>
+#include <boost/flyweight.hpp>
 
 #define DEBUG_TRACE_EXECUTION
 

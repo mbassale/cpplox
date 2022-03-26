@@ -1,6 +1,6 @@
 #include "vm.h"
 
-VM::VM() : chunk{}, ip{}, stack(), objects()
+VM::VM() : chunk{}, ip{}, stack(), objects(), symbols()
 {
     stackTop = stack.data();
 }
@@ -8,6 +8,7 @@ VM::VM() : chunk{}, ip{}, stack(), objects()
 VM::~VM()
 {
     objects.clear();
+    symbols.clear();
 }
 
 InterpretResult VM::interpret(Chunk &chunk)

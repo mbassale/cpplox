@@ -16,6 +16,7 @@ union uint32bytes
     } bytes;
 };
 
+typedef boost::flyweight<std::string> Symbol;
 typedef std::variant<nullptr_t, bool, double, std::string, Object> BaseValue;
 
 class Value : public BaseValue
