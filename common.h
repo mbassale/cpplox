@@ -17,6 +17,7 @@
 #include <array>
 #include <vector>
 #include <list>
+#include <forward_list>
 
 #define DEBUG_TRACE_EXECUTION
 

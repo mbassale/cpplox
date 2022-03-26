@@ -18,6 +18,8 @@ protected:
     virtual bool isEqual(const Object &obj) const { return false; }
 };
 
+typedef std::unique_ptr<Object> ObjectPtr;
+
 bool operator==(const Object &lhs, const Object &rhs);
 
 #endif // __cpplox_object_h

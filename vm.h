@@ -25,10 +25,11 @@ class VM
     uint8_t *ip;
     std::array<Value, STACK_MAX> stack;
     Value *stackTop;
+    std::forward_list<ObjectPtr> objects;
 
 public:
-    explicit VM() : chunk{}, ip{}, stack() { stackTop = stack.data(); }
-    ~VM() {}
+    explicit VM();
+    ~VM();
 
     InterpretResult interpret(Chunk &chunk);
 

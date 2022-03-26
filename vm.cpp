@@ -1,5 +1,15 @@
 #include "vm.h"
 
+VM::VM() : chunk{}, ip{}, stack(), objects()
+{
+    stackTop = stack.data();
+}
+
+VM::~VM()
+{
+    objects.clear();
+}
+
 InterpretResult VM::interpret(Chunk &chunk)
 {
     if (chunk.size() == 0)
