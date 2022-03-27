@@ -1,9 +1,10 @@
 #include "compiler.h"
 
-Compiler::Compiler()
+Compiler::Compiler() : locals()
 {
     hadError = false;
     panicMode = false;
+    locals.reserve(UINT8_MAX + 1);
 }
 
 ChunkPtr Compiler::compile(const std::string &source)
@@ -85,6 +86,12 @@ void Compiler::statement(const ParseFnArgs &args)
     if (match(TOKEN_PRINT))
     {
         printStatement(args);
+    }
+    else if (match(TOKEN_LEFT_BRACE))
+    {
+        beginScope();
+        block();
+        endScope();
     }
     else
     {
@@ -246,6 +253,11 @@ void Compiler::parsePrecedence(Precedence precedence)
 size_t Compiler::parseVariable(const std::string &errorMessage)
 {
     consume(TOKEN_IDENTIFIER, errorMessage);
+
+    declareVariable();
+    if (scopeDepth > 0)
+        return 0;
+
     return identifierConstant(previous);
 }
 
@@ -256,18 +268,30 @@ size_t Compiler::identifierConstant(const Token &name)
 
 void Compiler::namedVariable(const Token &name, bool canAssign)
 {
-    const auto offset = identifierConstant(name);
+    uint8_t getOp, setOp;
+    int offset = resolveLocal(name);
+    if (offset != -1)
+    {
+        getOp = OP_GET_LOCAL;
+        setOp = OP_SET_LOCAL;
+    }
+    else
+    {
+        offset = identifierConstant(name);
+        getOp = OP_GET_GLOBAL;
+        setOp = OP_SET_GLOBAL;
+    }
 
     if (canAssign && match(TOKEN_EQUAL))
     {
         ParseFnArgs args;
         args.canAssign = true;
         expression(args);
-        emitBytes(OP_SET_GLOBAL, offset);
+        emitBytes(setOp, offset);
     }
     else
     {
-        emitBytes(OP_GET_GLOBAL, offset);
+        emitBytes(getOp, offset);
     }
 }
 
@@ -278,7 +302,83 @@ ParseRule &Compiler::getRule(TokenType tokenType)
 
 void Compiler::defineVariable(size_t global)
 {
+    if (scopeDepth > 0)
+        return;
     emitBytes(OP_DEFINE_GLOBAL, global);
+}
+
+void Compiler::declareVariable()
+{
+    if (scopeDepth == 0)
+        return;
+    const auto &name = previous;
+
+    auto it = locals.rbegin();
+    while (it != locals.rend())
+    {
+        if (it->depth != -1 && it->depth < scopeDepth)
+            break;
+
+        const auto declaringName = name.lexeme();
+        if (declaringName == it->name.lexeme())
+        {
+            std::ostringstream ss;
+            ss << "Already a variable named '" << declaringName << "' in this scope.";
+            error(ss.str());
+        }
+
+        it++;
+    }
+
+    addLocal(name);
+}
+
+void Compiler::addLocal(const Token &name)
+{
+    Local local;
+    local.name = name;
+    local.depth = scopeDepth;
+    locals.push_back(local);
+}
+
+int Compiler::resolveLocal(const Token &name)
+{
+    auto localName = name.lexeme();
+    for (int i = locals.size() - 1; i >= 0; i--)
+    {
+        if (localName == locals[i].name.lexeme())
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void Compiler::beginScope()
+{
+    scopeDepth++;
+}
+
+void Compiler::block()
+{
+    while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF))
+    {
+        ParseFnArgs args{true};
+        declaration(args);
+    }
+
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+}
+
+void Compiler::endScope()
+{
+    scopeDepth--;
+
+    while (locals.size() > 0 && locals[locals.size() - 1].depth > scopeDepth)
+    {
+        emitByte(OP_POP);
+        locals.pop_back();
+    }
 }
 
 void Compiler::emitByte(uint8_t byte)

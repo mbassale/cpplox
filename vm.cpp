@@ -70,6 +70,20 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_GET_LOCAL:
+        {
+            uint8_t slot = readByte();
+            pushStack(stack[slot]);
+            break;
+        }
+
+        case OP_SET_LOCAL:
+        {
+            uint8_t slot = readByte();
+            stack[slot] = peekStack(0);
+            break;
+        }
+
         case OP_DEFINE_GLOBAL:
         {
             const auto &symbolName = readConstant();

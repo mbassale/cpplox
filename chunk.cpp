@@ -3,6 +3,7 @@
 size_t simpleInstruction(const std::string &name, size_t offset);
 size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset);
 size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t offset);
+size_t byteInstruction(const std::string &name, Chunk &chunk, size_t offset);
 
 Chunk::Chunk(const std::string &name) : name(name), code(), constants(), lines()
 {
@@ -55,6 +56,12 @@ size_t Chunk::disassembleInstruction(size_t offset)
 
     case OP_POP:
         return simpleInstruction("OP_POP", offset);
+
+    case OP_GET_LOCAL:
+        return byteInstruction("OP_GET_LOCAL", *this, offset);
+
+    case OP_SET_LOCAL:
+        return byteInstruction("OP_SET_LOCAL", *this, offset);
 
     case OP_DEFINE_GLOBAL:
         return constantInstruction("OP_DEFINE_GLOBAL", *this, offset);
@@ -132,4 +139,10 @@ size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t off
     std::cout << name << " " << std::setfill('0') << std::setw(4) << constantOffset.u32 << " "
               << (std::string)chunk.readConstant(constantOffset.u32) << std::endl;
     return offset + 4;
+}
+
+size_t byteInstruction(const std::string &name, Chunk &chunk, size_t offset)
+{
+    std::cout << name << " " << std::setfill('0') << std::setw(4) << offset << std::endl;
+    return offset + 2;
 }

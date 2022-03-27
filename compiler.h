@@ -42,6 +42,12 @@ struct ParseRule
     Precedence precedence;
 };
 
+struct Local
+{
+    Token name;
+    int depth;
+};
+
 class Compiler
 {
 private:
@@ -52,6 +58,8 @@ private:
     bool hadError;
     bool panicMode;
     std::list<std::string> errors;
+    std::vector<Local> locals;
+    int scopeDepth;
 
 public:
     explicit Compiler();
@@ -85,6 +93,12 @@ private:
     ParseRule &getRule(TokenType tokenType);
     void consume(TokenType tokenType, const std::string &errorMessage);
     void defineVariable(size_t global);
+    void declareVariable();
+    void addLocal(const Token &name);
+    int resolveLocal(const Token &name);
+    void beginScope();
+    void block();
+    void endScope();
     void emitByte(uint8_t byte);
     void emitBytes(uint8_t byte1, uint8_t byte2);
     size_t makeConstant(Value value);
