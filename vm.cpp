@@ -63,6 +63,12 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_POP:
+        {
+            popStack();
+            break;
+        }
+
         case OP_EQUAL:
         {
             const auto a = popStack();
@@ -98,12 +104,14 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_PRINT:
+        {
+            std::cout << popStack() << std::endl;
+            break;
+        }
+
         case OP_RETURN:
         {
-            if (!isStackEmpty())
-            {
-                std::cout << (std::string)popStack() << std::endl;
-            }
             return InterpretResult::INTERPRET_OK;
             break;
         }

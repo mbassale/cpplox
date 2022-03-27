@@ -54,6 +54,10 @@ public:
     inline bool hasErrors() const { return !errors.empty(); }
     inline const std::list<std::string> &getErrors() const { return errors; }
 
+    void declaration();
+    void statement();
+    void printStatement();
+    void expressionStatement();
     void expression();
     void number();
     void grouping();
@@ -64,6 +68,8 @@ public:
 
 private:
     void advance();
+    bool match(TokenType type);
+    bool check(TokenType type);
     void parsePrecedence(Precedence precedence);
     ParseRule &getRule(TokenType tokenType);
     void consume(TokenType tokenType, const std::string &errorMessage);

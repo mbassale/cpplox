@@ -1,5 +1,11 @@
 #include "value.h"
 
+std::ostream &operator<<(std::ostream &stream, const Value &value)
+{
+    stream << (std::string)value;
+    return stream;
+}
+
 bool Value::isFalsey() const
 {
     if (isNull())

@@ -52,6 +52,8 @@ public:
     operator double() const;
     operator std::string() const;
     operator Object() const;
+
+    friend std::ostream &operator<<(std::ostream &stream, const Value &value);
 };
 
 #endif // __cpplox_value_h

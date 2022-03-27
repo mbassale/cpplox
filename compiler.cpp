@@ -11,8 +11,12 @@ ChunkPtr Compiler::compile(const std::string &source)
     chunk = std::make_shared<Chunk>("<name>");
     scanner = std::make_unique<Scanner>(source);
     advance();
-    expression();
-    consume(TOKEN_EOF, "Expect end of expression.");
+
+    while (!match(TOKEN_EOF))
+    {
+        declaration();
+    }
+
     emitEpilogue();
     return hadError ? nullptr : chunk;
 }
@@ -28,6 +32,49 @@ void Compiler::advance()
             break;
         errorAtCurrent(current.lexeme());
     }
+}
+
+bool Compiler::match(TokenType type)
+{
+    if (!check(type))
+        return false;
+    advance();
+    return true;
+}
+bool Compiler::check(TokenType type)
+{
+    return current.type == type;
+}
+
+void Compiler::declaration()
+{
+    statement();
+}
+
+void Compiler::statement()
+{
+    if (match(TOKEN_PRINT))
+    {
+        printStatement();
+    }
+    else
+    {
+        expressionStatement();
+    }
+}
+
+void Compiler::printStatement()
+{
+    expression();
+    consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+    emitByte(OP_PRINT);
+}
+
+void Compiler::expressionStatement()
+{
+    expression();
+    consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+    emitByte(OP_POP);
 }
 
 void Compiler::expression()
