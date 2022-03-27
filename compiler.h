@@ -94,6 +94,7 @@ private:
     void consume(TokenType tokenType, const std::string &errorMessage);
     void defineVariable(size_t global);
     void declareVariable();
+    void markInitialized();
     void addLocal(const Token &name);
     int resolveLocal(const Token &name);
     void beginScope();

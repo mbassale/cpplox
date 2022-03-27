@@ -303,7 +303,10 @@ ParseRule &Compiler::getRule(TokenType tokenType)
 void Compiler::defineVariable(size_t global)
 {
     if (scopeDepth > 0)
+    {
+        markInitialized();
         return;
+    }
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
@@ -333,11 +336,16 @@ void Compiler::declareVariable()
     addLocal(name);
 }
 
+void Compiler::markInitialized()
+{
+    locals[locals.size() - 1].depth = scopeDepth;
+}
+
 void Compiler::addLocal(const Token &name)
 {
     Local local;
     local.name = name;
-    local.depth = scopeDepth;
+    local.depth = -1;
     locals.push_back(local);
 }
 
@@ -348,6 +356,12 @@ int Compiler::resolveLocal(const Token &name)
     {
         if (localName == locals[i].name.lexeme())
         {
+            if (locals[i].depth == -1)
+            {
+                std::ostringstream ss;
+                ss << "Can't read local variable '" << localName << "' in its own initialized.";
+                error(ss.str());
+            }
             return i;
         }
     }
