@@ -49,6 +49,9 @@ bool Compiler::check(TokenType type)
 void Compiler::declaration()
 {
     statement();
+
+    if (panicMode)
+        synchronize();
 }
 
 void Compiler::statement()
@@ -252,6 +255,31 @@ void Compiler::consume(TokenType tokenType, const std::string &errorMessage)
         return;
     }
     errorAtCurrent(errorMessage);
+}
+
+void Compiler::synchronize()
+{
+    panicMode = false;
+
+    while (current.type != TOKEN_EOF)
+    {
+        if (previous.type == TOKEN_SEMICOLON)
+            return;
+        switch (current.type)
+        {
+        case TOKEN_CLASS:
+        case TOKEN_FUN:
+        case TOKEN_VAR:
+        case TOKEN_FOR:
+        case TOKEN_IF:
+        case TOKEN_WHILE:
+        case TOKEN_PRINT:
+        case TOKEN_RETURN:
+            break;
+        }
+
+        advance();
+    }
 }
 
 void Compiler::error(const std::string &message)
