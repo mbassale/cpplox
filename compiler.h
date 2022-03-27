@@ -80,6 +80,7 @@ private:
     void emitConstant(Value value);
     void emitReturn();
 
+    void synchronize();
     void error(const std::string &message);
     void errorAtCurrent(const std::string &message);
     void errorAt(Token &token, const std::string &message);
