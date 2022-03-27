@@ -12,9 +12,11 @@ ChunkPtr Compiler::compile(const std::string &source)
     scanner = std::make_unique<Scanner>(source);
     advance();
 
+    ParseFnArgs args;
+    args.canAssign = true;
     while (!match(TOKEN_EOF))
     {
-        declaration();
+        declaration(args);
     }
 
     emitEpilogue();
@@ -46,28 +48,28 @@ bool Compiler::check(TokenType type)
     return current.type == type;
 }
 
-void Compiler::declaration()
+void Compiler::declaration(const ParseFnArgs &args)
 {
     if (match(TOKEN_VAR))
     {
-        varDeclarationStatement();
+        varDeclarationStatement(args);
     }
     else
     {
-        statement();
+        statement(args);
     }
 
     if (panicMode)
         synchronize();
 }
 
-void Compiler::varDeclarationStatement()
+void Compiler::varDeclarationStatement(const ParseFnArgs &args)
 {
     uint8_t global = parseVariable("Expect variable name.");
 
     if (match(TOKEN_EQUAL))
     {
-        expression();
+        expression(args);
     }
     else
     {
@@ -78,50 +80,50 @@ void Compiler::varDeclarationStatement()
     defineVariable(global);
 }
 
-void Compiler::statement()
+void Compiler::statement(const ParseFnArgs &args)
 {
     if (match(TOKEN_PRINT))
     {
-        printStatement();
+        printStatement(args);
     }
     else
     {
-        expressionStatement();
+        expressionStatement(args);
     }
 }
 
-void Compiler::printStatement()
+void Compiler::printStatement(const ParseFnArgs &args)
 {
-    expression();
+    expression(args);
     consume(TOKEN_SEMICOLON, "Expect ';' after value.");
     emitByte(OP_PRINT);
 }
 
-void Compiler::expressionStatement()
+void Compiler::expressionStatement(const ParseFnArgs &args)
 {
-    expression();
+    expression(args);
     consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
     emitByte(OP_POP);
 }
 
-void Compiler::expression()
+void Compiler::expression(const ParseFnArgs &args)
 {
     parsePrecedence(PREC_ASSIGNMENT);
 }
 
-void Compiler::number()
+void Compiler::number(const ParseFnArgs &args)
 {
     double value = std::strtod(previous.lexeme().c_str(), nullptr);
     emitConstant(Value(value));
 }
 
-void Compiler::grouping()
+void Compiler::grouping(const ParseFnArgs &args)
 {
-    expression();
+    expression(args);
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
-void Compiler::unary()
+void Compiler::unary(const ParseFnArgs &args)
 {
     const auto operatorType = previous.type;
 
@@ -143,7 +145,7 @@ void Compiler::unary()
     }
 }
 
-void Compiler::binary()
+void Compiler::binary(const ParseFnArgs &args)
 {
     const auto operatorType = previous.type;
     const auto rule = getRule(operatorType);
@@ -186,7 +188,7 @@ void Compiler::binary()
     }
 }
 
-void Compiler::literal()
+void Compiler::literal(const ParseFnArgs &args)
 {
     switch (previous.type)
     {
@@ -204,14 +206,14 @@ void Compiler::literal()
     }
 }
 
-void Compiler::string()
+void Compiler::string(const ParseFnArgs &args)
 {
     emitConstant(Value(std::string(previous.start + 1, previous.start + previous.length - 1)));
 }
 
-void Compiler::variable()
+void Compiler::variable(const ParseFnArgs &args)
 {
-    namedVariable(previous);
+    namedVariable(previous, args.canAssign);
 }
 
 void Compiler::parsePrecedence(Precedence precedence)
@@ -223,13 +225,21 @@ void Compiler::parsePrecedence(Precedence precedence)
         error("Expect expression.");
         return;
     }
-    std::invoke(prefixRule, *this);
+
+    ParseFnArgs args;
+    args.canAssign = precedence <= PREC_ASSIGNMENT;
+    std::invoke(prefixRule, *this, args);
 
     while (precedence <= getRule(current.type).precedence)
     {
         advance();
         const auto infixRule = getRule(previous.type).infix;
-        std::invoke(infixRule, *this);
+        std::invoke(infixRule, *this, args);
+    }
+
+    if (args.canAssign && match(TOKEN_EQUAL))
+    {
+        error("Invalid assignment target.");
     }
 }
 
@@ -244,10 +254,21 @@ size_t Compiler::identifierConstant(const Token &name)
     return makeConstant(Value(name.lexeme()));
 }
 
-void Compiler::namedVariable(const Token &name)
+void Compiler::namedVariable(const Token &name, bool canAssign)
 {
     const auto offset = identifierConstant(name);
-    emitBytes(OP_GET_GLOBAL, offset);
+
+    if (canAssign && match(TOKEN_EQUAL))
+    {
+        ParseFnArgs args;
+        args.canAssign = true;
+        expression(args);
+        emitBytes(OP_SET_GLOBAL, offset);
+    }
+    else
+    {
+        emitBytes(OP_GET_GLOBAL, offset);
+    }
 }
 
 ParseRule &Compiler::getRule(TokenType tokenType)

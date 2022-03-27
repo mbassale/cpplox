@@ -27,7 +27,13 @@ enum Precedence
 };
 
 class Compiler;
-typedef void (Compiler::*ParseFn)();
+
+struct ParseFnArgs
+{
+    bool canAssign = true;
+};
+
+typedef void (Compiler::*ParseFn)(const ParseFnArgs &args);
 
 struct ParseRule
 {
@@ -54,19 +60,19 @@ public:
     inline bool hasErrors() const { return !errors.empty(); }
     inline const std::list<std::string> &getErrors() const { return errors; }
 
-    void declaration();
-    void varDeclarationStatement();
-    void statement();
-    void printStatement();
-    void expressionStatement();
-    void expression();
-    void number();
-    void grouping();
-    void unary();
-    void binary();
-    void literal();
-    void string();
-    void variable();
+    void declaration(const ParseFnArgs &args);
+    void varDeclarationStatement(const ParseFnArgs &args);
+    void statement(const ParseFnArgs &args);
+    void printStatement(const ParseFnArgs &args);
+    void expressionStatement(const ParseFnArgs &args);
+    void expression(const ParseFnArgs &args);
+    void number(const ParseFnArgs &args);
+    void grouping(const ParseFnArgs &args);
+    void unary(const ParseFnArgs &args);
+    void binary(const ParseFnArgs &args);
+    void literal(const ParseFnArgs &args);
+    void string(const ParseFnArgs &args);
+    void variable(const ParseFnArgs &args);
 
 private:
     void advance();
@@ -75,7 +81,7 @@ private:
     void parsePrecedence(Precedence precedence);
     size_t parseVariable(const std::string &errorMessage);
     size_t identifierConstant(const Token &name);
-    void namedVariable(const Token &name);
+    void namedVariable(const Token &name, bool canAssign);
     ParseRule &getRule(TokenType tokenType);
     void consume(TokenType tokenType, const std::string &errorMessage);
     void defineVariable(size_t global);

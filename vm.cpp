@@ -94,6 +94,21 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_SET_GLOBAL:
+        {
+            const auto &symbolName = readConstant();
+            Symbol symbol(symbolName);
+            const auto it = globals.find(symbol);
+            if (it == globals.end())
+            {
+                std::ostringstream ss;
+                ss << "Undefined variable: " << symbolName;
+                throw VMRuntimeError(ss.str());
+            }
+            it->second = peekStack(0);
+            break;
+        }
+
         case OP_EQUAL:
         {
             const auto a = popStack();
