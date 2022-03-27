@@ -66,6 +66,7 @@ public:
     void binary();
     void literal();
     void string();
+    void variable();
 
 private:
     void advance();
@@ -74,6 +75,7 @@ private:
     void parsePrecedence(Precedence precedence);
     size_t parseVariable(const std::string &errorMessage);
     size_t identifierConstant(const Token &name);
+    void namedVariable(const Token &name);
     ParseRule &getRule(TokenType tokenType);
     void consume(TokenType tokenType, const std::string &errorMessage);
     void defineVariable(size_t global);
@@ -110,7 +112,7 @@ static ParseRule PARSE_RULES[] = {
     [TOKEN_GREATER_EQUAL] = {NULL, &Compiler::binary, PREC_COMPARISON},
     [TOKEN_LESS] = {NULL, &Compiler::binary, PREC_COMPARISON},
     [TOKEN_LESS_EQUAL] = {NULL, &Compiler::binary, PREC_COMPARISON},
-    [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_IDENTIFIER] = {&Compiler::variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {&Compiler::string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {&Compiler::number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},

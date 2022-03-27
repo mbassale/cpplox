@@ -50,7 +50,7 @@ private:
     }
     inline void binaryOperator(uint8_t op);
     inline void resetStack() { stackTop = stack.data(); }
-    inline void pushStack(Value value)
+    inline void pushStack(const Value &value)
     {
         *stackTop = value;
         stackTop++;

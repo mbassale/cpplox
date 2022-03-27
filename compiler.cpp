@@ -209,6 +209,11 @@ void Compiler::string()
     emitConstant(Value(std::string(previous.start + 1, previous.start + previous.length - 1)));
 }
 
+void Compiler::variable()
+{
+    namedVariable(previous);
+}
+
 void Compiler::parsePrecedence(Precedence precedence)
 {
     advance();
@@ -237,6 +242,12 @@ size_t Compiler::parseVariable(const std::string &errorMessage)
 size_t Compiler::identifierConstant(const Token &name)
 {
     return makeConstant(Value(name.lexeme()));
+}
+
+void Compiler::namedVariable(const Token &name)
+{
+    const auto offset = identifierConstant(name);
+    emitBytes(OP_GET_GLOBAL, offset);
 }
 
 ParseRule &Compiler::getRule(TokenType tokenType)
