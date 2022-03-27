@@ -1,6 +1,6 @@
 #include "vm.h"
 
-VM::VM() : chunk{}, ip{}, stack(), objects(), symbols(), globals()
+VM::VM() : chunk{}, ip{}, stack(), objects(), globals()
 {
     stackTop = stack.data();
 }
@@ -9,7 +9,6 @@ VM::~VM()
 {
     globals.clear();
     objects.clear();
-    symbols.clear();
 }
 
 InterpretResult VM::interpret(Chunk &chunk)
@@ -26,7 +25,6 @@ InterpretResult VM::run()
     for (;;)
     {
 #ifdef DEBUG_TRACE_EXECUTION
-        traceSymbols();
         traceStack();
         traceGlobals();
         chunk->disassembleInstruction((size_t)(ip - chunk->data()));
@@ -76,7 +74,6 @@ InterpretResult VM::run()
         {
             const auto &symbolName = readConstant();
             Symbol symbol(symbolName);
-            symbols.insert(symbol);
             globals[symbol] = peekStack(0);
             popStack();
             break;
@@ -211,16 +208,6 @@ void VM::traceStack()
         {
             std::cout << "|";
         }
-    }
-    std::cout << "]" << std::endl;
-}
-
-void VM::traceSymbols()
-{
-    std::cout << "SYMBOL TABLE [";
-    for (const auto &symbol : symbols)
-    {
-        std::cout << symbol << ", ";
     }
     std::cout << "]" << std::endl;
 }

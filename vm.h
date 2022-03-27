@@ -26,7 +26,6 @@ class VM
     std::array<Value, STACK_MAX> stack;
     Value *stackTop;
     std::forward_list<ObjectPtr> objects;
-    std::unordered_set<Symbol> symbols;
     std::unordered_map<Symbol, Value> globals;
 
 public:
@@ -66,7 +65,6 @@ private:
         return stackTop[-1 - distance];
     }
     void traceStack();
-    void traceSymbols();
     void traceGlobals();
 };
 
