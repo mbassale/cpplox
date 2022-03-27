@@ -1,12 +1,13 @@
 #include "vm.h"
 
-VM::VM() : chunk{}, ip{}, stack(), objects(), symbols()
+VM::VM() : chunk{}, ip{}, stack(), objects(), symbols(), globals()
 {
     stackTop = stack.data();
 }
 
 VM::~VM()
 {
+    globals.clear();
     objects.clear();
     symbols.clear();
 }
@@ -25,7 +26,9 @@ InterpretResult VM::run()
     for (;;)
     {
 #ifdef DEBUG_TRACE_EXECUTION
+        traceSymbols();
         traceStack();
+        traceGlobals();
         chunk->disassembleInstruction((size_t)(ip - chunk->data()));
 #endif
         uint8_t instruction;
@@ -65,6 +68,16 @@ InterpretResult VM::run()
 
         case OP_POP:
         {
+            popStack();
+            break;
+        }
+
+        case OP_DEFINE_GLOBAL:
+        {
+            const auto &symbolName = readConstant();
+            Symbol symbol(symbolName);
+            symbols.insert(symbol);
+            globals[symbol] = peekStack(0);
             popStack();
             break;
         }
@@ -185,4 +198,26 @@ void VM::traceStack()
         }
     }
     std::cout << "]" << std::endl;
+}
+
+void VM::traceSymbols()
+{
+    std::cout << "SYMBOL TABLE [";
+    for (const auto &symbol : symbols)
+    {
+        std::cout << symbol << ", ";
+    }
+    std::cout << "]" << std::endl;
+}
+
+void VM::traceGlobals()
+{
+    std::cout << "GLOBALS {\n";
+    auto it = globals.begin();
+    while (it != globals.end())
+    {
+        const auto &[symbol, value] = *it++;
+        std::cout << symbol << ": " << (std::string)value << "\n";
+    }
+    std::cout << "}" << std::endl;
 }

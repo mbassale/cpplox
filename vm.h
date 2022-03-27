@@ -27,6 +27,7 @@ class VM
     Value *stackTop;
     std::forward_list<ObjectPtr> objects;
     std::unordered_set<Symbol> symbols;
+    std::unordered_map<Symbol, Value> globals;
 
 public:
     explicit VM();
@@ -65,6 +66,8 @@ private:
         return stackTop[-1 - distance];
     }
     void traceStack();
+    void traceSymbols();
+    void traceGlobals();
 };
 
 #endif // __cpplox_vm_h

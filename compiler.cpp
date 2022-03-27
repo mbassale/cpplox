@@ -48,10 +48,34 @@ bool Compiler::check(TokenType type)
 
 void Compiler::declaration()
 {
-    statement();
+    if (match(TOKEN_VAR))
+    {
+        varDeclarationStatement();
+    }
+    else
+    {
+        statement();
+    }
 
     if (panicMode)
         synchronize();
+}
+
+void Compiler::varDeclarationStatement()
+{
+    uint8_t global = parseVariable("Expect variable name.");
+
+    if (match(TOKEN_EQUAL))
+    {
+        expression();
+    }
+    else
+    {
+        emitByte(OP_NIL);
+    }
+    consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+
+    defineVariable(global);
 }
 
 void Compiler::statement()
@@ -204,9 +228,25 @@ void Compiler::parsePrecedence(Precedence precedence)
     }
 }
 
+size_t Compiler::parseVariable(const std::string &errorMessage)
+{
+    consume(TOKEN_IDENTIFIER, errorMessage);
+    return identifierConstant(previous);
+}
+
+size_t Compiler::identifierConstant(const Token &name)
+{
+    return makeConstant(Value(name.lexeme()));
+}
+
 ParseRule &Compiler::getRule(TokenType tokenType)
 {
     return PARSE_RULES[tokenType];
+}
+
+void Compiler::defineVariable(size_t global)
+{
+    emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
 void Compiler::emitByte(uint8_t byte)
@@ -275,6 +315,8 @@ void Compiler::synchronize()
         case TOKEN_WHILE:
         case TOKEN_PRINT:
         case TOKEN_RETURN:
+            return;
+        default:
             break;
         }
 

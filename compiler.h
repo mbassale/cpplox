@@ -55,6 +55,7 @@ public:
     inline const std::list<std::string> &getErrors() const { return errors; }
 
     void declaration();
+    void varDeclarationStatement();
     void statement();
     void printStatement();
     void expressionStatement();
@@ -71,8 +72,11 @@ private:
     bool match(TokenType type);
     bool check(TokenType type);
     void parsePrecedence(Precedence precedence);
+    size_t parseVariable(const std::string &errorMessage);
+    size_t identifierConstant(const Token &name);
     ParseRule &getRule(TokenType tokenType);
     void consume(TokenType tokenType, const std::string &errorMessage);
+    void defineVariable(size_t global);
     void emitByte(uint8_t byte);
     void emitBytes(uint8_t byte1, uint8_t byte2);
     size_t makeConstant(Value value);

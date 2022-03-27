@@ -56,6 +56,9 @@ size_t Chunk::disassembleInstruction(size_t offset)
     case OP_POP:
         return simpleInstruction("OP_POP", offset);
 
+    case OP_DEFINE_GLOBAL:
+        return constantInstruction("OP_DEFINE_GLOBAL", *this, offset);
+
     case OP_EQUAL:
         return simpleInstruction("OP_EQUAL", offset);
 
