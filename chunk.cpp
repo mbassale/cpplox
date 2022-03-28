@@ -1,11 +1,5 @@
 #include "chunk.h"
 
-size_t simpleInstruction(const std::string &name, size_t offset);
-size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset);
-size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t offset);
-size_t byteInstruction(const std::string &name, Chunk &chunk, size_t offset);
-size_t jumpInstruction(const std::string &name, int sign, Chunk &chunk, size_t offset);
-
 Chunk::Chunk(const std::string &name) : name(name), code(), constants(), lines()
 {
 }
@@ -33,18 +27,17 @@ void Chunk::disassemble()
 
 size_t Chunk::disassembleInstruction(size_t offset)
 {
-    std::cout << std::setfill('0') << std::setw(4) << offset << " ";
-
     printLineColumn(offset);
+    printInstructionAddr(offset);
 
     uint8_t instruction = code[offset];
     switch (instruction)
     {
     case OP_CONSTANT:
-        return constantInstruction("OP_CONSTANT", *this, offset);
+        return constantInstruction("OP_CONSTANT", offset);
 
     case OP_CONSTANT_LONG:
-        return constantLongInstruction("OP_CONSTANT_LONG", *this, offset);
+        return constantLongInstruction("OP_CONSTANT_LONG", offset);
 
     case OP_NIL:
         return simpleInstruction("OP_NIL", offset);
@@ -59,13 +52,13 @@ size_t Chunk::disassembleInstruction(size_t offset)
         return simpleInstruction("OP_POP", offset);
 
     case OP_GET_LOCAL:
-        return byteInstruction("OP_GET_LOCAL", *this, offset);
+        return byteInstruction("OP_GET_LOCAL", offset);
 
     case OP_SET_LOCAL:
-        return byteInstruction("OP_SET_LOCAL", *this, offset);
+        return byteInstruction("OP_SET_LOCAL", offset);
 
     case OP_DEFINE_GLOBAL:
-        return constantInstruction("OP_DEFINE_GLOBAL", *this, offset);
+        return constantInstruction("OP_DEFINE_GLOBAL", offset);
 
     case OP_GET_GLOBAL:
         return simpleInstruction("OP_GET_GLOBAL", offset);
@@ -104,10 +97,10 @@ size_t Chunk::disassembleInstruction(size_t offset)
         return simpleInstruction("OP_PRINT", offset);
 
     case OP_JUMP:
-        return jumpInstruction("OP_JUMP", 1, *this, offset);
+        return jumpInstruction("OP_JUMP", 1, offset);
 
     case OP_JUMP_IF_FALSE:
-        return jumpInstruction("OP_JUMP_IF_FALSE", 1, *this, offset);
+        return jumpInstruction("OP_JUMP_IF_FALSE", 1, offset);
 
     case OP_RETURN:
         return simpleInstruction("OP_RETURN", offset);
@@ -120,46 +113,50 @@ size_t Chunk::disassembleInstruction(size_t offset)
 
 void Chunk::printLineColumn(size_t offset)
 {
-    std::cout << std::setfill('0') << std::setw(4) << lines.get(offset) << " ";
+    std::cout << std::dec << std::setfill('0') << std::setw(4) << lines.get(offset) << " ";
 }
 
-size_t simpleInstruction(const std::string &name, size_t offset)
+void Chunk::printInstructionAddr(size_t offset)
+{
+    std::cout << std::hex << std::setfill('0') << std::setw(4) << offset << " ";
+}
+
+size_t Chunk::simpleInstruction(const std::string &name, size_t offset)
 {
     std::cout << name << std::endl;
     return offset + 1;
 }
 
-size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset)
+size_t Chunk::constantInstruction(const std::string &name, size_t offset)
 {
-    uint8_t constantOffset = chunk.read(offset + 1);
+    uint8_t constantOffset = read(offset + 1);
     std::cout << name << " " << std::setfill('0') << std::setw(4) << (size_t)constantOffset << " "
-              << (std::string)chunk.readConstant(constantOffset) << std::endl;
+              << (std::string)readConstant(constantOffset) << std::endl;
     return offset + 2;
 }
 
-size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t offset)
+size_t Chunk::constantLongInstruction(const std::string &name, size_t offset)
 {
     uint32bytes constantOffset = {0};
-    constantOffset.bytes.b0 = chunk.read(offset + 1);
-    constantOffset.bytes.b1 = chunk.read(offset + 2);
-    constantOffset.bytes.b2 = chunk.read(offset + 3);
+    constantOffset.bytes.b0 = read(offset + 1);
+    constantOffset.bytes.b1 = read(offset + 2);
+    constantOffset.bytes.b2 = read(offset + 3);
     std::cout << name << " " << std::setfill('0') << std::setw(4) << constantOffset.u32 << " "
-              << (std::string)chunk.readConstant(constantOffset.u32) << std::endl;
+              << (std::string)readConstant(constantOffset.u32) << std::endl;
     return offset + 4;
 }
 
-size_t byteInstruction(const std::string &name, Chunk &chunk, size_t offset)
+size_t Chunk::byteInstruction(const std::string &name, size_t offset)
 {
     std::cout << name << " " << std::setfill('0') << std::setw(4) << offset << std::endl;
     return offset + 2;
 }
 
-size_t jumpInstruction(const std::string &name, int sign, Chunk &chunk, size_t offset)
+size_t Chunk::jumpInstruction(const std::string &name, int sign, size_t offset)
 {
-    uint8_t *code = chunk.data();
+    uint8_t *code = data();
     uint16_t jump = (uint16_t)(code[offset + 1] << 8);
     jump |= code[offset + 2];
-    std::cout
-        << name << " " << std::setfill('0') << std::setw(4) << offset << std::hex << jump << std::dec << std::endl;
+    std::cout << name << " " << std::hex << std::setfill('0') << std::setw(4) << (jump + offset + 3) << std::endl;
     return offset + 3;
 }

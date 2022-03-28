@@ -55,6 +55,12 @@ public:
 
 private:
     void printLineColumn(size_t offset);
+    void printInstructionAddr(size_t offset);
+    size_t simpleInstruction(const std::string &name, size_t offset);
+    size_t constantInstruction(const std::string &name, size_t offset);
+    size_t constantLongInstruction(const std::string &name, size_t offset);
+    size_t byteInstruction(const std::string &name, size_t offset);
+    size_t jumpInstruction(const std::string &name, int sign, size_t offset);
 };
 
 typedef std::shared_ptr<Chunk> ChunkPtr;
