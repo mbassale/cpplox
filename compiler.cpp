@@ -87,6 +87,10 @@ void Compiler::statement(const ParseFnArgs &args)
     {
         printStatement(args);
     }
+    else if (match(TOKEN_IF))
+    {
+        ifStatement(args);
+    }
     else if (match(TOKEN_LEFT_BRACE))
     {
         beginScope();
@@ -104,6 +108,23 @@ void Compiler::printStatement(const ParseFnArgs &args)
     expression(args);
     consume(TOKEN_SEMICOLON, "Expect ';' after value.");
     emitByte(OP_PRINT);
+}
+
+void Compiler::ifStatement(const ParseFnArgs &args)
+{
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+    expression(args);
+    consume(TOKEN_RIGHT_PAREN, "Exprect ')' after condition.");
+
+    size_t thenJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    statement(args);
+    size_t elseJump = emitJump(OP_JUMP);
+    patchJump(thenJump);
+    emitByte(OP_POP);
+    if (match(TOKEN_ELSE))
+        statement(args);
+    patchJump(elseJump);
 }
 
 void Compiler::expressionStatement(const ParseFnArgs &args)
@@ -431,6 +452,26 @@ void Compiler::emitConstant(Value value)
 void Compiler::emitReturn()
 {
     emitByte(OP_RETURN);
+}
+
+size_t Compiler::emitJump(uint8_t instruction)
+{
+    emitByte(instruction);
+    emitByte(0xff);
+    emitByte(0xff);
+    return chunk->size() - 2;
+}
+
+void Compiler::patchJump(size_t offset)
+{
+    size_t jump = chunk->size() - offset - 2;
+    if (jump > UINT16_MAX)
+    {
+        error("Too much code to jump over.");
+    }
+    uint8_t *code = chunk->data();
+    code[offset] = (jump >> 8) & 0xFF;
+    code[offset + 1] = jump & 0xFF;
 }
 
 void Compiler::consume(TokenType tokenType, const std::string &errorMessage)

@@ -38,6 +38,11 @@ private:
     InterpretResult run();
 
     inline uint8_t readByte() { return *ip++; }
+    inline uint16_t readShort()
+    {
+        ip += 2;
+        return (uint16_t)(ip[-2] << 8 | ip[-1]);
+    }
     inline Value &readConstant() { return chunk->readConstant(readByte()); }
     inline Value &readConstantLong()
     {

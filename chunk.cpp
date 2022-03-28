@@ -4,6 +4,7 @@ size_t simpleInstruction(const std::string &name, size_t offset);
 size_t constantInstruction(const std::string &name, Chunk &chunk, size_t offset);
 size_t constantLongInstruction(const std::string &name, Chunk &chunk, size_t offset);
 size_t byteInstruction(const std::string &name, Chunk &chunk, size_t offset);
+size_t jumpInstruction(const std::string &name, int sign, Chunk &chunk, size_t offset);
 
 Chunk::Chunk(const std::string &name) : name(name), code(), constants(), lines()
 {
@@ -102,6 +103,12 @@ size_t Chunk::disassembleInstruction(size_t offset)
     case OP_PRINT:
         return simpleInstruction("OP_PRINT", offset);
 
+    case OP_JUMP:
+        return jumpInstruction("OP_JUMP", 1, *this, offset);
+
+    case OP_JUMP_IF_FALSE:
+        return jumpInstruction("OP_JUMP_IF_FALSE", 1, *this, offset);
+
     case OP_RETURN:
         return simpleInstruction("OP_RETURN", offset);
 
@@ -145,4 +152,14 @@ size_t byteInstruction(const std::string &name, Chunk &chunk, size_t offset)
 {
     std::cout << name << " " << std::setfill('0') << std::setw(4) << offset << std::endl;
     return offset + 2;
+}
+
+size_t jumpInstruction(const std::string &name, int sign, Chunk &chunk, size_t offset)
+{
+    uint8_t *code = chunk.data();
+    uint16_t jump = (uint16_t)(code[offset + 1] << 8);
+    jump |= code[offset + 2];
+    std::cout
+        << name << " " << std::setfill('0') << std::setw(4) << offset << std::hex << jump << std::dec << std::endl;
+    return offset + 3;
 }

@@ -72,6 +72,7 @@ public:
     void varDeclarationStatement(const ParseFnArgs &args);
     void statement(const ParseFnArgs &args);
     void printStatement(const ParseFnArgs &args);
+    void ifStatement(const ParseFnArgs &args);
     void expressionStatement(const ParseFnArgs &args);
     void expression(const ParseFnArgs &args);
     void number(const ParseFnArgs &args);
@@ -106,6 +107,8 @@ private:
     void emitEpilogue();
     void emitConstant(Value value);
     void emitReturn();
+    size_t emitJump(uint8_t instruction);
+    void patchJump(size_t offset);
 
     void synchronize();
     void error(const std::string &message);
