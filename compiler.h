@@ -82,6 +82,8 @@ public:
     void literal(const ParseFnArgs &args);
     void string(const ParseFnArgs &args);
     void variable(const ParseFnArgs &args);
+    void logicalAnd(const ParseFnArgs &args);
+    void logicalOr(const ParseFnArgs &args);
 
 private:
     void advance();
@@ -139,7 +141,7 @@ static ParseRule PARSE_RULES[] = {
     [TOKEN_IDENTIFIER] = {&Compiler::variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {&Compiler::string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {&Compiler::number, NULL, PREC_NONE},
-    [TOKEN_AND] = {NULL, NULL, PREC_NONE},
+    [TOKEN_AND] = {NULL, &Compiler::logicalAnd, PREC_AND},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {&Compiler::literal, NULL, PREC_NONE},
@@ -147,7 +149,7 @@ static ParseRule PARSE_RULES[] = {
     [TOKEN_FUN] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
     [TOKEN_NIL] = {&Compiler::literal, NULL, PREC_NONE},
-    [TOKEN_OR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_OR] = {NULL, &Compiler::logicalOr, PREC_OR},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},

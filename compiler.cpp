@@ -244,6 +244,24 @@ void Compiler::variable(const ParseFnArgs &args)
     namedVariable(previous, args.canAssign);
 }
 
+void Compiler::logicalAnd(const ParseFnArgs &args)
+{
+    const auto endJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    parsePrecedence(PREC_AND);
+    patchJump(endJump);
+}
+
+void Compiler::logicalOr(const ParseFnArgs &args)
+{
+    const auto elseJump = emitJump(OP_JUMP_IF_FALSE);
+    const auto endJump = emitJump(OP_JUMP);
+    patchJump(elseJump);
+    emitByte(OP_POP);
+    parsePrecedence(PREC_OR);
+    patchJump(endJump);
+}
+
 void Compiler::parsePrecedence(Precedence precedence)
 {
     advance();
