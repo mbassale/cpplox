@@ -102,6 +102,9 @@ size_t Chunk::disassembleInstruction(size_t offset)
     case OP_JUMP_IF_FALSE:
         return jumpInstruction("OP_JUMP_IF_FALSE", 1, offset);
 
+    case OP_LOOP:
+        return jumpInstruction("OP_LOOP", -1, offset);
+
     case OP_RETURN:
         return simpleInstruction("OP_RETURN", offset);
 
@@ -157,6 +160,6 @@ size_t Chunk::jumpInstruction(const std::string &name, int sign, size_t offset)
     uint8_t *code = data();
     uint16_t jump = (uint16_t)(code[offset + 1] << 8);
     jump |= code[offset + 2];
-    std::cout << name << " " << std::hex << std::setfill('0') << std::setw(4) << (jump + offset + 3) << std::endl;
+    std::cout << name << " " << std::hex << std::setfill('0') << std::setw(4) << (sign * jump + offset + 3) << std::endl;
     return offset + 3;
 }

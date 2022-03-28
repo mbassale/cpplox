@@ -91,6 +91,10 @@ void Compiler::statement(const ParseFnArgs &args)
     {
         ifStatement(args);
     }
+    else if (match(TOKEN_WHILE))
+    {
+        whileStatement(args);
+    }
     else if (match(TOKEN_LEFT_BRACE))
     {
         beginScope();
@@ -125,6 +129,22 @@ void Compiler::ifStatement(const ParseFnArgs &args)
     if (match(TOKEN_ELSE))
         statement(args);
     patchJump(elseJump);
+}
+
+void Compiler::whileStatement(const ParseFnArgs &args)
+{
+    const auto loopStart = chunk->size();
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
+    expression(args);
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+    const auto exitJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    statement(args);
+    emitLoop(loopStart);
+
+    patchJump(exitJump);
+    emitByte(OP_POP);
 }
 
 void Compiler::expressionStatement(const ParseFnArgs &args)
@@ -490,6 +510,16 @@ void Compiler::patchJump(size_t offset)
     uint8_t *code = chunk->data();
     code[offset] = (jump >> 8) & 0xFF;
     code[offset + 1] = jump & 0xFF;
+}
+
+void Compiler::emitLoop(size_t loopStart)
+{
+    emitByte(OP_LOOP);
+    const auto offset = chunk->size() - loopStart + 2;
+    if (offset > UINT16_MAX)
+        error("Loop body too large.");
+    emitByte((offset >> 8) & 0xff);
+    emitByte(offset & 0xff);
 }
 
 void Compiler::consume(TokenType tokenType, const std::string &errorMessage)

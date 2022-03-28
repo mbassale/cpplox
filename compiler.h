@@ -73,6 +73,7 @@ public:
     void statement(const ParseFnArgs &args);
     void printStatement(const ParseFnArgs &args);
     void ifStatement(const ParseFnArgs &args);
+    void whileStatement(const ParseFnArgs &args);
     void expressionStatement(const ParseFnArgs &args);
     void expression(const ParseFnArgs &args);
     void number(const ParseFnArgs &args);
@@ -111,6 +112,7 @@ private:
     void emitReturn();
     size_t emitJump(uint8_t instruction);
     void patchJump(size_t offset);
+    void emitLoop(size_t loopStart);
 
     void synchronize();
     void error(const std::string &message);
