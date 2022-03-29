@@ -87,6 +87,10 @@ void Compiler::statement(const ParseFnArgs &args)
     {
         printStatement(args);
     }
+    else if (match(TOKEN_FOR))
+    {
+        forStatement(args);
+    }
     else if (match(TOKEN_IF))
     {
         ifStatement(args);
@@ -112,6 +116,59 @@ void Compiler::printStatement(const ParseFnArgs &args)
     expression(args);
     consume(TOKEN_SEMICOLON, "Expect ';' after value.");
     emitByte(OP_PRINT);
+}
+
+void Compiler::forStatement(const ParseFnArgs &args)
+{
+    beginScope();
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for.");
+    if (match(TOKEN_SEMICOLON))
+    {
+        // no initializer.
+    }
+    else if (match(TOKEN_VAR))
+    {
+        varDeclarationStatement(args);
+    }
+    else
+    {
+        expressionStatement(args);
+    }
+
+    int loopStart = chunk->size();
+    int exitJump = -1;
+    if (!match(TOKEN_SEMICOLON))
+    {
+        expression(args);
+        consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
+
+        exitJump = emitJump(OP_JUMP_IF_FALSE);
+        emitByte(OP_POP); // condition
+    }
+
+    if (!match(TOKEN_RIGHT_PAREN))
+    {
+        int bodyJump = emitJump(OP_JUMP);
+        int incrementStart = chunk->size();
+        expression(args);
+        emitByte(OP_POP);
+        consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
+
+        emitLoop(loopStart);
+        loopStart = incrementStart;
+        patchJump(bodyJump);
+    }
+
+    statement(args);
+    emitLoop(loopStart);
+
+    if (exitJump != -1)
+    {
+        patchJump(exitJump);
+        emitByte(OP_POP); // condition
+    }
+
+    endScope();
 }
 
 void Compiler::ifStatement(const ParseFnArgs &args)

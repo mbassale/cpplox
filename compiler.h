@@ -72,6 +72,7 @@ public:
     void varDeclarationStatement(const ParseFnArgs &args);
     void statement(const ParseFnArgs &args);
     void printStatement(const ParseFnArgs &args);
+    void forStatement(const ParseFnArgs &args);
     void ifStatement(const ParseFnArgs &args);
     void whileStatement(const ParseFnArgs &args);
     void expressionStatement(const ParseFnArgs &args);
