@@ -8,9 +8,9 @@ Compiler::Compiler()
     locals.reserve(UINT8_MAX + 1);
 }
 
-ChunkPtr Compiler::compile(const std::string &name, const std::string &source)
+FunctionPtr Compiler::compile(const std::string &name, const std::string &source)
 {
-    chunk = std::make_unique<Chunk>(name);
+    function = std::make_unique<Function>(FunctionType::TYPE_SCRIPT, name);
     scanner = std::make_unique<Scanner>(source);
     advance();
 
@@ -22,7 +22,7 @@ ChunkPtr Compiler::compile(const std::string &name, const std::string &source)
     }
 
     emitEpilogue();
-    return hadError ? nullptr : std::move(chunk);
+    return hadError ? nullptr : std::move(function);
 }
 
 void Compiler::advance()
@@ -136,7 +136,7 @@ void Compiler::forStatement(const ParseFnArgs &args)
         expressionStatement(args);
     }
 
-    int loopStart = chunk->size();
+    int loopStart = currentChunk().size();
     int exitJump = -1;
     if (!match(TOKEN_SEMICOLON))
     {
@@ -150,7 +150,7 @@ void Compiler::forStatement(const ParseFnArgs &args)
     if (!match(TOKEN_RIGHT_PAREN))
     {
         int bodyJump = emitJump(OP_JUMP);
-        int incrementStart = chunk->size();
+        int incrementStart = currentChunk().size();
         expression(args);
         emitByte(OP_POP);
         consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
@@ -191,7 +191,7 @@ void Compiler::ifStatement(const ParseFnArgs &args)
 
 void Compiler::whileStatement(const ParseFnArgs &args)
 {
-    const auto loopStart = chunk->size();
+    const auto loopStart = currentChunk().size();
     consume(TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
     expression(args);
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
@@ -514,18 +514,18 @@ void Compiler::endScope()
 
 void Compiler::emitByte(uint8_t byte)
 {
-    chunk->write(byte, previous.line);
+    currentChunk().write(byte, previous.line);
 }
 
 void Compiler::emitBytes(uint8_t byte1, uint8_t byte2)
 {
-    chunk->write(byte1);
-    chunk->write(byte2);
+    currentChunk().write(byte1);
+    currentChunk().write(byte2);
 }
 
 size_t Compiler::makeConstant(Value value)
 {
-    const auto constantOffset = chunk->writeConstant(value);
+    const auto constantOffset = currentChunk().writeConstant(value);
     // TODO: support OP_CONSTANT_LONG opcode.
     if (constantOffset > UINT8_MAX)
     {
@@ -555,17 +555,17 @@ size_t Compiler::emitJump(uint8_t instruction)
     emitByte(instruction);
     emitByte(0xff);
     emitByte(0xff);
-    return chunk->size() - 2;
+    return currentChunk().size() - 2;
 }
 
 void Compiler::patchJump(size_t offset)
 {
-    size_t jump = chunk->size() - offset - 2;
+    size_t jump = currentChunk().size() - offset - 2;
     if (jump > UINT16_MAX)
     {
         error("Too much code to jump over.");
     }
-    uint8_t *code = chunk->data();
+    uint8_t *code = currentChunk().data();
     code[offset] = (jump >> 8) & 0xFF;
     code[offset + 1] = jump & 0xFF;
 }
@@ -573,7 +573,7 @@ void Compiler::patchJump(size_t offset)
 void Compiler::emitLoop(size_t loopStart)
 {
     emitByte(OP_LOOP);
-    const auto offset = chunk->size() - loopStart + 2;
+    const auto offset = currentChunk().size() - loopStart + 2;
     if (offset > UINT16_MAX)
         error("Loop body too large.");
     emitByte((offset >> 8) & 0xff);

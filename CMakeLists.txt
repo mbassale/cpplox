@@ -41,6 +41,8 @@ set(SOURCES
   scanner.cpp
   object.h
   object.cpp
+  function.h
+  function.cpp
   value.h
   value.cpp
   vm.h

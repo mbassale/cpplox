@@ -4,6 +4,7 @@
 #include "common.h"
 #include "scanner.h"
 #include "chunk.h"
+#include "function.h"
 
 class CompilerError : public std::runtime_error
 {
@@ -52,7 +53,7 @@ class Compiler
 {
 private:
     ScannerUniquePtr scanner{};
-    ChunkPtr chunk{};
+    FunctionPtr function{nullptr};
     Token current{};
     Token previous{};
     bool hadError{false};
@@ -64,7 +65,7 @@ private:
 public:
     explicit Compiler();
 
-    ChunkPtr compile(const std::string &name, const std::string &source);
+    FunctionPtr compile(const std::string &name, const std::string &source);
     inline bool hasErrors() const { return !errors.empty(); }
     inline const std::list<std::string> &getErrors() const { return errors; }
 
@@ -88,6 +89,7 @@ public:
     void logicalOr(const ParseFnArgs &args);
 
 private:
+    inline Chunk &currentChunk() { return function->getChunk(); }
     void advance();
     bool match(TokenType type);
     bool check(TokenType type);

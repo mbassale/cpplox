@@ -49,7 +49,7 @@ public:
         try
         {
             Compiler compiler;
-            auto chunk = compiler.compile("main", source);
+            auto script = compiler.compile("main", source);
             if (compiler.hasErrors())
             {
                 for (const std::string &error : compiler.getErrors())
@@ -58,10 +58,10 @@ public:
                 }
                 return InterpretResult::INTERPRET_COMPILE_ERROR;
             }
-            chunk->disassemble();
+            script->getChunk().disassemble();
 
             std::cout << "== execution ==" << std::endl;
-            return vm.interpret(*chunk);
+            return vm.interpret(script->getChunk());
         }
         catch (CompilerError &err)
         {
