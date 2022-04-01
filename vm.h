@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "chunk.h"
+#include "object.h"
 
 typedef enum
 {
