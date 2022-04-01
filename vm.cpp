@@ -17,7 +17,9 @@ InterpretResult VM::interpret(Chunk &chunk)
         return InterpretResult::INTERPRET_RUNTIME_ERROR;
     this->chunk = &chunk;
     ip = this->chunk->data();
-    return run();
+    const auto result = run();
+    resetStack();
+    return result;
 }
 
 InterpretResult VM::run()

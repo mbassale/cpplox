@@ -55,16 +55,16 @@ private:
     ChunkPtr chunk{};
     Token current{};
     Token previous{};
-    bool hadError;
-    bool panicMode;
-    std::list<std::string> errors;
-    std::vector<Local> locals;
-    int scopeDepth;
+    bool hadError{false};
+    bool panicMode{false};
+    std::list<std::string> errors{};
+    std::vector<Local> locals{};
+    int scopeDepth{0};
 
 public:
     explicit Compiler();
 
-    ChunkPtr compile(const std::string &source);
+    ChunkPtr compile(const std::string &name, const std::string &source);
     inline bool hasErrors() const { return !errors.empty(); }
     inline const std::list<std::string> &getErrors() const { return errors; }
 

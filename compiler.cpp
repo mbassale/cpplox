@@ -1,15 +1,16 @@
 #include "compiler.h"
 
-Compiler::Compiler() : locals()
+Compiler::Compiler()
 {
+    scopeDepth = 0;
     hadError = false;
     panicMode = false;
     locals.reserve(UINT8_MAX + 1);
 }
 
-ChunkPtr Compiler::compile(const std::string &source)
+ChunkPtr Compiler::compile(const std::string &name, const std::string &source)
 {
-    chunk = std::make_unique<Chunk>("<name>");
+    chunk = std::make_unique<Chunk>(name);
     scanner = std::make_unique<Scanner>(source);
     advance();
 

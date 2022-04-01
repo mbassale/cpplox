@@ -49,7 +49,7 @@ public:
         try
         {
             Compiler compiler;
-            auto chunk = compiler.compile(source);
+            auto chunk = compiler.compile("main", source);
             if (compiler.hasErrors())
             {
                 for (const std::string &error : compiler.getErrors())
