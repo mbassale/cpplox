@@ -64,6 +64,6 @@ private:
     size_t jumpInstruction(const std::string &name, int sign, size_t offset);
 };
 
-typedef std::shared_ptr<Chunk> ChunkPtr;
+typedef std::unique_ptr<Chunk> ChunkPtr;
 
 #endif // __cpplox_chunk_h

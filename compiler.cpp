@@ -9,7 +9,7 @@ Compiler::Compiler() : locals()
 
 ChunkPtr Compiler::compile(const std::string &source)
 {
-    chunk = std::make_shared<Chunk>("<name>");
+    chunk = std::make_unique<Chunk>("<name>");
     scanner = std::make_unique<Scanner>(source);
     advance();
 
@@ -21,7 +21,7 @@ ChunkPtr Compiler::compile(const std::string &source)
     }
 
     emitEpilogue();
-    return hadError ? nullptr : chunk;
+    return hadError ? nullptr : std::move(chunk);
 }
 
 void Compiler::advance()
