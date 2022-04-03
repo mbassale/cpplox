@@ -106,7 +106,7 @@ InterpretResult VM::run()
             {
                 std::ostringstream ss;
                 ss << "Undefined variable: " << symbolName;
-                throw VMRuntimeError(ss.str());
+                runtimeError(ss.str());
             }
             pushStack(it->second);
             break;
@@ -121,7 +121,7 @@ InterpretResult VM::run()
             {
                 std::ostringstream ss;
                 ss << "Undefined variable: " << symbolName;
-                throw VMRuntimeError(ss.str());
+                runtimeError(ss.str());
             }
             it->second = peekStack(0);
             break;
@@ -154,7 +154,7 @@ InterpretResult VM::run()
         {
             if (!std::holds_alternative<double>(peekStack(0)))
             {
-                throw VMRuntimeError("Operand must be a number.");
+                runtimeError("Operand must be a number.");
             }
             const auto topValue = popStack();
             const auto num = std::get<double>(topValue);
@@ -228,7 +228,8 @@ bool VM::callValue(Value callee, int argCount)
             return call(function, argCount);
         }
     }
-    throw VMRuntimeError("Can only call function and classes.");
+    runtimeError("Can only call function and classes.");
+    return false;
 }
 
 bool VM::call(FunctionPtr function, int argCount)
@@ -237,11 +238,11 @@ bool VM::call(FunctionPtr function, int argCount)
     {
         std::ostringstream ss;
         ss << "Expected " << function->getArity() << " arguments but got " << argCount;
-        throw VMRuntimeError(ss.str());
+        runtimeError(ss.str());
     }
     if (frameCount == FRAMES_MAX)
     {
-        throw VMRuntimeError("Stack overflow.");
+        runtimeError("Stack overflow.");
     }
     pushFrame(function);
     getFrame().fp = stackTop - argCount - 1;
@@ -265,7 +266,7 @@ void VM::binaryOperator(uint8_t op)
     // Number operation
     if (!peekStack(0).isDouble() || !peekStack(1).isDouble())
     {
-        throw VMRuntimeError("Operands must be numbers or strings.");
+        runtimeError("Operands must be numbers or strings.");
     }
     const auto b = (double)popStack();
     const auto a = (double)popStack();
@@ -319,4 +320,19 @@ void VM::traceGlobals()
         std::cout << symbol << ": " << (std::string)value << "\n";
     }
     std::cout << "}" << std::endl;
+}
+
+void VM::runtimeError(const std::string &message)
+{
+    std::ostringstream ss;
+    ss << message << std::endl;
+    for (int i = frameCount - 1; i >= 0; i--)
+    {
+        const auto &frame = frames[i];
+        FunctionPtr function = frame.function;
+        auto &function_chunk = function->getChunk();
+        size_t instruction = frame.ip - function_chunk.data() - 1;
+        ss << "[line " << function_chunk.getLines().get(instruction) << "] in " << function->toString() << std::endl;
+    }
+    throw VMRuntimeError(ss.str());
 }

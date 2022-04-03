@@ -13,6 +13,7 @@ Compiler::Compiler(const Compiler &compiler) : scanner(compiler.scanner), curren
     scopeDepth = 0;
     hadError = false;
     panicMode = false;
+    locals.reserve(UINT8_MAX + 1);
 }
 
 FunctionPtr Compiler::compile(const std::string &name, const std::string &source)

@@ -122,6 +122,7 @@ private:
     }
     void traceStack();
     void traceGlobals();
+    void runtimeError(const std::string &message);
 };
 
 #endif // __cpplox_vm_h

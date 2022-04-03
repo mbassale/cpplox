@@ -51,6 +51,7 @@ public:
     inline Value &readConstant(size_t offset) { return constants[offset]; }
     inline uint8_t *data() { return code.data(); }
     size_t size() const { return code.size(); }
+    inline LineInfo &getLines() { return lines; }
 
     void disassemble();
     size_t disassembleInstruction(size_t offset);
