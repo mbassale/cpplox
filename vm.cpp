@@ -11,12 +11,13 @@ VM::~VM()
     objects.clear();
 }
 
-InterpretResult VM::interpret(Function &function)
+InterpretResult VM::interpret(FunctionPtr function)
 {
-    if (function.getChunk().size() == 0)
+    if (function->getChunk().size() == 0)
         return InterpretResult::INTERPRET_RUNTIME_ERROR;
     frameCount = 0;
     resetStack();
+    pushStack(function);
     pushFrame(function);
     const auto result = run();
     resetStack();

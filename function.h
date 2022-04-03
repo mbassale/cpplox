@@ -36,8 +36,8 @@ protected:
     friend bool operator==(const Function &lhs, const Function &rhs);
 };
 
-typedef std::unique_ptr<Function> FunctionPtr;
-typedef Function *FunctionWeakPtr;
+typedef std::shared_ptr<Function> FunctionPtr;
+typedef std::weak_ptr<Function> FunctionWeakPtr;
 
 bool operator==(const Function &lhs, const Function &rhs);
 

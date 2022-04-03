@@ -19,10 +19,17 @@ const size_t STACK_MAX = FRAMES_MAX * (UINT8_MAX + 1);
 struct CallFrame
 {
 public:
-    FunctionWeakPtr function; // compiled function obj
-    uint8_t *ip;              // return address
-    Value *fp;                // frame pointer
+    FunctionPtr function; // compiled function obj
+    uint8_t *ip;          // return address
+    Value *fp;            // frame pointer
 
+    CallFrame() : function(nullptr), ip(nullptr), fp(nullptr) {}
+    inline void reset()
+    {
+        function.reset();
+        ip = nullptr;
+        fp = nullptr;
+    }
     inline Function &getFunction() const { return *function; }
     inline Chunk &getChunk() const { return getFunction().getChunk(); }
 };
@@ -46,22 +53,27 @@ public:
     explicit VM();
     ~VM();
 
-    InterpretResult interpret(Function &function);
+    InterpretResult interpret(FunctionPtr function);
 
 private:
     InterpretResult run();
 
-    inline CallFrame &initFrame(Function &function, size_t frameOffset)
+    inline CallFrame &initFrame(FunctionPtr function, size_t frameOffset)
     {
         auto &frame = frames[frameOffset];
-        frame.ip = function.getChunk().data();
-        frame.function = &function;
+        frame.ip = function->getChunk().data();
+        frame.function = function;
         frame.fp = stackTop;
         return frame;
     }
-    inline CallFrame &pushFrame(Function &function)
+    inline CallFrame &pushFrame(FunctionPtr function)
     {
         return initFrame(function, frameCount++);
+    }
+    inline void popFrame()
+    {
+        auto &frame = frames[--frameCount];
+        frame.reset();
     }
     inline CallFrame &getFrame() { return frames[frameCount - 1]; }
     inline Chunk &getChunk() { return getFrame().getChunk(); }
@@ -90,6 +102,11 @@ private:
     {
         *stackTop = value;
         stackTop++;
+    }
+    inline void pushStack(FunctionPtr function)
+    {
+        auto object = std::static_pointer_cast<Object>(function);
+        pushStack(Value(object));
     }
     inline Value &popStack()
     {
