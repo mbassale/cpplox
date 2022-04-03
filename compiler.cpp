@@ -38,6 +38,19 @@ FunctionPtr Compiler::compileFunction(Compiler &compiler, FunctionType &function
     scanner = compiler.scanner;
     beginScope();
     consume(TOKEN_LEFT_PAREN, "Expect '(' after function name.");
+    if (!check(TOKEN_RIGHT_PAREN))
+    {
+        do
+        {
+            auto arity = function->incrArity();
+            if (arity > 255)
+            {
+                errorAtCurrent("Can't have more than 255 parameters.");
+            }
+            uint8_t param = parseVariable("Expect parameter name.");
+            defineVariable(param);
+        } while (match(TOKEN_COMMA));
+    }
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
     consume(TOKEN_LEFT_BRACE, "Expect '{' before function body.");
     block();

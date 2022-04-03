@@ -25,6 +25,8 @@ public:
     Function(FunctionType type, const std::string &name, int arity = 0) : type(type), name(name), chunk(name), arity(arity) {}
 
     inline Chunk &getChunk() { return chunk; }
+    inline int getArity() const { return arity; }
+    inline int incrArity() { return ++arity; }
 
     std::string toString() const override;
     bool isFalsey() const override;
