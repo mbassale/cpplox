@@ -5,6 +5,7 @@
 #include <cstdbool>
 #include <cstddef>
 #include <cstdint>
+#include <typeinfo>
 #include <functional>
 #include <variant>
 #include <string>

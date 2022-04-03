@@ -9,16 +9,17 @@ public:
     Object() {}
     Object(const Object &) {}
 
-    std::string toString() const { return std::string(); }
-    bool isFalsey() const { return true; }
-    bool isTruthy() const { return false; }
+    virtual std::string toString() const { return std::string(); }
+    virtual bool isFalsey() const { return true; }
+    virtual bool isTruthy() const { return false; }
+    virtual bool isEqual(const Object &obj) const { return true; }
 
 protected:
     friend bool operator==(const Object &, const Object &);
-    virtual bool isEqual(const Object &obj) const { return false; }
 };
 
-typedef std::unique_ptr<Object> ObjectPtr;
+typedef std::shared_ptr<Object> ObjectPtr;
+typedef std::weak_ptr<Object> ObjectWeakPtr;
 
 bool operator==(const Object &lhs, const Object &rhs);
 
