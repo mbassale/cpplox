@@ -61,7 +61,12 @@ public:
             script->getChunk().disassemble();
 
             std::cout << "== execution ==" << std::endl;
-            return vm.interpret(script->getChunk());
+            return vm.interpret(*script);
+        }
+        catch (VMRuntimeError &err)
+        {
+            std::cerr << "RuntimeError: " << err.what() << std::endl;
+            return InterpretResult::INTERPRET_RUNTIME_ERROR;
         }
         catch (CompilerError &err)
         {

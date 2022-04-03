@@ -4,6 +4,7 @@
 #include "common.h"
 #include "chunk.h"
 #include "object.h"
+#include "function.h"
 
 typedef enum
 {
@@ -12,7 +13,19 @@ typedef enum
     INTERPRET_RUNTIME_ERROR
 } InterpretResult;
 
-const size_t STACK_MAX = 256;
+const size_t FRAMES_MAX = 256;
+const size_t STACK_MAX = FRAMES_MAX * (UINT8_MAX + 1);
+
+struct CallFrame
+{
+public:
+    FunctionWeakPtr function; // compiled function obj
+    uint8_t *ip;              // return address
+    Value *fp;                // frame pointer
+
+    inline Function &getFunction() const { return *function; }
+    inline Chunk &getChunk() const { return getFunction().getChunk(); }
+};
 
 class VMRuntimeError : public std::runtime_error
 {
@@ -22,9 +35,9 @@ public:
 
 class VM
 {
-    Chunk *chunk;
-    uint8_t *ip;
     std::array<Value, STACK_MAX> stack;
+    std::array<CallFrame, FRAMES_MAX> frames;
+    size_t frameCount;
     Value *stackTop;
     std::forward_list<ObjectPtr> objects;
     std::unordered_map<Symbol, Value> globals;
@@ -33,26 +46,44 @@ public:
     explicit VM();
     ~VM();
 
-    InterpretResult interpret(Chunk &chunk);
+    InterpretResult interpret(Function &function);
 
 private:
     InterpretResult run();
 
-    inline uint8_t readByte() { return *ip++; }
+    inline CallFrame &initFrame(Function &function, size_t frameOffset)
+    {
+        auto &frame = frames[frameOffset];
+        frame.ip = function.getChunk().data();
+        frame.function = &function;
+        frame.fp = stackTop;
+        return frame;
+    }
+    inline CallFrame &pushFrame(Function &function)
+    {
+        return initFrame(function, frameCount++);
+    }
+    inline CallFrame &getFrame() { return frames[frameCount - 1]; }
+    inline Chunk &getChunk() { return getFrame().getChunk(); }
+
+    inline uint8_t readByte() { return *getFrame().ip++; }
     inline uint16_t readShort()
     {
-        ip += 2;
-        return (uint16_t)(ip[-2] << 8 | ip[-1]);
+        auto &frame = getFrame();
+        frame.ip += 2;
+        return (uint16_t)(frame.ip[-2] << 8 | frame.ip[-1]);
     }
-    inline Value &readConstant() { return chunk->readConstant(readByte()); }
+    inline Value &readConstant() { return getChunk().readConstant(readByte()); }
     inline Value &readConstantLong()
     {
         uint32bytes constantOffset = {0};
         constantOffset.bytes.b0 = readByte();
         constantOffset.bytes.b1 = readByte();
         constantOffset.bytes.b2 = readByte();
-        return chunk->readConstant(constantOffset.u32);
+        return getChunk().readConstant(constantOffset.u32);
     }
+    inline void incrIp(size_t offset) { getFrame().ip += offset; }
+    inline void decrIp(size_t offset) { getFrame().ip -= offset; }
     inline void binaryOperator(uint8_t op);
     inline void resetStack() { stackTop = stack.data(); }
     inline void pushStack(const Value &value)

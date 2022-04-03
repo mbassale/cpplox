@@ -1,6 +1,6 @@
 #include "vm.h"
 
-VM::VM() : chunk{}, ip{}, stack(), objects(), globals()
+VM::VM() : stack(), frames(), frameCount(0), objects(), globals()
 {
     stackTop = stack.data();
 }
@@ -11,12 +11,13 @@ VM::~VM()
     objects.clear();
 }
 
-InterpretResult VM::interpret(Chunk &chunk)
+InterpretResult VM::interpret(Function &function)
 {
-    if (chunk.size() == 0)
+    if (function.getChunk().size() == 0)
         return InterpretResult::INTERPRET_RUNTIME_ERROR;
-    this->chunk = &chunk;
-    ip = this->chunk->data();
+    frameCount = 0;
+    resetStack();
+    pushFrame(function);
     const auto result = run();
     resetStack();
     return result;
@@ -24,12 +25,13 @@ InterpretResult VM::interpret(Chunk &chunk)
 
 InterpretResult VM::run()
 {
+    auto &frame = getFrame();
     for (;;)
     {
 #ifdef DEBUG_TRACE_EXECUTION
         traceStack();
         traceGlobals();
-        chunk->disassembleInstruction((size_t)(ip - chunk->data()));
+        frame.getChunk().disassembleInstruction((size_t)(frame.ip - frame.getChunk().data()));
 #endif
         uint8_t instruction;
         switch (instruction = readByte())
@@ -75,14 +77,14 @@ InterpretResult VM::run()
         case OP_GET_LOCAL:
         {
             uint8_t slot = readByte();
-            pushStack(stack[slot]);
+            pushStack(frame.fp[slot]);
             break;
         }
 
         case OP_SET_LOCAL:
         {
             uint8_t slot = readByte();
-            stack[slot] = peekStack(0);
+            frame.fp[slot] = peekStack(0);
             break;
         }
 
@@ -169,7 +171,7 @@ InterpretResult VM::run()
         case OP_JUMP:
         {
             uint16_t offset = readShort();
-            ip += offset;
+            frame.ip += offset;
             break;
         }
 
@@ -177,14 +179,14 @@ InterpretResult VM::run()
         {
             uint16_t offset = readShort();
             if (peekStack(0).isFalsey())
-                ip += offset;
+                frame.ip += offset;
             break;
         }
 
         case OP_LOOP:
         {
             uint16_t offset = readShort();
-            ip -= offset;
+            frame.ip -= offset;
             break;
         }
 

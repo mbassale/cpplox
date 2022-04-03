@@ -28,5 +28,6 @@ public:
 };
 
 typedef std::unique_ptr<Function> FunctionPtr;
+typedef Function *FunctionWeakPtr;
 
 #endif // __cpplox_function_h
