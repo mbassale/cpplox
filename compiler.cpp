@@ -8,10 +8,17 @@ Compiler::Compiler()
     locals.reserve(UINT8_MAX + 1);
 }
 
+Compiler::Compiler(const Compiler &compiler) : scanner(compiler.scanner), current(compiler.current), previous(compiler.previous), locals(compiler.locals)
+{
+    scopeDepth = 0;
+    hadError = false;
+    panicMode = false;
+}
+
 FunctionPtr Compiler::compile(const std::string &name, const std::string &source)
 {
-    function = std::make_unique<Function>(FunctionType::TYPE_SCRIPT, name);
-    scanner = std::make_unique<Scanner>(source);
+    function = std::make_shared<Function>(FunctionType::TYPE_SCRIPT, name);
+    scanner = std::make_shared<Scanner>(source);
     advance();
 
     ParseFnArgs args;
@@ -23,6 +30,19 @@ FunctionPtr Compiler::compile(const std::string &name, const std::string &source
 
     emitEpilogue();
     return hadError ? nullptr : std::move(function);
+}
+
+FunctionPtr Compiler::compileFunction(Compiler &compiler, FunctionType &functionType, const std::string &name)
+{
+    function = std::make_shared<Function>(functionType, name);
+    scanner = compiler.scanner;
+    beginScope();
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after function name.");
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before function body.");
+    block();
+    emitReturn();
+    return function;
 }
 
 void Compiler::advance()
@@ -52,7 +72,11 @@ bool Compiler::check(TokenType type)
 
 void Compiler::declaration(const ParseFnArgs &args)
 {
-    if (match(TOKEN_VAR))
+    if (match(TOKEN_FUN))
+    {
+        funDeclaration(args);
+    }
+    else if (match(TOKEN_VAR))
     {
         varDeclarationStatement(args);
     }
@@ -63,6 +87,15 @@ void Compiler::declaration(const ParseFnArgs &args)
 
     if (panicMode)
         synchronize();
+}
+
+void Compiler::funDeclaration(const ParseFnArgs &args)
+{
+    uint8_t global = parseVariable("Expect function name.");
+    markInitialized();
+    const auto functionName = (std::string)currentChunk().readConstant(global);
+    compileDefinition(TYPE_FUNCTION, functionName);
+    defineVariable(global);
 }
 
 void Compiler::varDeclarationStatement(const ParseFnArgs &args)
@@ -455,6 +488,8 @@ void Compiler::declareVariable()
 
 void Compiler::markInitialized()
 {
+    if (scopeDepth == 0)
+        return;
     locals[locals.size() - 1].depth = scopeDepth;
 }
 
@@ -499,6 +534,16 @@ void Compiler::block()
     }
 
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+}
+
+void Compiler::compileDefinition(FunctionType type, const std::string &name)
+{
+    std::cout << "Defintion: " << name << std::endl;
+    Compiler compiler(*this);
+    auto newFunction = compiler.compileFunction(*this, type, name);
+    previous = compiler.previous;
+    current = compiler.current;
+    emitBytes(OP_CONSTANT, makeConstant(Value(newFunction)));
 }
 
 void Compiler::endScope()

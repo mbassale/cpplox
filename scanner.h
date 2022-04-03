@@ -132,6 +132,6 @@ private:
     TokenType checkKeyword(size_t offset, const std::string &rest, TokenType type);
 };
 
-typedef std::unique_ptr<Scanner> ScannerUniquePtr;
+typedef std::shared_ptr<Scanner> ScannerPtr;
 
 #endif // __cpplox_scanner_h

@@ -52,7 +52,7 @@ struct Local
 class Compiler
 {
 private:
-    ScannerUniquePtr scanner{};
+    ScannerPtr scanner{nullptr};
     FunctionPtr function{nullptr};
     Token current{};
     Token previous{};
@@ -64,12 +64,15 @@ private:
 
 public:
     explicit Compiler();
+    explicit Compiler(const Compiler &compiler);
 
     FunctionPtr compile(const std::string &name, const std::string &source);
+    FunctionPtr compileFunction(Compiler &compiler, FunctionType &functionType, const std::string &name);
     inline bool hasErrors() const { return !errors.empty(); }
     inline const std::list<std::string> &getErrors() const { return errors; }
 
     void declaration(const ParseFnArgs &args);
+    void funDeclaration(const ParseFnArgs &args);
     void varDeclarationStatement(const ParseFnArgs &args);
     void statement(const ParseFnArgs &args);
     void printStatement(const ParseFnArgs &args);
@@ -106,6 +109,7 @@ private:
     int resolveLocal(const Token &name);
     void beginScope();
     void block();
+    void compileDefinition(FunctionType type, const std::string &name);
     void endScope();
     void emitByte(uint8_t byte);
     void emitBytes(uint8_t byte1, uint8_t byte2);
