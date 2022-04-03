@@ -18,7 +18,7 @@ InterpretResult VM::interpret(FunctionPtr function)
     frameCount = 0;
     resetStack();
     pushStack(function);
-    pushFrame(function);
+    call(function, 0);
     const auto result = run();
     resetStack();
     return result;
@@ -26,13 +26,12 @@ InterpretResult VM::interpret(FunctionPtr function)
 
 InterpretResult VM::run()
 {
-    auto &frame = getFrame();
     for (;;)
     {
 #ifdef DEBUG_TRACE_EXECUTION
         traceStack();
         traceGlobals();
-        frame.getChunk().disassembleInstruction((size_t)(frame.ip - frame.getChunk().data()));
+        getFrame().getChunk().disassembleInstruction((size_t)(getFrame().ip - getFrame().getChunk().data()));
 #endif
         uint8_t instruction;
         switch (instruction = readByte())
@@ -78,14 +77,14 @@ InterpretResult VM::run()
         case OP_GET_LOCAL:
         {
             uint8_t slot = readByte();
-            pushStack(frame.fp[slot]);
+            pushStack(getFrame().fp[slot]);
             break;
         }
 
         case OP_SET_LOCAL:
         {
             uint8_t slot = readByte();
-            frame.fp[slot] = peekStack(0);
+            getFrame().fp[slot] = peekStack(0);
             break;
         }
 
@@ -172,7 +171,7 @@ InterpretResult VM::run()
         case OP_JUMP:
         {
             uint16_t offset = readShort();
-            frame.ip += offset;
+            getFrame().ip += offset;
             break;
         }
 
@@ -180,14 +179,24 @@ InterpretResult VM::run()
         {
             uint16_t offset = readShort();
             if (peekStack(0).isFalsey())
-                frame.ip += offset;
+                getFrame().ip += offset;
             break;
         }
 
         case OP_LOOP:
         {
             uint16_t offset = readShort();
-            frame.ip -= offset;
+            getFrame().ip -= offset;
+            break;
+        }
+
+        case OP_CALL:
+        {
+            const auto argCount = readByte();
+            if (!callValue(peekStack(argCount), argCount))
+            {
+                return INTERPRET_RUNTIME_ERROR;
+            }
             break;
         }
 
@@ -205,6 +214,38 @@ InterpretResult VM::run()
     }
 
     return InterpretResult::INTERPRET_RUNTIME_ERROR;
+}
+
+bool VM::callValue(Value callee, int argCount)
+{
+    if (callee.isObject())
+    {
+        const auto object = (ObjectPtr)callee;
+        const auto function = std::dynamic_pointer_cast<Function>(object);
+        // we have a function?
+        if (function)
+        {
+            return call(function, argCount);
+        }
+    }
+    throw VMRuntimeError("Can only call function and classes.");
+}
+
+bool VM::call(FunctionPtr function, int argCount)
+{
+    if (argCount != function->getArity())
+    {
+        std::ostringstream ss;
+        ss << "Expected " << function->getArity() << " arguments but got " << argCount;
+        throw VMRuntimeError(ss.str());
+    }
+    if (frameCount == FRAMES_MAX)
+    {
+        throw VMRuntimeError("Stack overflow.");
+    }
+    pushFrame(function);
+    getFrame().fp = stackTop - argCount - 1;
+    return true;
 }
 
 void VM::binaryOperator(uint8_t op)

@@ -70,6 +70,8 @@ private:
     {
         return initFrame(function, frameCount++);
     }
+    inline bool callValue(Value callee, int argCount);
+    inline bool call(FunctionPtr function, int argCount);
     inline void popFrame()
     {
         auto &frame = frames[--frameCount];

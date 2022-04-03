@@ -85,6 +85,7 @@ public:
     void grouping(const ParseFnArgs &args);
     void unary(const ParseFnArgs &args);
     void binary(const ParseFnArgs &args);
+    void call(const ParseFnArgs &args);
     void literal(const ParseFnArgs &args);
     void string(const ParseFnArgs &args);
     void variable(const ParseFnArgs &args);
@@ -103,6 +104,7 @@ private:
     ParseRule &getRule(TokenType tokenType);
     void consume(TokenType tokenType, const std::string &errorMessage);
     void defineVariable(size_t global);
+    uint8_t argumentList(const ParseFnArgs &args);
     void declareVariable();
     void markInitialized();
     void addLocal(const Token &name);
@@ -128,7 +130,7 @@ private:
 };
 
 static ParseRule PARSE_RULES[] = {
-    [TOKEN_LEFT_PAREN] = {&Compiler::grouping, NULL, PREC_NONE},
+    [TOKEN_LEFT_PAREN] = {&Compiler::grouping, &Compiler::call, PREC_CALL},
     [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
     [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},

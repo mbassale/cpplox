@@ -340,6 +340,12 @@ void Compiler::binary(const ParseFnArgs &args)
     }
 }
 
+void Compiler::call(const ParseFnArgs &args)
+{
+    uint8_t argCount = argumentList(args);
+    emitBytes(OP_CALL, argCount);
+}
+
 void Compiler::literal(const ParseFnArgs &args)
 {
     switch (previous.type)
@@ -473,6 +479,25 @@ void Compiler::defineVariable(size_t global)
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
+uint8_t Compiler::argumentList(const ParseFnArgs &args)
+{
+    uint8_t argCount = 0;
+    if (!check(TOKEN_RIGHT_PAREN))
+    {
+        do
+        {
+            expression(args);
+            if (argCount == 255)
+            {
+                error("Can't have more than 255 arguments.");
+            }
+            argCount++;
+        } while (match(TOKEN_COMMA));
+    }
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
+    return argCount;
+}
+
 void Compiler::declareVariable()
 {
     if (scopeDepth == 0)
@@ -551,7 +576,6 @@ void Compiler::block()
 
 void Compiler::compileDefinition(FunctionType type, const std::string &name)
 {
-    std::cout << "Defintion: " << name << std::endl;
     Compiler compiler(*this);
     auto newFunction = compiler.compileFunction(*this, type, name);
     previous = compiler.previous;
