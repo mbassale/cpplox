@@ -202,7 +202,15 @@ InterpretResult VM::run()
 
         case OP_RETURN:
         {
-            return InterpretResult::INTERPRET_OK;
+            auto result = popStack();
+            popFrame();
+            if (frameCount == 0)
+            {
+                popStack();
+                return InterpretResult::INTERPRET_OK;
+            }
+            stackTop = getFrame().fp;
+            pushStack(result);
             break;
         }
 

@@ -630,6 +630,7 @@ void Compiler::emitConstant(Value value)
 
 void Compiler::emitReturn()
 {
+    emitByte(OP_NIL);
     emitByte(OP_RETURN);
 }
 
