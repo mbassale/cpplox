@@ -9,6 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 #------------------------------------------------#
 # LIBRARIES                                      #
 #------------------------------------------------#
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -56,7 +60,7 @@ add_executable(
   src/main.cpp
 )
 
-target_link_libraries(cpplox libcpplox)
+target_link_libraries(cpplox libcpplox boost_thread boost_system Threads::Threads)
 
 #------------------------------------------------#
 # GOOGLE TEST                                    #
@@ -75,6 +79,9 @@ target_link_libraries(
   libcpplox
   gtest
   gtest_main
+  boost_thread
+  boost_system
+  Threads::Threads
 )
 
 include(GoogleTest)
