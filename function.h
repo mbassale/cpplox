@@ -24,6 +24,8 @@ public:
     Function(const Function &function) : type(function.type), arity(function.arity), name(function.name), chunk(function.chunk) {}
     Function(FunctionType type, const std::string &name, int arity = 0) : type(type), name(name), chunk(name), arity(arity) {}
 
+    inline FunctionType getType() const { return type; }
+    inline const std::string &getName() const { return name; }
     inline Chunk &getChunk() { return chunk; }
     inline int getArity() const { return arity; }
     inline int incrArity() { return ++arity; }

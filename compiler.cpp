@@ -143,6 +143,10 @@ void Compiler::statement(const ParseFnArgs &args)
     {
         ifStatement(args);
     }
+    else if (match(TOKEN_RETURN))
+    {
+        returnStatement(args);
+    }
     else if (match(TOKEN_WHILE))
     {
         whileStatement(args);
@@ -164,6 +168,24 @@ void Compiler::printStatement(const ParseFnArgs &args)
     expression(args);
     consume(TOKEN_SEMICOLON, "Expect ';' after value.");
     emitByte(OP_PRINT);
+}
+
+void Compiler::returnStatement(const ParseFnArgs &args)
+{
+    if (function->getType() == FunctionType::TYPE_SCRIPT)
+    {
+        error("Can't return from top-level code.");
+    }
+    if (match(TOKEN_SEMICOLON))
+    {
+        emitReturn();
+    }
+    else
+    {
+        expression(args);
+        consume(TOKEN_SEMICOLON, "Expect ';' after return value.");
+        emitByte(OP_RETURN);
+    }
 }
 
 void Compiler::forStatement(const ParseFnArgs &args)

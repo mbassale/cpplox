@@ -1,0 +1,8 @@
+
+fun calc1() {
+    var count = 10;
+    return count
+}
+
+calc1();
+print res;
