@@ -24,36 +24,36 @@ include_directories(${Boost_INCLUDE_DIRS})
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
 #------------------------------------------------#
-configure_file(config.h.in config.h)
+configure_file(config.h.in src/config.h)
 
+include_directories(src)
 set(SOURCES
-  common.h
-  chunk.h
-  chunk.cpp
-  compiler.h
-  compiler.cpp
-  config.h
-  debug.h
-  debug.cpp
-  lineinfo.h
-  lineinfo.cpp
-  scanner.h
-  scanner.cpp
-  object.h
-  object.cpp
-  function.h
-  function.cpp
-  value.h
-  value.cpp
-  vm.h
-  vm.cpp
+  src/common.h
+  src/chunk.h
+  src/chunk.cpp
+  src/compiler.h
+  src/compiler.cpp
+  src/config.h
+  src/debug.h
+  src/debug.cpp
+  src/lineinfo.h
+  src/lineinfo.cpp
+  src/scanner.h
+  src/scanner.cpp
+  src/object.h
+  src/object.cpp
+  src/function.h
+  src/function.cpp
+  src/value.h
+  src/value.cpp
+  src/vm.h
+  src/vm.cpp
 )
-
-ADD_LIBRARY(libcpplox STATIC ${SOURCES})
+add_library(libcpplox STATIC ${SOURCES})
 
 add_executable(
   cpplox 
-  main.cpp
+  src/main.cpp
 )
 
 target_link_libraries(cpplox libcpplox)
@@ -63,7 +63,7 @@ target_link_libraries(cpplox libcpplox)
 #------------------------------------------------#
 enable_testing()
 
-include_directories(./)
+
 add_executable(
   cpplox_test
   tests/value_test.cpp

@@ -3,7 +3,7 @@
 cpplox
 cpplox_test*
 .vscode
-/config.h
+/src/config.h
 Makefile
 CMakeLists.txt.user
 CMakeCache.txt
