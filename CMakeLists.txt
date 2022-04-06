@@ -49,25 +49,30 @@ set(SOURCES
   vm.cpp
 )
 
+ADD_LIBRARY(libcpplox STATIC ${SOURCES})
+
 add_executable(
   cpplox 
-  main.cpp 
-  ${SOURCES}
+  main.cpp
 )
+
+target_link_libraries(cpplox libcpplox)
 
 #------------------------------------------------#
 # GOOGLE TEST                                    #
 #------------------------------------------------#
 enable_testing()
 
+include_directories(./)
 add_executable(
   cpplox_test
-  value_test.cpp
-  ${SOURCES}
+  tests/value_test.cpp
+  tests/scanner_test.cpp
 )
 
 target_link_libraries(
   cpplox_test
+  libcpplox
   gtest
   gtest_main
 )
