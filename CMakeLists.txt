@@ -9,9 +9,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 #------------------------------------------------#
 # LIBRARIES                                      #
 #------------------------------------------------#
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-find_package(Threads REQUIRED)
+if(UNIX AND NOT APPLE)
+  set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+  set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+  find_package(Threads REQUIRED)
+endif()
 
 include(FetchContent)
 FetchContent_Declare(
@@ -60,7 +62,13 @@ add_executable(
   src/main.cpp
 )
 
-target_link_libraries(cpplox libcpplox boost_thread boost_system Threads::Threads)
+if(UNIX AND NOT APPLE)
+  set(ADDITIONAL_LIBRARIES boost_thread boost_system Threads::Threads)
+else()
+  set(ADDITIONAL_LIBRARIES "")
+endif()
+
+target_link_libraries(cpplox libcpplox ${ADDITIONAL_LIBRARIES})
 
 #------------------------------------------------#
 # GOOGLE TEST                                    #
@@ -79,9 +87,7 @@ target_link_libraries(
   libcpplox
   gtest
   gtest_main
-  boost_thread
-  boost_system
-  Threads::Threads
+  ${ADDITIONAL_LIBRARIES}
 )
 
 include(GoogleTest)
