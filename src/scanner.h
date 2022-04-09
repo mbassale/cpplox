@@ -85,7 +85,7 @@ public:
 
 class Scanner
 {
-    const std::string &source;
+    const std::string source;
     std::string::const_iterator start;
     std::string::const_iterator current;
     size_t line;
@@ -93,8 +93,8 @@ class Scanner
 public:
     explicit Scanner(const std::string &source) : source(source)
     {
-        start = source.begin();
-        current = source.begin();
+        start = this->source.begin();
+        current = this->source.begin();
         line = 1;
     }
 
