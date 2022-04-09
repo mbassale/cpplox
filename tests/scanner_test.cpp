@@ -7,9 +7,9 @@ struct ScanTestData
 {
     const char *name;
     const char *source;
-    std::array<Token, N> tokens;
+    std::array<TokenType, N> tokenTypes;
 
-    ScanTestData(const char *name, const char *source, const std::array<Token, N> &tokens) : name(name), source(source), tokens(tokens) {}
+    ScanTestData(const char *name, const char *source, const std::array<TokenType, N> &tokenTypes) : name(name), source(source), tokenTypes(tokenTypes) {}
 };
 
 TEST(ScannerTest, PunctuationTokenAssertions)
@@ -18,45 +18,44 @@ TEST(ScannerTest, PunctuationTokenAssertions)
         ScanTestData<19>(
             "Punctuation",
             "(){},.-+;/*!!====>>=<<=",
-            std::array<Token, 19>{
+            std::array<TokenType, 19>{
                 // One character tokens.
-                Token(TokenType::TOKEN_LEFT_PAREN),
-                Token(TokenType::TOKEN_RIGHT_PAREN),
-                Token(TokenType::TOKEN_LEFT_BRACE),
-                Token(TokenType::TOKEN_RIGHT_BRACE),
-                Token(TokenType::TOKEN_COMMA),
-                Token(TokenType::TOKEN_DOT),
-                Token(TokenType::TOKEN_MINUS),
-                Token(TokenType::TOKEN_PLUS),
-                Token(TokenType::TOKEN_SEMICOLON),
-                Token(TokenType::TOKEN_SLASH),
-                Token(TokenType::TOKEN_STAR),
+                TokenType::TOKEN_LEFT_PAREN,
+                TokenType::TOKEN_RIGHT_PAREN,
+                TokenType::TOKEN_LEFT_BRACE,
+                TokenType::TOKEN_RIGHT_BRACE,
+                TokenType::TOKEN_COMMA,
+                TokenType::TOKEN_DOT,
+                TokenType::TOKEN_MINUS,
+                TokenType::TOKEN_PLUS,
+                TokenType::TOKEN_SEMICOLON,
+                TokenType::TOKEN_SLASH,
+                TokenType::TOKEN_STAR,
                 // One or two character tokens.
-                Token(TokenType::TOKEN_BANG),
-                Token(TokenType::TOKEN_BANG_EQUAL),
-                Token(TokenType::TOKEN_EQUAL_EQUAL),
-                Token(TokenType::TOKEN_EQUAL),
-                Token(TokenType::TOKEN_GREATER),
-                Token(TokenType::TOKEN_GREATER_EQUAL),
-                Token(TokenType::TOKEN_LESS),
-                Token(TokenType::TOKEN_LESS_EQUAL),
+                TokenType::TOKEN_BANG,
+                TokenType::TOKEN_BANG_EQUAL,
+                TokenType::TOKEN_EQUAL_EQUAL,
+                TokenType::TOKEN_EQUAL,
+                TokenType::TOKEN_GREATER,
+                TokenType::TOKEN_GREATER_EQUAL,
+                TokenType::TOKEN_LESS,
+                TokenType::TOKEN_LESS_EQUAL,
             }),
     };
     for (const auto testData : testCases)
     {
-        std::vector<Token> actualTokens{};
         size_t tokenCount = 0;
         Scanner scanner(testData.source);
         std::for_each(
-            testData.tokens.begin(),
-            testData.tokens.end(),
-            [&](const Token &expected)
+            testData.tokenTypes.begin(),
+            testData.tokenTypes.end(),
+            [&](const TokenType &expected)
             {
                 auto actual = scanner.next();
-                ASSERT_EQ(actual.type, expected.type);
+                ASSERT_EQ(actual.type, expected);
                 tokenCount++;
             });
-        ASSERT_EQ(tokenCount, testData.tokens.size());
+        ASSERT_EQ(tokenCount, testData.tokenTypes.size());
         // Scanner should return EOF after the source is completely scanned.
         ASSERT_EQ(scanner.next().type, TokenType::TOKEN_EOF);
         ASSERT_EQ(scanner.next().type, TokenType::TOKEN_EOF);
