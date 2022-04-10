@@ -59,9 +59,26 @@ struct VMInstr
     size_t offset;
     size_t nextOffset;
 
+    VMInstr(OpCode opCode) : VMInstr(opCode, std::string(), 0, 0, 0) {}
     VMInstr(OpCode opCode, const std::string &name, uint32_t args, size_t offset, size_t nextOffset) : opCode(opCode), name(name), offset(offset), nextOffset(nextOffset)
     {
         this->args.u32 = args;
+    }
+
+    static VMInstr makeConstant(uint8_t index, size_t offset = 0, size_t nextOffset = 0)
+    {
+        VMInstrArgs args;
+        args.u32 = 0;
+        args.bytes.b0 = index;
+        return VMInstr(OP_CONSTANT, "OP_CONSTANT", args.u32, offset, nextOffset);
+    }
+
+    static VMInstr makeDefineGlobal(uint8_t index, size_t offset = 0, size_t nextOffset = 0)
+    {
+        VMInstrArgs args;
+        args.u32 = 0;
+        args.bytes.b0 = index;
+        return VMInstr(OP_DEFINE_GLOBAL, "OP_DEFINE_GLOBAL", args.u32, offset, nextOffset);
     }
 };
 
