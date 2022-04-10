@@ -139,46 +139,87 @@ private:
 };
 
 static ParseRule PARSE_RULES[] = {
+    // [0] TOKEN_EMPTY
     {},
+    // [1] TOKEN_LEFT_PAREN
     {&Compiler::grouping, &Compiler::call, PREC_CALL},
+    // [2] TOKEN_RIGHT_PAREN
     {NULL, NULL, PREC_NONE},
+    // [3] TOKEN_LEFT_BRACE
     {NULL, NULL, PREC_NONE},
+    // [4] TOKEN_RIGHT_BRACE
     {NULL, NULL, PREC_NONE},
+    // [5] TOKEN_COMMA
     {NULL, NULL, PREC_NONE},
+    // [6] TOKEN_DOT
     {NULL, NULL, PREC_NONE},
+    // [7] TOKEN_MINUS
     {&Compiler::unary, &Compiler::binary, PREC_TERM},
+    // [8] TOKEN_PLUS
     {NULL, &Compiler::binary, PREC_TERM},
+    // [9] TOKEN_SEMICOLON
     {NULL, NULL, PREC_NONE},
+    // [10] TOKEN_SLASH
     {NULL, &Compiler::binary, PREC_FACTOR},
-    {&Compiler::unary, NULL, PREC_NONE},
+    // [11] TOKEN_STAR
     {NULL, &Compiler::binary, PREC_FACTOR},
+    // [12] TOKEN_BANG
+    {&Compiler::unary, NULL, PREC_FACTOR},
+    // [13] TOKEN_BANG_EQUAL
     {NULL, &Compiler::binary, PREC_EQUALITY},
+    // [14] TOKEN_EQUAL
     {NULL, NULL, PREC_NONE},
+    // [15] TOKEN_EQUAL_EQUAL
     {NULL, &Compiler::binary, PREC_EQUALITY},
+    // [16] TOKEN_GREATER
     {NULL, &Compiler::binary, PREC_COMPARISON},
+    // [17] TOKEN_GREATER_EQUAL
     {NULL, &Compiler::binary, PREC_COMPARISON},
+    // [18] TOKEN_LESS
     {NULL, &Compiler::binary, PREC_COMPARISON},
+    // [19] TOKEN_LESS_EQUAL
     {NULL, &Compiler::binary, PREC_COMPARISON},
+    // [20] TOKEN_IDENTIFIER
     {&Compiler::variable, NULL, PREC_NONE},
+    // [21] TOKEN_STRING
     {&Compiler::string, NULL, PREC_NONE},
+    // [22] TOKEN_NUMBER
     {&Compiler::number, NULL, PREC_NONE},
+    // [23] TOKEN_AND
     {NULL, &Compiler::logicalAnd, PREC_AND},
+    // [24] TOKEN_CLASS
     {NULL, NULL, PREC_NONE},
+    // [25] TOKEN_ELSE
     {NULL, NULL, PREC_NONE},
+    // [26] TOKEN_FALSE
     {&Compiler::literal, NULL, PREC_NONE},
+    // [27] TOKEN_FOR
     {NULL, NULL, PREC_NONE},
+    // [28] TOKEN_FUN
     {NULL, NULL, PREC_NONE},
+    // [29] TOKEN_IF
     {NULL, NULL, PREC_NONE},
+    // [30] TOKEN_NIL
     {&Compiler::literal, NULL, PREC_NONE},
+    // [31] TOKEN_OR
     {NULL, &Compiler::logicalOr, PREC_OR},
+    // [32] TOKEN_PRINT
     {NULL, NULL, PREC_NONE},
+    // [33] TOKEN_RETURN
     {NULL, NULL, PREC_NONE},
+    // [34] TOKEN_SUPER
     {NULL, NULL, PREC_NONE},
+    // [35] TOKEN_THIS
     {NULL, NULL, PREC_NONE},
+    // [36] TOKEN_TRUE
     {&Compiler::literal, NULL, PREC_NONE},
+    // [37] TOKEN_VAR
     {NULL, NULL, PREC_NONE},
+    // [38] TOKEN_WHILE
     {NULL, NULL, PREC_NONE},
+    // [39] TOKEN_ERROR
     {NULL, NULL, PREC_NONE},
+    // [40] TOKEN_EOF
     {NULL, NULL, PREC_NONE},
 };
 
