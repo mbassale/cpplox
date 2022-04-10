@@ -2,6 +2,7 @@
 #include "chunk.h"
 #include "compiler.h"
 #include "vm.h"
+#include "debug.h"
 
 #define EXIT_CMDLINE_HELP 64
 
@@ -58,7 +59,10 @@ public:
                 }
                 return InterpretResult::INTERPRET_COMPILE_ERROR;
             }
-            script->getChunk().disassemble();
+            Disassembler disassembler(script->getChunk());
+            const auto instructions = disassembler.disassemble();
+            OpCodePrinter printer(script->getChunk(), instructions);
+            printer.print();
 
             std::cout << "== execution ==" << std::endl;
             return vm.interpret(script);

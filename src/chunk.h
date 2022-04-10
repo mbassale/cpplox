@@ -34,6 +34,37 @@ typedef enum
     OP_RETURN,
 } OpCode;
 
+union VMInstrArgs
+{
+    uint32_t u32;
+    struct
+    {
+        uint16_t w0;
+        uint16_t w1;
+    } words;
+    struct
+    {
+        uint8_t b0;
+        uint8_t b1;
+        uint8_t b2;
+        uint8_t b3;
+    } bytes;
+};
+
+struct VMInstr
+{
+    OpCode opCode;
+    std::string name;
+    VMInstrArgs args;
+    size_t offset;
+    size_t nextOffset;
+
+    VMInstr(OpCode opCode, const std::string &name, uint32_t args, size_t offset, size_t nextOffset) : opCode(opCode), name(name), offset(offset), nextOffset(nextOffset)
+    {
+        this->args.u32 = args;
+    }
+};
+
 class Chunk
 {
 private:
@@ -44,24 +75,16 @@ private:
 
 public:
     explicit Chunk(const std::string &name);
+
+    inline const std::string &getName() const { return name; }
+    inline uint8_t *data() { return code.data(); }
+    inline size_t size() const { return code.size(); }
+    inline LineInfo &getLines() { return lines; }
+
     void write(uint8_t byte, size_t line = LINE_INFO_CONTINUE);
     inline uint8_t read(size_t offset) const { return code[offset]; }
     size_t writeConstant(Value value);
     inline Value &readConstant(size_t offset) { return constants[offset]; }
-    inline uint8_t *data() { return code.data(); }
-    size_t size() const { return code.size(); }
-    inline LineInfo &getLines() { return lines; }
-
-    void disassemble();
-    size_t disassembleInstruction(size_t offset);
-
-private:
-    void printLineColumn(size_t offset);
-    void printInstructionAddr(size_t offset);
-    size_t simpleInstruction(const std::string &name, size_t offset);
-    size_t constantInstruction(const std::string &name, size_t offset);
-    size_t byteInstruction(const std::string &name, size_t offset);
-    size_t jumpInstruction(const std::string &name, int sign, size_t offset);
 };
 
 typedef std::unique_ptr<Chunk> ChunkPtr;
