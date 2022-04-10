@@ -85,6 +85,7 @@ add_executable(
   cpplox_test
   tests/value_test.cpp
   tests/scanner_test.cpp
+  tests/compiler_test.cpp
 )
 
 target_link_libraries(

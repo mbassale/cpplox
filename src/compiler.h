@@ -49,9 +49,16 @@ struct Local
     int depth;
 };
 
+struct CompilerConfig
+{
+    bool dumpTokens;
+    bool disassembleInstructions;
+};
+
 class Compiler
 {
 private:
+    CompilerConfig config;
     ScannerPtr scanner{nullptr};
     FunctionPtr function{nullptr};
     Token current{};
@@ -64,6 +71,7 @@ private:
 
 public:
     explicit Compiler();
+    explicit Compiler(const CompilerConfig &flags);
     explicit Compiler(const Compiler &compiler);
 
     FunctionPtr compile(const std::string &name, const std::string &source);

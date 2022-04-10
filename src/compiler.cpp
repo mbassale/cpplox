@@ -1,6 +1,10 @@
 #include "compiler.h"
 
-Compiler::Compiler()
+Compiler::Compiler() : Compiler({false, false})
+{
+}
+
+Compiler::Compiler(const CompilerConfig &config) : config(config)
 {
     scopeDepth = 0;
     hadError = false;
@@ -8,7 +12,7 @@ Compiler::Compiler()
     locals.reserve(UINT8_MAX + 1);
 }
 
-Compiler::Compiler(const Compiler &compiler) : scanner(compiler.scanner), current(compiler.current), previous(compiler.previous), locals(compiler.locals)
+Compiler::Compiler(const Compiler &compiler) : config(compiler.config), scanner(compiler.scanner), current(compiler.current), previous(compiler.previous), locals(compiler.locals)
 {
     scopeDepth = 0;
     hadError = false;
@@ -65,7 +69,10 @@ void Compiler::advance()
     for (;;)
     {
         current = scanner->next();
-        std::cout << current.str() << std::endl;
+        if (config.dumpTokens)
+        {
+            std::cout << current.str() << std::endl;
+        }
         if (current.type != TOKEN_ERROR)
             break;
         errorAtCurrent(current.lexeme());
