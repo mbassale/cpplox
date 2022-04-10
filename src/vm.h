@@ -88,14 +88,6 @@ private:
         return (uint16_t)(frame.ip[-2] << 8 | frame.ip[-1]);
     }
     inline Value &readConstant() { return getChunk().readConstant(readByte()); }
-    inline Value &readConstantLong()
-    {
-        uint32bytes constantOffset = {0};
-        constantOffset.bytes.b0 = readByte();
-        constantOffset.bytes.b1 = readByte();
-        constantOffset.bytes.b2 = readByte();
-        return getChunk().readConstant(constantOffset.u32);
-    }
     inline void incrIp(size_t offset) { getFrame().ip += offset; }
     inline void decrIp(size_t offset) { getFrame().ip -= offset; }
     inline void binaryOperator(uint8_t op);

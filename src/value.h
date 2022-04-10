@@ -4,18 +4,6 @@
 #include "common.h"
 #include "object.h"
 
-union uint32bytes
-{
-    uint32_t u32;
-    struct _bytes
-    {
-        uint8_t b0;
-        uint8_t b1;
-        uint8_t b2;
-        uint8_t b3;
-    } bytes;
-};
-
 typedef boost::flyweight<std::string> Symbol;
 typedef std::variant<nullptr_t, bool, double, std::string, ObjectPtr> BaseValue;
 

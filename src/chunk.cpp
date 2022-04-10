@@ -36,9 +36,6 @@ size_t Chunk::disassembleInstruction(size_t offset)
     case OP_CONSTANT:
         return constantInstruction("OP_CONSTANT", offset);
 
-    case OP_CONSTANT_LONG:
-        return constantLongInstruction("OP_CONSTANT_LONG", offset);
-
     case OP_NIL:
         return simpleInstruction("OP_NIL", offset);
 
@@ -139,17 +136,6 @@ size_t Chunk::constantInstruction(const std::string &name, size_t offset)
     std::cout << name << " " << std::setfill('0') << std::setw(4) << (size_t)constantOffset << " "
               << (std::string)readConstant(constantOffset) << std::endl;
     return offset + 2;
-}
-
-size_t Chunk::constantLongInstruction(const std::string &name, size_t offset)
-{
-    uint32bytes constantOffset = {0};
-    constantOffset.bytes.b0 = read(offset + 1);
-    constantOffset.bytes.b1 = read(offset + 2);
-    constantOffset.bytes.b2 = read(offset + 3);
-    std::cout << name << " " << std::setfill('0') << std::setw(4) << constantOffset.u32 << " "
-              << (std::string)readConstant(constantOffset.u32) << std::endl;
-    return offset + 4;
 }
 
 size_t Chunk::byteInstruction(const std::string &name, size_t offset)

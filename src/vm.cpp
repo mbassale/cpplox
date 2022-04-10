@@ -43,13 +43,6 @@ InterpretResult VM::run()
             break;
         }
 
-        case OP_CONSTANT_LONG:
-        {
-            Value constant = readConstantLong();
-            pushStack(constant);
-            break;
-        }
-
         case OP_NIL:
         {
             pushStack(Value(nullptr));

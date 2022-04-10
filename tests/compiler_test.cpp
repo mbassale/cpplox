@@ -17,7 +17,7 @@ class CompilerTest : public ::testing::Test
 TEST_F(CompilerTest, CompileAssertions)
 {
     std::array<CompilerTestData, 1> testCases = {
-        CompilerTestData("PrintStmt", "print 1+2-3-4;"),
+        CompilerTestData("PrintStmt", "print 1+2*3/4;"),
     };
     for (const auto &testCase : testCases)
     {

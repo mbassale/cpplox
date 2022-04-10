@@ -8,7 +8,6 @@
 typedef enum
 {
     OP_CONSTANT,
-    OP_CONSTANT_LONG,
     OP_NIL,
     OP_TRUE,
     OP_FALSE,
@@ -61,7 +60,6 @@ private:
     void printInstructionAddr(size_t offset);
     size_t simpleInstruction(const std::string &name, size_t offset);
     size_t constantInstruction(const std::string &name, size_t offset);
-    size_t constantLongInstruction(const std::string &name, size_t offset);
     size_t byteInstruction(const std::string &name, size_t offset);
     size_t jumpInstruction(const std::string &name, int sign, size_t offset);
 };
