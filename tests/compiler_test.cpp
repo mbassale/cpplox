@@ -58,6 +58,42 @@ TEST_F(CompilerTest, CompileAssertions)
                 VMInstr(OP_POP),
                 VMInstr(OP_FALSE),
                 VMInstr(OP_PRINT),
+                VMInstr(OP_RETURN)}),
+        CompilerTestData(
+            "WhileStmt",
+            "while(true){print true;}",
+            std::vector<VMInstr>{
+                VMInstr(OP_TRUE),
+                VMInstr(OP_JUMP_IF_FALSE),
+                VMInstr(OP_POP),
+                VMInstr(OP_TRUE),
+                VMInstr(OP_PRINT),
+                VMInstr(OP_LOOP),
+                VMInstr(OP_POP),
+                VMInstr(OP_RETURN)}),
+        CompilerTestData(
+            "ForStmt",
+            "for(var i=0;i<10;i=i+1){print i;}",
+            std::vector<VMInstr>{
+                VMInstr::makeConstant(0),
+                VMInstr(OP_GET_LOCAL),
+                VMInstr::makeConstant(1),
+                VMInstr(OP_LESS),
+                VMInstr(OP_JUMP_IF_FALSE),
+                VMInstr(OP_POP),
+                VMInstr(OP_JUMP),
+                VMInstr(OP_GET_LOCAL),
+                VMInstr::makeConstant(2),
+                VMInstr(OP_ADD),
+                VMInstr(OP_SET_LOCAL),
+                VMInstr(OP_POP),
+                VMInstr(OP_LOOP),
+                VMInstr(OP_GET_LOCAL),
+                VMInstr(OP_PRINT),
+                VMInstr(OP_LOOP),
+                VMInstr(OP_POP),
+                // TODO: Investigate double OP_POP, we should have only one
+                VMInstr(OP_POP),
                 VMInstr(OP_RETURN)})};
 
     for (const auto &testCase : testCases)
