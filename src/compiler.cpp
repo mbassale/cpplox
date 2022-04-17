@@ -23,6 +23,13 @@ Compiler::Compiler(const Compiler &compiler) : config(compiler.config), scanner(
 FunctionPtr Compiler::compile(const std::string &name, const std::string &source)
 {
     function = std::make_shared<Function>(FunctionType::TYPE_SCRIPT, name);
+    Local local;
+    Token token(TOKEN_IDENTIFIER);
+    token.start = name.begin();
+    token.length = name.length();
+    local.name = token;
+    local.depth = 0;
+    locals.push_back(local);
     scanner = std::make_shared<Scanner>(source);
     advance();
 
@@ -659,7 +666,7 @@ void Compiler::emitConstant(Value value)
 
 void Compiler::emitReturn()
 {
-    // emitByte(OP_NIL);
+    emitByte(OP_NIL);
     emitByte(OP_RETURN);
 }
 
