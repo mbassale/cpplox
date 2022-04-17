@@ -2,6 +2,7 @@
 #define __cpplox_vm_h
 
 #include "common.h"
+#include "debug.h"
 #include "chunk.h"
 #include "object.h"
 #include "function.h"
@@ -57,18 +58,19 @@ public:
 
 private:
     InterpretResult run();
+    void traceInstruction();
 
-    inline CallFrame &initFrame(FunctionPtr function, size_t frameOffset)
+    inline CallFrame &initFrame(FunctionPtr function, size_t frameOffset, int argCount)
     {
         auto &frame = frames[frameOffset];
         frame.ip = function->getChunk().data();
         frame.function = function;
-        frame.fp = stackTop;
+        frame.fp = stackTop - argCount - 1;
         return frame;
     }
-    inline CallFrame &pushFrame(FunctionPtr function)
+    inline CallFrame &pushFrame(FunctionPtr function, int argCount)
     {
-        return initFrame(function, frameCount++);
+        return initFrame(function, frameCount++, argCount);
     }
     inline bool callValue(Value callee, int argCount);
     inline bool call(FunctionPtr function, int argCount);

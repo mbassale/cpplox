@@ -131,56 +131,62 @@ VMInstr Disassembler::jumpInstruction(OpCode opCode, const std::string &name, si
 
 void OpCodePrinter::print()
 {
-    std::cout << "== " << chunk.getName() << " ==\n";
+    std::cout << "chunk " << chunk.getName() << "() {\n";
     for (const auto &instr : instructions)
     {
-        printLineColumn(instr.offset);
-        printInstructionAddr(instr.offset);
-        std::cout << instr.name << " ";
+        printInstruction(instr);
+    }
+    std::cout << "} // " << chunk.getName() << std::endl;
+}
 
-        switch (instr.opCode)
-        {
-        case OP_CONSTANT:
-        case OP_DEFINE_GLOBAL:
-            printConstantInstruction(instr);
-            break;
+void OpCodePrinter::printInstruction(const VMInstr &instr)
+{
+    printLineColumn(instr.offset);
+    printInstructionAddr(instr.offset);
+    std::cout << instr.name << " ";
 
-        case OP_NIL:
-        case OP_TRUE:
-        case OP_FALSE:
-        case OP_POP:
-        case OP_GET_GLOBAL:
-        case OP_SET_GLOBAL:
-        case OP_EQUAL:
-        case OP_GREATER:
-        case OP_LESS:
-        case OP_ADD:
-        case OP_SUBTRACT:
-        case OP_MULTIPLY:
-        case OP_DIVIDE:
-        case OP_NEGATE:
-        case OP_NOT:
-        case OP_PRINT:
-        case OP_RETURN:
-            printSimpleInstruction(instr);
-            break;
+    switch (instr.opCode)
+    {
+    case OP_CONSTANT:
+    case OP_DEFINE_GLOBAL:
+        printConstantInstruction(instr);
+        break;
 
-        case OP_GET_LOCAL:
-        case OP_SET_LOCAL:
-        case OP_CALL:
-            printByteInstruction(instr);
-            break;
+    case OP_NIL:
+    case OP_TRUE:
+    case OP_FALSE:
+    case OP_POP:
+    case OP_GET_GLOBAL:
+    case OP_SET_GLOBAL:
+    case OP_EQUAL:
+    case OP_GREATER:
+    case OP_LESS:
+    case OP_ADD:
+    case OP_SUBTRACT:
+    case OP_MULTIPLY:
+    case OP_DIVIDE:
+    case OP_NEGATE:
+    case OP_NOT:
+    case OP_PRINT:
+    case OP_RETURN:
+        printSimpleInstruction(instr);
+        break;
 
-        case OP_JUMP:
-        case OP_JUMP_IF_FALSE:
-        case OP_LOOP:
-            printJumpInstruction(instr);
-            break;
+    case OP_GET_LOCAL:
+    case OP_SET_LOCAL:
+    case OP_CALL:
+        printByteInstruction(instr);
+        break;
 
-        default:
-            std::cout << "Unknown opcode: " << instr.opCode << std::endl;
-            break;
-        }
+    case OP_JUMP:
+    case OP_JUMP_IF_FALSE:
+    case OP_LOOP:
+        printJumpInstruction(instr);
+        break;
+
+    default:
+        std::cout << "Unknown opcode: " << instr.opCode << std::endl;
+        break;
     }
 }
 
@@ -202,8 +208,22 @@ void OpCodePrinter::printSimpleInstruction(const VMInstr &instr)
 void OpCodePrinter::printConstantInstruction(const VMInstr &instr)
 {
     const auto constantOffset = instr.args.bytes.b0;
+    const auto constantValue = chunk.readConstant(constantOffset);
     std::cout << std::setfill('0') << std::setw(4) << (size_t)constantOffset << " "
-              << (std::string)chunk.readConstant(constantOffset) << std::endl;
+              << (std::string)constantValue << std::endl;
+    if (constantValue.isObject())
+    {
+        const auto object = (ObjectPtr)constantValue;
+        const auto function = std::dynamic_pointer_cast<Function>(object);
+        // we have a function?
+        if (function)
+        {
+            Disassembler disassembler(function->getChunk());
+            const auto instructions = disassembler.disassemble();
+            OpCodePrinter opCodePrinter(function->getChunk(), instructions);
+            opCodePrinter.print();
+        }
+    }
 }
 
 void OpCodePrinter::printByteInstruction(const VMInstr &instr)

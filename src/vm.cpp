@@ -29,9 +29,7 @@ InterpretResult VM::run()
     for (;;)
     {
 #ifdef DEBUG_TRACE_EXECUTION
-        traceStack();
-        traceGlobals();
-        getFrame().getChunk().disassembleInstruction((size_t)(getFrame().ip - getFrame().getChunk().data()));
+        traceInstruction();
 #endif
         uint8_t instruction;
         switch (instruction = readByte())
@@ -245,8 +243,7 @@ bool VM::call(FunctionPtr function, int argCount)
     {
         runtimeError("Stack overflow.");
     }
-    pushFrame(function);
-    getFrame().fp = stackTop - argCount - 1;
+    pushFrame(function, argCount);
     return true;
 }
 
@@ -336,4 +333,15 @@ void VM::runtimeError(const std::string &message)
         ss << "[line " << function_chunk.getLines().get(instruction) << "] in " << function->toString() << std::endl;
     }
     throw VMRuntimeError(ss.str());
+}
+
+void VM::traceInstruction()
+{
+    traceStack();
+    traceGlobals();
+    Disassembler disassembler(getFrame().getChunk());
+    auto insOffset = (size_t)(getFrame().ip - getFrame().getChunk().data());
+    const auto ins = disassembler.disassembleInstruction(insOffset);
+    OpCodePrinter opCodePrinter(getFrame().getChunk());
+    opCodePrinter.printInstruction(ins);
 }

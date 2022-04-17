@@ -23,4 +23,6 @@
 #include <unordered_map>
 #include <boost/flyweight.hpp>
 
+#define DEBUG_TRACE_EXECUTION
+
 #endif // __cpplox_common_h

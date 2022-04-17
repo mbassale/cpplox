@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "chunk.h"
+#include "function.h"
 
 class Disassembler
 {
@@ -29,9 +30,11 @@ private:
     std::vector<VMInstr> instructions;
 
 public:
+    OpCodePrinter(Chunk &chunk) : chunk(chunk), instructions() {}
     OpCodePrinter(Chunk &chunk, const std::vector<VMInstr> &instructions) : chunk(chunk), instructions(instructions) {}
 
     void print();
+    void printInstruction(const VMInstr &instr);
 
 private:
     void printLineColumn(size_t offset);
