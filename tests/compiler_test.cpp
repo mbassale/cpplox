@@ -31,6 +31,7 @@ TEST_F(CompilerTest, CompileAssertions)
                 VMInstr(OP_DIVIDE),
                 VMInstr(OP_ADD),
                 VMInstr(OP_PRINT),
+                VMInstr(OP_NIL),
                 VMInstr(OP_RETURN)}),
         CompilerTestData(
             "VarStmt",
@@ -40,6 +41,7 @@ TEST_F(CompilerTest, CompileAssertions)
                 VMInstr::makeConstant(1),
                 VMInstr(OP_ADD),
                 VMInstr::makeDefineGlobal(0),
+                VMInstr(OP_NIL),
                 VMInstr(OP_RETURN)}),
         CompilerTestData(
             "IfStmt",
@@ -58,6 +60,7 @@ TEST_F(CompilerTest, CompileAssertions)
                 VMInstr(OP_POP),
                 VMInstr(OP_FALSE),
                 VMInstr(OP_PRINT),
+                VMInstr(OP_NIL),
                 VMInstr(OP_RETURN)}),
         CompilerTestData(
             "WhileStmt",
@@ -70,6 +73,7 @@ TEST_F(CompilerTest, CompileAssertions)
                 VMInstr(OP_PRINT),
                 VMInstr(OP_LOOP),
                 VMInstr(OP_POP),
+                VMInstr(OP_NIL),
                 VMInstr(OP_RETURN)}),
         CompilerTestData(
             "ForStmt",
@@ -92,8 +96,8 @@ TEST_F(CompilerTest, CompileAssertions)
                 VMInstr(OP_PRINT),
                 VMInstr(OP_LOOP),
                 VMInstr(OP_POP),
-                // TODO: Investigate double OP_POP, we should have only one
                 VMInstr(OP_POP),
+                VMInstr(OP_NIL),
                 VMInstr(OP_RETURN)})};
 
     for (const auto &testCase : testCases)
