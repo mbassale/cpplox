@@ -226,6 +226,16 @@ bool VM::callValue(Value callee, int argCount)
         {
             return call(function, argCount);
         }
+
+        const auto nativeFunction = std::dynamic_pointer_cast<NativeFunction>(object);
+        // we have a native function?
+        if (nativeFunction)
+        {
+            const auto functionPtr = nativeFunction->getFunctionPtr();
+            const auto result = functionPtr(argCount, stackTop - argCount);
+            pushStack(result);
+            return true;
+        }
     }
     runtimeError("Can only call function and classes.");
     return false;
@@ -292,6 +302,13 @@ void VM::binaryOperator(uint8_t op)
         // TODO: throw runtime exception.
         break;
     };
+}
+
+void VM::defineNative(const std::string &name, NativeFnPtr function)
+{
+    Symbol nativeFunctionName(name);
+    const auto nativeFunction = std::make_shared<NativeFunction>(name, function);
+    globals[nativeFunctionName] = Value(nativeFunction);
 }
 
 void VM::traceStack()

@@ -6,6 +6,7 @@
 #include "chunk.h"
 #include "object.h"
 #include "function.h"
+#include "native.h"
 
 typedef enum
 {
@@ -55,10 +56,10 @@ public:
     ~VM();
 
     InterpretResult interpret(FunctionPtr function);
+    void defineNative(const std::string &name, NativeFnPtr function);
 
 private:
     InterpretResult run();
-    void traceInstruction();
 
     inline CallFrame &initFrame(FunctionPtr function, size_t frameOffset, int argCount)
     {
@@ -114,6 +115,8 @@ private:
     {
         return stackTop[-1 - distance];
     }
+
+    void traceInstruction();
     void traceStack();
     void traceGlobals();
     void runtimeError(const std::string &message);

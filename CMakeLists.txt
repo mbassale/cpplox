@@ -55,6 +55,8 @@ set(SOURCES
   src/object.cpp
   src/function.h
   src/function.cpp
+  src/native.h
+  src/native.cpp
   src/value.h
   src/value.cpp
   src/vm.h

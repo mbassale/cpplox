@@ -3,8 +3,14 @@
 #include "compiler.h"
 #include "vm.h"
 #include "debug.h"
+#include "ctime"
 
 #define EXIT_CMDLINE_HELP 64
+
+static Value clockNative(int argCount, Value *args)
+{
+    return Value((double)clock() / CLOCKS_PER_SEC);
+}
 
 class Driver
 {
@@ -14,6 +20,7 @@ private:
 public:
     Driver() : vm()
     {
+        vm.defineNative("clock", clockNative);
     }
 
     void repl()
