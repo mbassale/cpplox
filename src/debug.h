@@ -4,6 +4,7 @@
 #include "common.h"
 #include "chunk.h"
 #include "function.h"
+#include "native.h"
 
 class Disassembler
 {

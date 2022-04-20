@@ -214,14 +214,17 @@ void OpCodePrinter::printConstantInstruction(const VMInstr &instr)
     if (constantValue.isObject())
     {
         const auto object = (ObjectPtr)constantValue;
-        const auto function = std::dynamic_pointer_cast<Function>(object);
         // we have a function?
-        if (function)
+        if (object->getType() == ObjectType::OBJ_FUNCTION)
         {
-            Disassembler disassembler(function->getChunk());
-            const auto instructions = disassembler.disassemble();
-            OpCodePrinter opCodePrinter(function->getChunk(), instructions);
-            opCodePrinter.print();
+            const auto function = std::dynamic_pointer_cast<Function>(object);
+            if (function)
+            {
+                Disassembler disassembler(function->getChunk());
+                const auto instructions = disassembler.disassemble();
+                OpCodePrinter opCodePrinter(function->getChunk(), instructions);
+                opCodePrinter.print();
+            }
         }
     }
 }

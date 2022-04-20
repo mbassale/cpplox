@@ -3,12 +3,24 @@
 
 #include "common.h"
 
+enum ObjectType
+{
+    OBJ_EMPTY = 0,
+    OBJ_FUNCTION,
+    OBJ_NATIVE
+};
+
 class Object
 {
-public:
-    Object() {}
-    Object(const Object &) {}
+private:
+    ObjectType type;
 
+public:
+    Object() : type(OBJ_EMPTY) {}
+    Object(const Object &obj) : type(obj.type) {}
+    Object(ObjectType type) : type(type) {}
+
+    inline ObjectType getType() const { return type; }
     virtual std::string toString() const { return std::string(); }
     virtual bool isFalsey() const { return true; }
     virtual bool isTruthy() const { return false; }

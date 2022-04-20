@@ -220,21 +220,33 @@ bool VM::callValue(Value callee, int argCount)
     if (callee.isObject())
     {
         const auto object = (ObjectPtr)callee;
-        const auto function = std::dynamic_pointer_cast<Function>(object);
-        // we have a function?
-        if (function)
+        switch (object->getType())
         {
-            return call(function, argCount);
+        case ObjectType::OBJ_FUNCTION:
+        {
+            const auto function = std::dynamic_pointer_cast<Function>(object);
+            // we have a function?
+            if (function)
+            {
+                return call(function, argCount);
+            }
+            break;
         }
-
-        const auto nativeFunction = std::dynamic_pointer_cast<NativeFunction>(object);
-        // we have a native function?
-        if (nativeFunction)
+        case ObjectType::OBJ_NATIVE:
         {
-            const auto functionPtr = nativeFunction->getFunctionPtr();
-            const auto result = functionPtr(argCount, stackTop - argCount);
-            pushStack(result);
-            return true;
+            const auto nativeFunction = std::dynamic_pointer_cast<NativeFunction>(object);
+            // we have a native function?
+            if (nativeFunction)
+            {
+                const auto functionPtr = nativeFunction->getFunctionPtr();
+                const auto result = functionPtr(argCount, stackTop - argCount);
+                pushStack(result);
+                return true;
+            }
+            break;
+        }
+        default:
+            break;
         }
     }
     runtimeError("Can only call function and classes.");

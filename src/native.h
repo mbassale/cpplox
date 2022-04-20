@@ -14,9 +14,9 @@ private:
     NativeFnPtr functionPtr;
 
 public:
-    NativeFunction() : name(), functionPtr(nullptr) {}
-    NativeFunction(const std::string &name, NativeFnPtr functionPtr) : name(name), functionPtr(functionPtr) {}
-    NativeFunction(const NativeFunction &function) : name(function.name), functionPtr(function.functionPtr) {}
+    NativeFunction() : Object(ObjectType::OBJ_NATIVE), name(), functionPtr(nullptr) {}
+    NativeFunction(const std::string &name, NativeFnPtr functionPtr) : Object(ObjectType::OBJ_NATIVE), name(name), functionPtr(functionPtr) {}
+    NativeFunction(const NativeFunction &function) : Object(ObjectType::OBJ_NATIVE), name(function.name), functionPtr(function.functionPtr) {}
 
     inline const std::string &getName() const { return name; }
     inline NativeFnPtr getFunctionPtr() const { return functionPtr; }

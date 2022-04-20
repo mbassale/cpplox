@@ -14,17 +14,17 @@ enum FunctionType
 class Function : public Object
 {
 private:
-    FunctionType type;
+    FunctionType functionType;
     std::string name;
     int arity;
     Chunk chunk;
 
 public:
-    Function() : type(TYPE_FUNCTION), arity(0), name("anonymous"), chunk(name) {}
-    Function(const Function &function) : type(function.type), arity(function.arity), name(function.name), chunk(function.chunk) {}
-    Function(FunctionType type, const std::string &name, int arity = 0) : type(type), name(name), chunk(name), arity(arity) {}
+    Function() : Object(ObjectType::OBJ_FUNCTION), functionType(TYPE_FUNCTION), arity(0), name("anonymous"), chunk(name) {}
+    Function(const Function &function) : Object(ObjectType::OBJ_FUNCTION), functionType(function.functionType), arity(function.arity), name(function.name), chunk(function.chunk) {}
+    Function(FunctionType functionType, const std::string &name, int arity = 0) : Object(ObjectType::OBJ_FUNCTION), functionType(functionType), name(name), chunk(name), arity(arity) {}
 
-    inline FunctionType getType() const { return type; }
+    inline FunctionType getType() const { return functionType; }
     inline const std::string &getName() const { return name; }
     inline Chunk &getChunk() { return chunk; }
     inline int getArity() const { return arity; }
