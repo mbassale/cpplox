@@ -61,24 +61,26 @@ public:
 private:
     InterpretResult run();
 
-    inline CallFrame &initFrame(FunctionPtr function, size_t frameOffset, int argCount)
+    inline CallFrame &pushFrame(FunctionPtr function, int argCount)
     {
-        auto &frame = frames[frameOffset];
+        frameCount++;
+        auto &frame = frames[frameCount - 1];
         frame.ip = function->getChunk().data();
         frame.function = function;
         frame.fp = stackTop - argCount - 1;
         return frame;
     }
-    inline CallFrame &pushFrame(FunctionPtr function, int argCount)
-    {
-        return initFrame(function, frameCount++, argCount);
-    }
     inline bool callValue(Value callee, int argCount);
     inline bool call(FunctionPtr function, int argCount);
     inline void popFrame()
     {
-        auto &frame = frames[--frameCount];
-        frame.reset();
+        stackTop = getFrame().fp;
+        frameCount--;
+        if (frameCount >= 0)
+        {
+            auto &frame = frames[frameCount];
+            frame.reset();
+        }
     }
     inline CallFrame &getFrame() { return frames[frameCount - 1]; }
     inline Chunk &getChunk() { return getFrame().getChunk(); }

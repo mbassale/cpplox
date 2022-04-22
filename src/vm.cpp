@@ -200,7 +200,6 @@ InterpretResult VM::run()
                 popStack();
                 return InterpretResult::INTERPRET_OK;
             }
-            stackTop = getFrame().fp;
             pushStack(result);
             break;
         }

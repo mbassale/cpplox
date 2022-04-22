@@ -1,8 +1,7 @@
 
 fun calc1() {
     var count = 10;
-    return count
+    return count;
 }
 
-calc1();
-print res;
+print calc1();
