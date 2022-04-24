@@ -47,6 +47,12 @@ VMInstr Disassembler::disassembleInstruction(size_t offset)
     case OP_SET_GLOBAL:
         return simpleInstruction(instruction, "OP_SET_GLOBAL", offset);
 
+    case OP_GET_UPVALUE:
+        return byteInstruction(instruction, "OP_GET_UPVALUE", offset);
+
+    case OP_SET_UPVALUE:
+        return byteInstruction(instruction, "OP_SET_UPVALUE", offset);
+
     case OP_EQUAL:
         return simpleInstruction(instruction, "OP_EQUAL", offset);
 
@@ -90,7 +96,7 @@ VMInstr Disassembler::disassembleInstruction(size_t offset)
         return byteInstruction(instruction, "OP_CALL", offset);
 
     case OP_CLOSURE:
-        return byteInstruction(instruction, "OP_CLOSURE", offset);
+        return closureInstruction(offset);
 
     case OP_RETURN:
         return simpleInstruction(instruction, "OP_RETURN", offset);
@@ -116,10 +122,35 @@ VMInstr Disassembler::constantInstruction(OpCode opCode, const std::string &name
 
 VMInstr Disassembler::byteInstruction(OpCode opCode, const std::string &name, size_t offset)
 {
+    uint8_t arg0 = chunk.read(offset + 1);
     VMInstrArgs args;
     args.u32 = 0;
-    args.bytes.b0 = offset;
-    return VMInstr(opCode, name, 0, args.u32, offset + 2);
+    args.bytes.b0 = arg0;
+    return VMInstr(opCode, name, args.u32, offset, offset + 2);
+}
+
+VMInstr Disassembler::closureInstruction(size_t offset)
+{
+    uint8_t constantOffset = chunk.read(offset + 1);
+    const auto constantValue = chunk.readConstant(constantOffset);
+    if (constantValue.isObject())
+    {
+        const auto object = (ObjectPtr)constantValue;
+        // we have a function?
+        if (object->getType() == ObjectType::OBJ_FUNCTION)
+        {
+            const auto function = std::dynamic_pointer_cast<Function>(object);
+            if (function)
+            {
+                VMInstrArgs args;
+                args.u32 = 0;
+                args.bytes.b0 = constantOffset;
+                return VMInstr(OP_CLOSURE, "OP_CLOSURE", args.u32, offset, offset + function->getUpvalueCount() * 2 + 2);
+            }
+        }
+        throw InvalidBytecodeException(OP_CLOSURE, "Closure constant value is not a FunctionPtr");
+    }
+    throw InvalidBytecodeException(OP_CLOSURE, "Closure constant value is not an Object");
 }
 
 VMInstr Disassembler::jumpInstruction(OpCode opCode, const std::string &name, size_t offset)
@@ -177,9 +208,14 @@ void OpCodePrinter::printInstruction(const VMInstr &instr)
 
     case OP_GET_LOCAL:
     case OP_SET_LOCAL:
+    case OP_GET_UPVALUE:
+    case OP_SET_UPVALUE:
     case OP_CALL:
-    case OP_CLOSURE:
         printByteInstruction(instr);
+        break;
+
+    case OP_CLOSURE:
+        printClosureInstruction(instr);
         break;
 
     case OP_JUMP:
@@ -215,6 +251,21 @@ void OpCodePrinter::printConstantInstruction(const VMInstr &instr)
     const auto constantValue = chunk.readConstant(constantOffset);
     std::cout << std::setfill('0') << std::setw(4) << (size_t)constantOffset << " "
               << (std::string)constantValue << std::endl;
+}
+
+void OpCodePrinter::printByteInstruction(const VMInstr &instr)
+{
+    const auto byteOffset = instr.args.bytes.b0;
+    std::cout << std::setfill('0') << std::setw(4) << byteOffset << std::endl;
+}
+
+void OpCodePrinter::printClosureInstruction(const VMInstr &instr)
+{
+    const auto constantOffset = instr.args.bytes.b0;
+    const auto constantValue = chunk.readConstant(constantOffset);
+    std::cout << std::setfill('0') << std::setw(4) << (size_t)constantOffset << " "
+              << (std::string)constantValue << " ";
+
     if (constantValue.isObject())
     {
         const auto object = (ObjectPtr)constantValue;
@@ -224,19 +275,31 @@ void OpCodePrinter::printConstantInstruction(const VMInstr &instr)
             const auto function = std::dynamic_pointer_cast<Function>(object);
             if (function)
             {
+                for (int i = 0; i < function->getUpvalueCount(); i++)
+                {
+                    std::cout << " u:" << chunk.read(instr.offset + i + 1) << "l: " << chunk.read(instr.offset + i + 2) << ", ";
+                }
+                std::cout << std::endl;
+
                 Disassembler disassembler(function->getChunk());
                 const auto instructions = disassembler.disassemble();
                 OpCodePrinter opCodePrinter(function->getChunk(), instructions);
                 opCodePrinter.print();
             }
+            else
+            {
+                std::cout << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << std::endl;
         }
     }
-}
-
-void OpCodePrinter::printByteInstruction(const VMInstr &instr)
-{
-    const auto byteOffset = instr.args.bytes.b0;
-    std::cout << std::setfill('0') << std::setw(4) << byteOffset << std::endl;
+    else
+    {
+        std::cout << std::endl;
+    }
 }
 
 void OpCodePrinter::printJumpInstruction(const VMInstr &instr)

@@ -5,6 +5,18 @@
 #include "chunk.h"
 #include "function.h"
 #include "native.h"
+#include "closure.h"
+
+class InvalidBytecodeException : public std::runtime_error
+{
+private:
+    OpCode opCode;
+
+public:
+    InvalidBytecodeException(OpCode opCode, const std::string &message) : opCode(opCode), std::runtime_error(message) {}
+
+    inline OpCode getOpCode() const { return opCode; }
+};
 
 class Disassembler
 {
@@ -21,6 +33,7 @@ private:
     VMInstr simpleInstruction(OpCode opCode, const std::string &name, size_t offset);
     VMInstr constantInstruction(OpCode opCode, const std::string &name, size_t offset);
     VMInstr byteInstruction(OpCode opCode, const std::string &name, size_t offset);
+    VMInstr closureInstruction(size_t offset);
     VMInstr jumpInstruction(OpCode opCode, const std::string &name, size_t offset);
 };
 
@@ -43,6 +56,7 @@ private:
     void printSimpleInstruction(const VMInstr &instr);
     void printConstantInstruction(const VMInstr &instr);
     void printByteInstruction(const VMInstr &instr);
+    void printClosureInstruction(const VMInstr &instr);
     void printJumpInstruction(const VMInstr &instr);
 };
 

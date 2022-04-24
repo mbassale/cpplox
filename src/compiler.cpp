@@ -12,7 +12,7 @@ Compiler::Compiler(const CompilerConfig &config) : config(config)
     locals.reserve(UINT8_MAX + 1);
 }
 
-Compiler::Compiler(const Compiler &compiler) : config(compiler.config), scanner(compiler.scanner), current(compiler.current), previous(compiler.previous), locals(compiler.locals)
+Compiler::Compiler(Compiler &compiler) : enclosing(&compiler), config(compiler.config), scanner(compiler.scanner), current(compiler.current), previous(compiler.previous)
 {
     scopeDepth = 0;
     hadError = false;
@@ -121,7 +121,15 @@ void Compiler::funDeclaration(const ParseFnArgs &args)
 {
     uint8_t global = parseVariable("Expect function name.");
     markInitialized();
-    const auto functionName = (std::string)currentChunk().readConstant(global);
+    std::string functionName = "<fn>";
+    if (scopeDepth > 0)
+    {
+        functionName = locals[locals.size() - 1].name.lexeme();
+    }
+    else
+    {
+        functionName = (std::string)currentChunk().readConstant(global);
+    }
     compileDefinition(TYPE_FUNCTION, functionName);
     defineVariable(global);
 }
@@ -456,7 +464,7 @@ void Compiler::parsePrecedence(Precedence precedence)
     }
 }
 
-size_t Compiler::parseVariable(const std::string &errorMessage)
+int Compiler::parseVariable(const std::string &errorMessage)
 {
     consume(TOKEN_IDENTIFIER, errorMessage);
 
@@ -480,6 +488,11 @@ void Compiler::namedVariable(const Token &name, bool canAssign)
     {
         getOp = OP_GET_LOCAL;
         setOp = OP_SET_LOCAL;
+    }
+    else if ((offset = resolveUpvalue(name)) != -1)
+    {
+        getOp = OP_GET_UPVALUE;
+        setOp = OP_SET_UPVALUE;
     }
     else
     {
@@ -595,6 +608,48 @@ int Compiler::resolveLocal(const Token &name)
     return -1;
 }
 
+int Compiler::resolveUpvalue(const Token &name)
+{
+    if (enclosing == nullptr)
+        return -1;
+
+    int local = enclosing->resolveLocal(name);
+    if (local != -1)
+    {
+        return addUpvalue((uint8_t)local, true);
+    }
+
+    int upvalue = enclosing->resolveUpvalue(name);
+    if (upvalue != -1)
+    {
+        return addUpvalue((uint8_t)upvalue, false);
+    }
+
+    return -1;
+}
+
+int Compiler::addUpvalue(uint8_t index, bool isLocal)
+{
+    int upvalueCount = function->getUpvalueCount();
+
+    for (int i = 0; i < upvalueCount; i++)
+    {
+        const auto &upvalue = upvalues[i];
+        if (upvalue.index == index && upvalue.isLocal == isLocal)
+        {
+            return i;
+        }
+    }
+
+    Upvalue upvalue;
+    upvalue.index = index;
+    upvalue.isLocal = isLocal;
+    upvalues.push_back(upvalue);
+
+    function->incrUpvalueCount();
+    return upvalueCount;
+}
+
 void Compiler::beginScope()
 {
     scopeDepth++;
@@ -618,6 +673,12 @@ void Compiler::compileDefinition(FunctionType type, const std::string &name)
     previous = compiler.previous;
     current = compiler.current;
     emitBytes(OP_CLOSURE, makeConstant(Value(newFunction)));
+
+    for (int i = 0; i < function->getUpvalueCount(); i++)
+    {
+        emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
+        emitByte(compiler.upvalues[i].index);
+    }
 }
 
 void Compiler::endScope()

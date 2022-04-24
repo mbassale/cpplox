@@ -49,6 +49,12 @@ struct Local
     int depth;
 };
 
+struct Upvalue
+{
+    uint8_t index;
+    bool isLocal;
+};
+
 struct CompilerConfig
 {
     bool dumpTokens;
@@ -58,6 +64,7 @@ struct CompilerConfig
 class Compiler
 {
 private:
+    Compiler *enclosing{nullptr};
     CompilerConfig config;
     ScannerPtr scanner{nullptr};
     FunctionPtr function{nullptr};
@@ -67,12 +74,13 @@ private:
     bool panicMode{false};
     std::list<std::string> errors{};
     std::vector<Local> locals{};
+    std::vector<Upvalue> upvalues{};
     int scopeDepth{0};
 
 public:
     explicit Compiler();
     explicit Compiler(const CompilerConfig &flags);
-    explicit Compiler(const Compiler &compiler);
+    explicit Compiler(Compiler &compiler);
 
     FunctionPtr compile(const std::string &name, const std::string &source);
     FunctionPtr compileFunction(Compiler &compiler, FunctionType &functionType, const std::string &name);
@@ -107,7 +115,7 @@ private:
     bool match(TokenType type);
     bool check(TokenType type);
     void parsePrecedence(Precedence precedence);
-    size_t parseVariable(const std::string &errorMessage);
+    int parseVariable(const std::string &errorMessage);
     size_t identifierConstant(const Token &name);
     void namedVariable(const Token &name, bool canAssign);
     ParseRule &getRule(TokenType tokenType);
@@ -118,6 +126,8 @@ private:
     void markInitialized();
     void addLocal(const Token &name);
     int resolveLocal(const Token &name);
+    int resolveUpvalue(const Token &name);
+    int addUpvalue(uint8_t index, bool isLocal);
     void beginScope();
     void block();
     void compileDefinition(FunctionType type, const std::string &name);
