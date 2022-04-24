@@ -89,6 +89,9 @@ VMInstr Disassembler::disassembleInstruction(size_t offset)
     case OP_CALL:
         return byteInstruction(instruction, "OP_CALL", offset);
 
+    case OP_CLOSURE:
+        return byteInstruction(instruction, "OP_CLOSURE", offset);
+
     case OP_RETURN:
         return simpleInstruction(instruction, "OP_RETURN", offset);
 
@@ -175,6 +178,7 @@ void OpCodePrinter::printInstruction(const VMInstr &instr)
     case OP_GET_LOCAL:
     case OP_SET_LOCAL:
     case OP_CALL:
+    case OP_CLOSURE:
         printByteInstruction(instr);
         break;
 

@@ -617,7 +617,7 @@ void Compiler::compileDefinition(FunctionType type, const std::string &name)
     auto newFunction = compiler.compileFunction(*this, type, name);
     previous = compiler.previous;
     current = compiler.current;
-    emitBytes(OP_CONSTANT, makeConstant(Value(newFunction)));
+    emitBytes(OP_CLOSURE, makeConstant(Value(newFunction)));
 }
 
 void Compiler::endScope()

@@ -7,6 +7,7 @@
 #include "object.h"
 #include "function.h"
 #include "native.h"
+#include "closure.h"
 
 typedef enum
 {
@@ -21,18 +22,18 @@ const size_t STACK_MAX = FRAMES_MAX * (UINT8_MAX + 1);
 struct CallFrame
 {
 public:
-    FunctionPtr function; // compiled function obj
-    uint8_t *ip;          // return address
-    Value *fp;            // frame pointer
+    ClosurePtr closure; // compiled function obj
+    uint8_t *ip;        // return address
+    Value *fp;          // frame pointer
 
-    CallFrame() : function(nullptr), ip(nullptr), fp(nullptr) {}
+    CallFrame() : closure(nullptr), ip(nullptr), fp(nullptr) {}
     inline void reset()
     {
-        function.reset();
+        closure.reset();
         ip = nullptr;
         fp = nullptr;
     }
-    inline Function &getFunction() const { return *function; }
+    inline Function &getFunction() const { return *(closure->getFunction()); }
     inline Chunk &getChunk() const { return getFunction().getChunk(); }
 };
 
@@ -61,17 +62,17 @@ public:
 private:
     InterpretResult run();
 
-    inline CallFrame &pushFrame(FunctionPtr function, int argCount)
+    inline CallFrame &pushFrame(ClosurePtr closure, int argCount)
     {
         frameCount++;
         auto &frame = frames[frameCount - 1];
-        frame.ip = function->getChunk().data();
-        frame.function = function;
+        frame.ip = closure->getChunk().data();
+        frame.closure = closure;
         frame.fp = stackTop - argCount - 1;
         return frame;
     }
     inline bool callValue(Value callee, int argCount);
-    inline bool call(FunctionPtr function, int argCount);
+    inline bool call(ClosurePtr closure, int argCount);
     inline void popFrame()
     {
         stackTop = getFrame().fp;
@@ -104,7 +105,12 @@ private:
     }
     inline void pushStack(FunctionPtr function)
     {
-        auto object = std::static_pointer_cast<Object>(function);
+        auto object = std::dynamic_pointer_cast<Object>(function);
+        pushStack(Value(object));
+    }
+    inline void pushStack(ClosurePtr closure)
+    {
+        auto object = std::dynamic_pointer_cast<Object>(closure);
         pushStack(Value(object));
     }
     inline Value &popStack()

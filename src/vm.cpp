@@ -18,7 +18,10 @@ InterpretResult VM::interpret(FunctionPtr function)
     frameCount = 0;
     resetStack();
     pushStack(function);
-    call(function, 0);
+    ClosurePtr closure = std::make_shared<Closure>(function);
+    popStack();
+    pushStack(closure);
+    call(closure, 0);
     const auto result = run();
     resetStack();
     return result;
@@ -191,6 +194,24 @@ InterpretResult VM::run()
             break;
         }
 
+        case OP_CLOSURE:
+        {
+            const auto functionValue = readConstant();
+            if (!functionValue.isObject())
+            {
+                runtimeError("Operand must be an object.");
+            }
+            const auto functionObjPtr = (ObjectPtr)functionValue;
+            if (functionObjPtr->getType() != ObjectType::OBJ_FUNCTION)
+            {
+                runtimeError("Operand must be a function.");
+            }
+            const auto functionPtr = std::dynamic_pointer_cast<Function>(functionObjPtr);
+            ClosurePtr closure = std::make_shared<Closure>(functionPtr);
+            pushStack(Value(closure));
+            break;
+        }
+
         case OP_RETURN:
         {
             auto result = popStack();
@@ -221,13 +242,13 @@ bool VM::callValue(Value callee, int argCount)
         const auto object = (ObjectPtr)callee;
         switch (object->getType())
         {
-        case ObjectType::OBJ_FUNCTION:
+        case ObjectType::OBJ_CLOSURE:
         {
-            const auto function = std::dynamic_pointer_cast<Function>(object);
-            // we have a function?
-            if (function)
+            const auto closure = std::dynamic_pointer_cast<Closure>(object);
+            // we have a closure?
+            if (closure)
             {
-                return call(function, argCount);
+                return call(closure, argCount);
             }
             break;
         }
@@ -252,19 +273,19 @@ bool VM::callValue(Value callee, int argCount)
     return false;
 }
 
-bool VM::call(FunctionPtr function, int argCount)
+bool VM::call(ClosurePtr closure, int argCount)
 {
-    if (argCount != function->getArity())
+    if (argCount != closure->getArity())
     {
         std::ostringstream ss;
-        ss << "Expected " << function->getArity() << " arguments but got " << argCount;
+        ss << "Expected " << closure->getArity() << " arguments but got " << argCount;
         runtimeError(ss.str());
     }
     if (frameCount == FRAMES_MAX)
     {
         runtimeError("Stack overflow.");
     }
-    pushFrame(function, argCount);
+    pushFrame(closure, argCount);
     return true;
 }
 
@@ -355,7 +376,7 @@ void VM::runtimeError(const std::string &message)
     for (int i = frameCount - 1; i >= 0; i--)
     {
         const auto &frame = frames[i];
-        FunctionPtr function = frame.function;
+        FunctionPtr function = frame.closure->getFunction();
         auto &function_chunk = function->getChunk();
         size_t instruction = frame.ip - function_chunk.data() - 1;
         ss << "[line " << function_chunk.getLines().get(instruction) << "] in " << function->toString() << std::endl;

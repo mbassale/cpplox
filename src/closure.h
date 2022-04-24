@@ -15,6 +15,10 @@ public:
     Closure(FunctionPtr function) : Object(ObjectType::OBJ_CLOSURE), function(function) {}
 
     inline FunctionPtr getFunction() const { return function; }
+    inline FunctionType getType() const { return function->getType(); }
+    inline const std::string &getName() const { return function->getName(); }
+    inline Chunk &getChunk() { return function->getChunk(); }
+    inline int getArity() const { return function->getArity(); }
 
     std::string toString() const override;
     bool isFalsey() const override;
