@@ -7,7 +7,8 @@ enum ObjectType
 {
     OBJ_EMPTY = 0,
     OBJ_FUNCTION,
-    OBJ_NATIVE
+    OBJ_NATIVE,
+    OBJ_CLOSURE,
 };
 
 class Object
