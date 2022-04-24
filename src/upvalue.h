@@ -3,12 +3,19 @@
 
 #include "common.h"
 #include "object.h"
+#include "value.h"
 
 class Upvalue : public Object {
+ private:
+  Value *location;
+
  public:
   Upvalue() : Object(ObjectType::OBJ_UPVALUE) {}
   Upvalue(const Upvalue &upvalue) : Object(ObjectType::OBJ_UPVALUE) {}
+  Upvalue(Value *location)
+      : Object(ObjectType::OBJ_UPVALUE), location(location) {}
 
+  Value *getLocation() { return location; }
   std::string toString() const override;
   bool isFalsey() const override;
   virtual bool isTruthy() const override;
