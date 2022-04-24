@@ -59,6 +59,8 @@ set(SOURCES
   src/native.cpp
   src/closure.h
   src/closure.cpp
+  src/upvalue.h
+  src/upvalue.cpp
   src/value.h
   src/value.cpp
   src/vm.h
