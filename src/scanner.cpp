@@ -1,5 +1,7 @@
 #include "scanner.h"
 
+bool operator==(const Token &lhs, const Token &rhs) { return lhs.isEqual(rhs); }
+
 Token Token::make(const Scanner &scanner, TokenType type) {
   Token token(type);
   token.start = scanner.start;

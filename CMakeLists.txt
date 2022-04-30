@@ -40,6 +40,9 @@ configure_file(config.h.in src/config.h)
 include_directories(src)
 set(SOURCES
   src/common.h
+  src/ast.h
+  src/ast.cpp
+  src/ast_comparer.h
   src/chunk.h
   src/chunk.cpp
   src/compiler.h
@@ -51,6 +54,8 @@ set(SOURCES
   src/lineinfo.cpp
   src/scanner.h
   src/scanner.cpp
+  src/parser.h
+  src/parser.cpp
   src/object.h
   src/object.cpp
   src/function.h
@@ -91,6 +96,7 @@ add_executable(
   cpplox_test
   tests/value_test.cpp
   tests/scanner_test.cpp
+  tests/parser_test.cpp
   tests/compiler_test.cpp
 )
 

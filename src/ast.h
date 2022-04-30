@@ -8,6 +8,8 @@ namespace cpplox::ast {
 
 struct Node {
   Node() {}
+
+  virtual bool isEqual(const Node& other) { return true; }
 };
 typedef std::shared_ptr<Node> NodePtr;
 
@@ -25,6 +27,16 @@ struct Literal : public Expression {
   Literal(const Token& literal) : literal(literal) {}
   Literal(Token&& literal) : literal(literal) {}
 
+  bool isEqual(const Node& other) override {
+    if (typeid(other) == typeid(*this)) {
+      const auto& otherLiteral = dynamic_cast<const Literal&>(other);
+      return isEqual(otherLiteral);
+    }
+    return false;
+  }
+
+  bool isEqual(const Literal& other) { return this->literal == other.literal; }
+
   static std::shared_ptr<Literal> make(const Token& literal) {
     return std::make_shared<Literal>(literal);
   }
@@ -34,6 +46,18 @@ typedef std::shared_ptr<Literal> LiteralPtr;
 struct Identifier : public Expression {
   Token identifier;
   Identifier(const Token& identifier) : identifier(identifier) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(other) == typeid(*this)) {
+      const auto& otherIdentifier = dynamic_cast<const Identifier&>(other);
+      return isEqual(otherIdentifier);
+    }
+    return false;
+  }
+
+  bool isEqual(const Identifier& other) {
+    return this->identifier == other.identifier;
+  }
 };
 typedef std::shared_ptr<Identifier> IdentifierPtr;
 
@@ -44,6 +68,23 @@ struct Program : public Node {
   Program(const std::vector<StatementPtr>& statements)
       : statements(statements) {}
 
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherProgram = dynamic_cast<const Program&>(other);
+      return isEqual(otherProgram);
+    }
+    return false;
+  }
+
+  bool isEqual(const Program& other) {
+    return this->statements.size() == other.statements.size() &&
+           std::equal(this->statements.cbegin(), this->statements.cend(),
+                      other.statements.cbegin(),
+                      [](const auto& stmt1, const auto& stmt2) {
+                        return stmt1->isEqual(*stmt2);
+                      });
+  }
+
   static std::shared_ptr<Program> make(
       const std::vector<StatementPtr>& statements) {
     return std::make_shared<Program>(statements);
@@ -53,6 +94,18 @@ typedef std::shared_ptr<Program> ProgramPtr;
 
 struct Block : public Statement {
   std::vector<StatementPtr> statements;
+
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherBlock = dynamic_cast<const Block&>(other);
+      return isEqual(otherBlock);
+    }
+    return false;
+  }
+
+  bool isEqual(const Block& other) {
+    return this->statements == other.statements;
+  }
 };
 typedef std::shared_ptr<Block> BlockPtr;
 
@@ -80,6 +133,19 @@ struct ExpressionStatement : public Statement {
   ExpressionStatement() : expression(nullptr) {}
   ExpressionStatement(const ExpressionPtr& expression)
       : expression(expression) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherExprStmt =
+          dynamic_cast<const ExpressionStatement&>(other);
+      return isEqual(otherExprStmt);
+    }
+    return false;
+  }
+
+  bool isEqual(const ExpressionStatement& other) {
+    return this->expression->isEqual(*other.expression);
+  }
 
   static std::shared_ptr<ExpressionStatement> make(
       const ExpressionPtr& expression) {

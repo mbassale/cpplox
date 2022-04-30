@@ -62,9 +62,15 @@ struct Token {
   size_t length;
   size_t line;
   std::string error;
+  std::string _lexeme;
 
   explicit Token() : type(TOKEN_EMPTY) {}
   explicit Token(TokenType type) : type(type), start(), length(), line() {}
+  explicit Token(TokenType type, const std::string &lexeme)
+      : type(type), _lexeme(lexeme), line(1) {
+    start = _lexeme.cbegin();
+    length = _lexeme.size();
+  }
   explicit Token(TokenType type, std::string::const_iterator start,
                  size_t length, size_t line)
       : type(type), start(start), length(length), line(line) {}
@@ -78,9 +84,17 @@ struct Token {
     return ss.str();
   }
 
+  bool isEqual(const Token &token) const {
+    std::cout << "IsEqual: " << this->lexeme() << " == " << token.lexeme()
+              << std::endl;
+    return this->type == token.type && this->lexeme() == token.lexeme();
+  }
+
   static Token make(const Scanner &scanner, TokenType type);
   static Token makeError(const Scanner &scanner, const std::string &error);
 };
+
+bool operator==(const Token &lhs, const Token &rhs);
 
 class Scanner {
   const std::string source;

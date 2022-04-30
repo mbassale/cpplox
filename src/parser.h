@@ -28,8 +28,7 @@ class Parser {
 
   bool isAtEnd() { return current.type == TOKEN_EOF; }
   bool match(TokenType tokenType);
-  Token peek() { return current; }
-  Token advance();
+  void advance();
   void consume(TokenType tokenType, const std::string& error_message);
 };
 

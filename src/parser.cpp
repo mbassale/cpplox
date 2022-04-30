@@ -8,11 +8,9 @@ ast::ProgramPtr Parser::parse() {
   ast::ProgramPtr programNode = std::make_shared<ast::Program>();
 
   previous = Token();
-  while (keepRunning) {
-    current = scanner.next();
-    if (current.type == TOKEN_EOF) {
-      break;
-    }
+  current = scanner.next();
+  std::cout << "Token: " << current.lexeme() << std::endl;
+  while (!isAtEnd()) {
     const auto stmt = statement();
     programNode->statements.push_back(stmt);
   }
@@ -110,8 +108,9 @@ ast::ExpressionPtr Parser::primary() {
     case TOKEN_NUMBER:
     case TOKEN_STRING:
     case TOKEN_IDENTIFIER:
+      advance();
       return std::static_pointer_cast<ast::Expression>(
-          ast::Literal::make(current));
+          ast::Literal::make(previous));
     case TOKEN_LEFT_PAREN: {
       const auto expr = expression();
       consume(TOKEN_RIGHT_PAREN, "Unbalanced parenthesis.");
@@ -130,14 +129,16 @@ bool Parser::match(TokenType tokenType) {
   return false;
 }
 
-Token Parser::advance() {
+void Parser::advance() {
+  previous = current;
   current = scanner.next();
-  return current;
+  std::cout << "Token: " << current.lexeme() << std::endl;
 }
 
 void Parser::consume(TokenType tokenType, const std::string& error_message) {
   if (match(tokenType)) {
     advance();
+    return;
   }
   throw std::runtime_error(error_message);
 }
