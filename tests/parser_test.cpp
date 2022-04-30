@@ -25,13 +25,20 @@ void ParserTest::compareAsts(ast::NodePtr left, ast::NodePtr right) {}
 
 TEST_F(ParserTest, ParserAssertions) {
   std::vector<ParserTestData> testCases = {
+      ParserTestData("MinimalStatement", ";",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::Statement::make()})),
       ParserTestData("ExpressionStatement", "true;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
-                         AS_STATEMENT_PTR(ast::ExpressionStatement::make(
+                         AS_STATEMENT(ast::ExpressionStatement::make(
                              ast::Literal::make(Token(TOKEN_TRUE, "true"))))})),
-      /*ParserTestData("ForStatement", "for(;;){true;}",
-                     ast::Program::make(std::vector<ast::StatementPtr>{
-                         AS_STATEMENT_PTR(ast::ForStatement::make())}))*/};
+      ParserTestData(
+          "ForStatement", "for(;;){true;}",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              AS_STATEMENT(ast::ForStatement::make(
+                  nullptr, nullptr, nullptr,
+                  AS_STATEMENT(ast::ExpressionStatement::make(
+                      ast::Literal::make(Token(TOKEN_TRUE, "true"))))))}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);

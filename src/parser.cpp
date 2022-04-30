@@ -9,10 +9,14 @@ ast::ProgramPtr Parser::parse() {
 
   previous = Token();
   current = scanner.next();
-  std::cout << "Token: " << current.lexeme() << std::endl;
   while (!isAtEnd()) {
-    const auto stmt = statement();
-    programNode->statements.push_back(stmt);
+    try {
+      const auto stmt = statement();
+      programNode->statements.push_back(stmt);
+    } catch (ParserException& ex) {
+      std::cerr << "Error: " << ex.what() << std::endl;
+      errors.push_back(ex);
+    }
   }
 
   return programNode;
@@ -35,6 +39,8 @@ ast::StatementPtr Parser::statement() {
     return std::static_pointer_cast<ast::Statement>(block());
   } else if (match(TOKEN_FOR)) {
     return std::static_pointer_cast<ast::ForStatement>(forStatement());
+  } else if (match(TOKEN_SEMICOLON)) {
+    return std::make_shared<ast::Statement>();
   } else {
     return std::static_pointer_cast<ast::Statement>(expressionStatement());
   }
@@ -42,7 +48,7 @@ ast::StatementPtr Parser::statement() {
 
 ast::BlockPtr Parser::block() {
   auto blockStmt = std::make_shared<ast::Block>();
-  while (!match(TOKEN_RIGHT_BRACE) && isAtEnd()) {
+  while (!match(TOKEN_RIGHT_BRACE) && !isAtEnd()) {
     auto stmt = statement();
     blockStmt->statements.push_back(stmt);
   }
@@ -50,22 +56,28 @@ ast::BlockPtr Parser::block() {
 }
 
 ast::ForStatementPtr Parser::forStatement() {
+  consume(TOKEN_LEFT_PAREN, "Missing left paren");
   ast::ExpressionPtr initializer{nullptr};
   if (!match(TOKEN_SEMICOLON)) {
     initializer = expression();
+    consume(TOKEN_SEMICOLON, "Missing semicolon after initializer");
   }
   ast::ExpressionPtr condition{nullptr};
   if (!match(TOKEN_SEMICOLON)) {
     condition = expression();
+    consume(TOKEN_SEMICOLON, "Missing semicolon after initializer");
   }
   ast::ExpressionPtr increment{nullptr};
-  if (!match(TOKEN_SEMICOLON)) {
+  if (!match(TOKEN_RIGHT_PAREN)) {
     increment = expression();
+    consume(TOKEN_RIGHT_PAREN, "Missing right paren");
   }
+  ast::StatementPtr body = statement();
   auto forStmt = std::make_shared<ast::ForStatement>();
   forStmt->initializer = initializer;
   forStmt->condition = condition;
   forStmt->increment = increment;
+  forStmt->body = body;
   return std::static_pointer_cast<ast::ForStatement>(forStmt);
 }
 
@@ -76,7 +88,7 @@ ast::ForStatementPtr Parser::forStatement() {
  */
 ast::ExpressionStatementPtr Parser::expressionStatement() {
   const auto expr = expression();
-  consume(TOKEN_SEMICOLON, "Missing semicolon.");
+  consume(TOKEN_SEMICOLON, "Missing semicolon");
   auto exprStmt = std::make_shared<ast::ExpressionStatement>();
   exprStmt->expression = expr;
   return exprStmt;
@@ -113,11 +125,11 @@ ast::ExpressionPtr Parser::primary() {
           ast::Literal::make(previous));
     case TOKEN_LEFT_PAREN: {
       const auto expr = expression();
-      consume(TOKEN_RIGHT_PAREN, "Unbalanced parenthesis.");
+      consume(TOKEN_RIGHT_PAREN, "Unbalanced parenthesis");
       return expr;
     }
     default:
-      throw std::runtime_error("Unknown primary.");
+      throw ParserException("Unknown primary", current);
   }
 }
 
@@ -132,15 +144,14 @@ bool Parser::match(TokenType tokenType) {
 void Parser::advance() {
   previous = current;
   current = scanner.next();
-  std::cout << "Token: " << current.lexeme() << std::endl;
 }
 
 void Parser::consume(TokenType tokenType, const std::string& error_message) {
-  if (match(tokenType)) {
+  if (current.type == tokenType) {
     advance();
     return;
   }
-  throw std::runtime_error(error_message);
+  throw ParserException(error_message, current);
 }
 
 }  // namespace cpplox

@@ -13,13 +13,19 @@ struct Node {
 };
 typedef std::shared_ptr<Node> NodePtr;
 
-struct Statement : public Node {};
+struct Statement : public Node {
+  static std::shared_ptr<Statement> make() {
+    return std::make_shared<Statement>();
+  }
+};
 typedef std::shared_ptr<Statement> StatementPtr;
-#define AS_STATEMENT_PTR(EXPR) \
-  std::static_pointer_cast<cpplox::ast::Statement>(EXPR)
+#define AS_STATEMENT(EXPR) \
+  std::dynamic_pointer_cast<cpplox::ast::Statement>(EXPR)
 
 struct Expression : public Node {};
 typedef std::shared_ptr<Expression> ExpressionPtr;
+#define AS_EXPRESSION(EXPR) \
+  std::dynamic_pointer_cast<cpplox::ast::Expression>(EXPR)
 
 struct Literal : public Expression {
   Token literal;
@@ -120,9 +126,23 @@ struct ForStatement : public Statement {
         condition(nullptr),
         increment(nullptr),
         body(nullptr) {}
+  ForStatement(const ExpressionPtr& initializer, const ExpressionPtr& condition,
+               const ExpressionPtr& increment, const StatementPtr& body)
+      : initializer(initializer),
+        condition(condition),
+        increment(increment),
+        body(body) {}
 
   static std::shared_ptr<ForStatement> make() {
     return std::make_shared<ForStatement>();
+  }
+
+  static std::shared_ptr<ForStatement> make(const ExpressionPtr& initializer,
+                                            const ExpressionPtr& condition,
+                                            const ExpressionPtr& increment,
+                                            const StatementPtr& body) {
+    return std::make_shared<ForStatement>(initializer, condition, increment,
+                                          body);
   }
 };
 typedef std::shared_ptr<ForStatement> ForStatementPtr;

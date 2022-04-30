@@ -7,16 +7,31 @@
 
 namespace cpplox {
 
+class ParserException : public std::runtime_error {
+ private:
+  Token location;
+
+ public:
+  ParserException(const std::string& error_message, const Token& location)
+      : std::runtime_error(error_message), location(location) {}
+};
+
 class Parser {
  private:
   Token previous;
   Token current;
   Scanner& scanner;
+  std::vector<ParserException> errors;
 
  public:
-  Parser(Scanner& scanner) : scanner(scanner), previous(), current() {}
+  Parser(Scanner& scanner)
+      : scanner(scanner), previous(), current(), errors() {}
 
   ast::ProgramPtr parse();
+
+  inline const std::vector<ParserException>& getErrors() const {
+    return errors;
+  }
 
  private:
   ast::BlockPtr block();
