@@ -42,7 +42,6 @@ set(SOURCES
   src/common.h
   src/ast.h
   src/ast.cpp
-  src/ast_comparer.h
   src/chunk.h
   src/chunk.cpp
   src/compiler.h
