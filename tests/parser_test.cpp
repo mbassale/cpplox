@@ -28,22 +28,39 @@ TEST_F(ParserTest, ParserAssertions) {
       ParserTestData("MinimalStatement", ";",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::Statement::make()})),
-      ParserTestData("ExpressionStatement", "true;",
-                     ast::Program::make(std::vector<ast::StatementPtr>{
-                         AS_STATEMENT(ast::ExpressionStatement::make(
-                             ast::Literal::make(Token(TOKEN_TRUE, "true"))))})),
       ParserTestData(
-          "ForStatement", "for(;;){true;}",
+          "ExpressionStatement", "true;",
           ast::Program::make(std::vector<ast::StatementPtr>{
-              AS_STATEMENT(ast::ForStatement::make(
-                  nullptr, nullptr, nullptr,
-                  AS_STATEMENT(ast::ExpressionStatement::make(
-                      ast::Literal::make(Token(TOKEN_TRUE, "true"))))))}))};
+              ast::ExpressionStatement::make(ast::Literal::makeTrue())})),
+      ParserTestData("ForStatement", "for(;;){true;}",
+                     ast::Program::make(
+                         std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                             nullptr, nullptr, nullptr,
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ExpressionStatement::make(
+                                     ast::Literal::makeTrue())}))})),
+      ParserTestData("IfStatement", "if(true){true;}",
+                     ast::Program::make(
+                         std::vector<ast::StatementPtr>{ast::IfStatement::make(
+                             ast::Literal::makeTrue(),
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ExpressionStatement::make(
+                                     ast::Literal::makeTrue())}))})),
+      ParserTestData("IfElseStatement", "if(true){true;}else{false;}",
+                     ast::Program::make(
+                         std::vector<ast::StatementPtr>{ast::IfStatement::make(
+                             ast::Literal::makeTrue(),
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ExpressionStatement::make(
+                                     ast::Literal::makeTrue())}),
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ExpressionStatement::make(
+                                     ast::Literal::makeFalse())}))}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
     const auto actualProgram = parser.parse();
-    ASSERT_TRUE(actualProgram->isEqual(*testCase.program));
+    ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }

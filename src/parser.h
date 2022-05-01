@@ -37,6 +37,7 @@ class Parser {
   ast::BlockPtr block();
   ast::StatementPtr statement();
   ast::ForStatementPtr forStatement();
+  ast::IfStatementPtr ifStatement();
   ast::ExpressionStatementPtr expressionStatement();
   ast::ExpressionPtr expression();
   ast::ExpressionPtr primary();

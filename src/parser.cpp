@@ -36,13 +36,15 @@ ast::ProgramPtr Parser::parse() {
  */
 ast::StatementPtr Parser::statement() {
   if (match(TOKEN_LEFT_BRACE)) {
-    return std::static_pointer_cast<ast::Statement>(block());
+    return block();
   } else if (match(TOKEN_FOR)) {
-    return std::static_pointer_cast<ast::ForStatement>(forStatement());
+    return forStatement();
+  } else if (match(TOKEN_IF)) {
+    return ifStatement();
   } else if (match(TOKEN_SEMICOLON)) {
-    return std::make_shared<ast::Statement>();
+    return ast::Statement::make();
   } else {
-    return std::static_pointer_cast<ast::Statement>(expressionStatement());
+    return expressionStatement();
   }
 }
 
@@ -72,13 +74,20 @@ ast::ForStatementPtr Parser::forStatement() {
     increment = expression();
     consume(TOKEN_RIGHT_PAREN, "Missing right paren");
   }
-  ast::StatementPtr body = statement();
-  auto forStmt = std::make_shared<ast::ForStatement>();
-  forStmt->initializer = initializer;
-  forStmt->condition = condition;
-  forStmt->increment = increment;
-  forStmt->body = body;
-  return std::static_pointer_cast<ast::ForStatement>(forStmt);
+  auto body = statement();
+  return ast::ForStatement::make(initializer, condition, increment, body);
+}
+
+ast::IfStatementPtr Parser::ifStatement() {
+  consume(TOKEN_LEFT_PAREN, "Missing left paren");
+  auto condition = expression();
+  consume(TOKEN_RIGHT_PAREN, "Missing right paren");
+  auto thenBranch = statement();
+  ast::StatementPtr elseBranch{nullptr};
+  if (match(TOKEN_ELSE)) {
+    elseBranch = statement();
+  }
+  return ast::IfStatement::make(condition, thenBranch, elseBranch);
 }
 
 /**
@@ -94,9 +103,7 @@ ast::ExpressionStatementPtr Parser::expressionStatement() {
   return exprStmt;
 }
 
-ast::ExpressionPtr Parser::expression() {
-  return std::static_pointer_cast<ast::Expression>(primary());
-}
+ast::ExpressionPtr Parser::expression() { return primary(); }
 
 /**
  * primary:

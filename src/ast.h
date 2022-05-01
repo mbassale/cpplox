@@ -46,6 +46,12 @@ struct Literal : public Expression {
   static std::shared_ptr<Literal> make(const Token& literal) {
     return std::make_shared<Literal>(literal);
   }
+  static std::shared_ptr<Literal> makeTrue() {
+    return std::make_shared<Literal>(Token(TOKEN_TRUE, "true"));
+  }
+  static std::shared_ptr<Literal> makeFalse() {
+    return std::make_shared<Literal>(Token(TOKEN_FALSE, "false"));
+  }
 };
 typedef std::shared_ptr<Literal> LiteralPtr;
 
@@ -101,6 +107,9 @@ typedef std::shared_ptr<Program> ProgramPtr;
 struct Block : public Statement {
   std::vector<StatementPtr> statements;
 
+  Block() : statements() {}
+  Block(const std::vector<StatementPtr>& statements) : statements(statements) {}
+
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
       const auto& otherBlock = dynamic_cast<const Block&>(other);
@@ -110,7 +119,17 @@ struct Block : public Statement {
   }
 
   bool isEqual(const Block& other) {
-    return this->statements == other.statements;
+    return this->statements.size() == other.statements.size() &&
+           std::equal(this->statements.cbegin(), this->statements.cend(),
+                      other.statements.cbegin(),
+                      [](const auto& stmt1, const auto& stmt2) {
+                        return stmt1->isEqual(*stmt2);
+                      });
+  }
+
+  static std::shared_ptr<Block> make(
+      const std::vector<StatementPtr>& statements) {
+    return std::make_shared<Block>(statements);
   }
 };
 typedef std::shared_ptr<Block> BlockPtr;
@@ -133,6 +152,54 @@ struct ForStatement : public Statement {
         increment(increment),
         body(body) {}
 
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherFor = dynamic_cast<const ForStatement&>(other);
+      return isEqual(otherFor);
+    }
+    return false;
+  }
+
+  bool isEqual(const ForStatement& other) {
+    // compare initializers
+    bool hasLhs = (bool)this->initializer;
+    bool hasRhs = (bool)other.initializer;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (this->initializer && other.initializer) {
+      if (!this->initializer->isEqual(*other.initializer)) {
+        return false;
+      }
+    }
+
+    // compare conditions
+    hasLhs = (bool)this->condition;
+    hasRhs = (bool)other.condition;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (this->condition && other.condition) {
+      if (!this->condition->isEqual(*other.condition)) {
+        return false;
+      }
+    }
+
+    // compare increments
+    hasLhs = (bool)this->increment;
+    hasRhs = (bool)other.increment;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (this->increment && other.increment) {
+      if (!this->condition->isEqual(*other.increment)) {
+        return false;
+      }
+    }
+
+    return body->isEqual(*other.body);
+  }
+
   static std::shared_ptr<ForStatement> make() {
     return std::make_shared<ForStatement>();
   }
@@ -146,6 +213,58 @@ struct ForStatement : public Statement {
   }
 };
 typedef std::shared_ptr<ForStatement> ForStatementPtr;
+
+struct IfStatement : public Statement {
+  ExpressionPtr condition;
+  StatementPtr thenBranch;
+  StatementPtr elseBranch;
+
+  IfStatement()
+      : condition(nullptr), thenBranch(nullptr), elseBranch(nullptr) {}
+  IfStatement(const ExpressionPtr& condition, const StatementPtr& thenBranch)
+      : condition(condition), thenBranch(thenBranch), elseBranch(nullptr) {}
+  IfStatement(const ExpressionPtr& condition, const StatementPtr& thenBranch,
+              const StatementPtr& elseBranch)
+      : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
+
+  static std::shared_ptr<IfStatement> make(const ExpressionPtr& condition,
+                                           const StatementPtr& thenBranch) {
+    return std::make_shared<IfStatement>(condition, thenBranch);
+  }
+  static std::shared_ptr<IfStatement> make(const ExpressionPtr& condition,
+                                           const StatementPtr& thenBranch,
+                                           const StatementPtr& elseBranch) {
+    return std::make_shared<IfStatement>(condition, thenBranch, elseBranch);
+  }
+
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherFor = dynamic_cast<const IfStatement&>(other);
+      return isEqual(otherFor);
+    }
+    return false;
+  }
+
+  bool isEqual(const IfStatement& other) {
+    // compare conditions
+    bool hasLhs = (bool)condition;
+    bool hasRhs = (bool)other.condition;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (!this->condition->isEqual(*other.condition)) {
+      return false;
+    }
+
+    // compare branches
+    bool thenBranchEqual = thenBranch->isEqual(*other.thenBranch);
+    if (thenBranchEqual && elseBranch) {
+      return elseBranch->isEqual(*other.elseBranch);
+    }
+    return thenBranchEqual;
+  }
+};
+typedef std::shared_ptr<IfStatement> IfStatementPtr;
 
 struct ExpressionStatement : public Statement {
   ExpressionPtr expression;

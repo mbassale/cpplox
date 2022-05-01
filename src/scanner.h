@@ -75,6 +75,7 @@ struct Token {
                  size_t length, size_t line)
       : type(type), start(start), length(length), line(line) {}
   const std::string lexeme() const {
+    if (_lexeme.size() > 0) return _lexeme;
     return std::string(start, start + length);
   }
   const std::string str() const {
@@ -85,8 +86,6 @@ struct Token {
   }
 
   bool isEqual(const Token &token) const {
-    std::cout << "IsEqual: " << this->lexeme() << " == " << token.lexeme()
-              << std::endl;
     return this->type == token.type && this->lexeme() == token.lexeme();
   }
 
