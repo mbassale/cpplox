@@ -32,6 +32,11 @@ TEST_F(ParserTest, ParserAssertions) {
           "ExpressionStatement", "true;",
           ast::Program::make(std::vector<ast::StatementPtr>{
               ast::ExpressionStatement::make(ast::Literal::makeTrue())})),
+      ParserTestData(
+          "VarDeclaration", "var test=true;",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::VarDeclaration::make(
+                  Token(TOKEN_IDENTIFIER, "test"), ast::Literal::makeTrue())})),
       ParserTestData("IfStatement", "if(true){true;}",
                      ast::Program::make(
                          std::vector<ast::StatementPtr>{ast::IfStatement::make(
@@ -62,7 +67,11 @@ TEST_F(ParserTest, ParserAssertions) {
                              nullptr, nullptr, nullptr,
                              ast::Block::make(std::vector<ast::StatementPtr>{
                                  ast::ExpressionStatement::make(
-                                     ast::Literal::makeTrue())}))}))};
+                                     ast::Literal::makeTrue())}))})),
+      ParserTestData(
+          "PrintStatement", "print true;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::PrintStatement::make(ast::Literal::makeTrue())}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);

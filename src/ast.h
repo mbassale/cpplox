@@ -104,6 +104,50 @@ struct Program : public Node {
 };
 typedef std::shared_ptr<Program> ProgramPtr;
 
+struct VarDeclaration : public Statement {
+  Token identifier;
+  ExpressionPtr initializer;
+
+  VarDeclaration(const Token& identifier)
+      : identifier(identifier), initializer(nullptr) {}
+  VarDeclaration(const Token& identifier, const ExpressionPtr& initializer)
+      : identifier(identifier), initializer(initializer) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherProgram = dynamic_cast<const VarDeclaration&>(other);
+      return isEqual(otherProgram);
+    }
+    return false;
+  }
+
+  bool isEqual(const VarDeclaration& other) {
+    if (!identifier.isEqual(other.identifier)) {
+      return false;
+    }
+
+    // compare initializers
+    bool hasLhs = (bool)this->initializer;
+    bool hasRhs = (bool)other.initializer;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (this->initializer && other.initializer) {
+      if (!this->initializer->isEqual(*other.initializer)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  static std::shared_ptr<VarDeclaration> make(
+      const Token& identifier, const ExpressionPtr& initializer = nullptr) {
+    return std::make_shared<VarDeclaration>(identifier, initializer);
+  }
+};
+typedef std::shared_ptr<VarDeclaration> VarDeclarationPtr;
+
 struct Block : public Statement {
   std::vector<StatementPtr> statements;
 
@@ -256,6 +300,34 @@ struct WhileStatement : public Statement {
   }
 };
 typedef std::shared_ptr<WhileStatement> WhileStatementPtr;
+
+struct PrintStatement : public Statement {
+  ExpressionPtr expression;
+
+  PrintStatement() : expression(nullptr) {}
+  PrintStatement(const ExpressionPtr& expression) : expression(expression) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherPrint = dynamic_cast<const PrintStatement&>(other);
+      return isEqual(otherPrint);
+    }
+    return false;
+  }
+
+  bool isEqual(const PrintStatement& other) {
+    return expression->isEqual(*other.expression);
+  }
+
+  static std::shared_ptr<PrintStatement> make() {
+    return std::make_shared<PrintStatement>();
+  }
+
+  static std::shared_ptr<PrintStatement> make(const ExpressionPtr& expression) {
+    return std::make_shared<PrintStatement>(expression);
+  }
+};
+typedef std::shared_ptr<PrintStatement> PrintStatementPtr;
 
 struct IfStatement : public Statement {
   ExpressionPtr condition;

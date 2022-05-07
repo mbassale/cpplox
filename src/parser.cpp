@@ -11,7 +11,7 @@ ast::ProgramPtr Parser::parse() {
   current = scanner.next();
   while (!isAtEnd()) {
     try {
-      const auto stmt = statement();
+      const auto stmt = declaration();
       programNode->statements.push_back(stmt);
     } catch (ParserException& ex) {
       std::cerr << "Error: " << ex.what() << std::endl;
@@ -25,6 +25,39 @@ ast::ProgramPtr Parser::parse() {
 }
 
 /**
+ * declaration:
+ *  classDecl
+ *   | funDecl
+ *   | varDecl
+ *   | statement ;
+ *
+ * @return ast::StatementPtr
+ */
+ast::StatementPtr Parser::declaration() {
+  if (match(TOKEN_VAR)) {
+    return varDeclaration();
+  } else {
+    return statement();
+  }
+}
+
+/**
+ * varDeclaration: "var" IDENTIFIER ( "=" expression )? ";" ;
+ *
+ * @return ast::VarDeclarationPtr
+ */
+ast::VarDeclarationPtr Parser::varDeclaration() {
+  auto identifier = current;
+  consume(TOKEN_IDENTIFIER, "Invalid identifier");
+  ast::ExpressionPtr initializer = nullptr;
+  if (match(TOKEN_EQUAL)) {
+    initializer = expression();
+  }
+  consume(TOKEN_SEMICOLON, "Missing semicolon");
+  return ast::VarDeclaration::make(identifier, initializer);
+}
+
+/**
  * statement:
  *  exprStmt
  *  | forStmt
@@ -34,7 +67,7 @@ ast::ProgramPtr Parser::parse() {
  *  | whileStmt
  *  | block ;
  *
- * @return ast::Statement
+ * @return ast::StatementPtr
  */
 ast::StatementPtr Parser::statement() {
   if (match(TOKEN_LEFT_BRACE)) {
@@ -45,6 +78,8 @@ ast::StatementPtr Parser::statement() {
     return ifStatement();
   } else if (match(TOKEN_WHILE)) {
     return whileStatement();
+  } else if (match(TOKEN_PRINT)) {
+    return printStatement();
   } else if (match(TOKEN_SEMICOLON)) {
     return ast::Statement::make();
   } else {
@@ -94,8 +129,12 @@ ast::IfStatementPtr Parser::ifStatement() {
   return ast::IfStatement::make(condition, thenBranch, elseBranch);
 }
 
+/**
+ * whileStatement: "while" "(" expression ")" statement ;
+ *
+ * @return ast::WhileStatementPtr
+ */
 ast::WhileStatementPtr Parser::whileStatement() {
-  std::cout << "whileStatement: " << current.str() << std::endl;
   consume(TOKEN_LEFT_PAREN, "Missing left paren");
   auto condition = expression();
   consume(TOKEN_RIGHT_PAREN, "Missing right paren");
@@ -104,9 +143,20 @@ ast::WhileStatementPtr Parser::whileStatement() {
 }
 
 /**
+ * printStatement: "print" expression ";" ;
+ *
+ * @return ast::PrintStatementPtr
+ */
+ast::PrintStatementPtr Parser::printStatement() {
+  auto expr = expression();
+  consume(TOKEN_SEMICOLON, "Missing semicolon");
+  return ast::PrintStatement::make(expr);
+}
+
+/**
  * expressionStatement: expression ";" ;
  *
- * @return ast::ExpressionStatement
+ * @return ast::ExpressionStatementPtr
  */
 ast::ExpressionStatementPtr Parser::expressionStatement() {
   const auto expr = expression();

@@ -34,11 +34,14 @@ class Parser {
   }
 
  private:
+  ast::StatementPtr declaration();
+  ast::VarDeclarationPtr varDeclaration();
   ast::BlockPtr block();
   ast::StatementPtr statement();
   ast::ForStatementPtr forStatement();
   ast::IfStatementPtr ifStatement();
   ast::WhileStatementPtr whileStatement();
+  ast::PrintStatementPtr printStatement();
   ast::ExpressionStatementPtr expressionStatement();
   ast::ExpressionPtr expression();
   ast::ExpressionPtr primary();
