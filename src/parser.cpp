@@ -16,6 +16,8 @@ ast::ProgramPtr Parser::parse() {
     } catch (ParserException& ex) {
       std::cerr << "Error: " << ex.what() << std::endl;
       errors.push_back(ex);
+      // TODO: move to next statement to keep gathering errors
+      break;
     }
   }
 
@@ -41,6 +43,8 @@ ast::StatementPtr Parser::statement() {
     return forStatement();
   } else if (match(TOKEN_IF)) {
     return ifStatement();
+  } else if (match(TOKEN_WHILE)) {
+    return whileStatement();
   } else if (match(TOKEN_SEMICOLON)) {
     return ast::Statement::make();
   } else {
@@ -88,6 +92,15 @@ ast::IfStatementPtr Parser::ifStatement() {
     elseBranch = statement();
   }
   return ast::IfStatement::make(condition, thenBranch, elseBranch);
+}
+
+ast::WhileStatementPtr Parser::whileStatement() {
+  std::cout << "whileStatement: " << current.str() << std::endl;
+  consume(TOKEN_LEFT_PAREN, "Missing left paren");
+  auto condition = expression();
+  consume(TOKEN_RIGHT_PAREN, "Missing right paren");
+  auto body = statement();
+  return ast::WhileStatement::make(condition, body);
 }
 
 /**

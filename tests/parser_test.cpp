@@ -32,13 +32,6 @@ TEST_F(ParserTest, ParserAssertions) {
           "ExpressionStatement", "true;",
           ast::Program::make(std::vector<ast::StatementPtr>{
               ast::ExpressionStatement::make(ast::Literal::makeTrue())})),
-      ParserTestData("ForStatement", "for(;;){true;}",
-                     ast::Program::make(
-                         std::vector<ast::StatementPtr>{ast::ForStatement::make(
-                             nullptr, nullptr, nullptr,
-                             ast::Block::make(std::vector<ast::StatementPtr>{
-                                 ast::ExpressionStatement::make(
-                                     ast::Literal::makeTrue())}))})),
       ParserTestData("IfStatement", "if(true){true;}",
                      ast::Program::make(
                          std::vector<ast::StatementPtr>{ast::IfStatement::make(
@@ -55,7 +48,21 @@ TEST_F(ParserTest, ParserAssertions) {
                                      ast::Literal::makeTrue())}),
                              ast::Block::make(std::vector<ast::StatementPtr>{
                                  ast::ExpressionStatement::make(
-                                     ast::Literal::makeFalse())}))}))};
+                                     ast::Literal::makeFalse())}))})),
+      ParserTestData("WhileStatement", "while(true){true;}",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::WhileStatement::make(
+                             ast::Literal::makeTrue(),
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ExpressionStatement::make(
+                                     ast::Literal::makeTrue())}))})),
+      ParserTestData("ForStatement", "for(;;){true;}",
+                     ast::Program::make(
+                         std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                             nullptr, nullptr, nullptr,
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ExpressionStatement::make(
+                                     ast::Literal::makeTrue())}))}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);

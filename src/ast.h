@@ -214,6 +214,49 @@ struct ForStatement : public Statement {
 };
 typedef std::shared_ptr<ForStatement> ForStatementPtr;
 
+struct WhileStatement : public Statement {
+  ExpressionPtr condition;
+  StatementPtr body;
+
+  WhileStatement() : condition(nullptr), body(nullptr) {}
+  WhileStatement(const ExpressionPtr& condition, const StatementPtr& body)
+      : condition(condition), body(body) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherWhile = dynamic_cast<const WhileStatement&>(other);
+      return isEqual(otherWhile);
+    }
+    return false;
+  }
+
+  bool isEqual(const WhileStatement& other) {
+    // compare conditions
+    const auto hasLhs = (bool)this->condition;
+    const auto hasRhs = (bool)other.condition;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (this->condition && other.condition) {
+      if (!this->condition->isEqual(*other.condition)) {
+        return false;
+      }
+    }
+
+    return body->isEqual(*other.body);
+  }
+
+  static std::shared_ptr<WhileStatement> make() {
+    return std::make_shared<WhileStatement>();
+  }
+
+  static std::shared_ptr<WhileStatement> make(const ExpressionPtr& condition,
+                                              const StatementPtr& body) {
+    return std::make_shared<WhileStatement>(condition, body);
+  }
+};
+typedef std::shared_ptr<WhileStatement> WhileStatementPtr;
+
 struct IfStatement : public Statement {
   ExpressionPtr condition;
   StatementPtr thenBranch;

@@ -38,6 +38,7 @@ class Parser {
   ast::StatementPtr statement();
   ast::ForStatementPtr forStatement();
   ast::IfStatementPtr ifStatement();
+  ast::WhileStatementPtr whileStatement();
   ast::ExpressionStatementPtr expressionStatement();
   ast::ExpressionPtr expression();
   ast::ExpressionPtr primary();
@@ -46,6 +47,7 @@ class Parser {
   bool match(TokenType tokenType);
   void advance();
   void consume(TokenType tokenType, const std::string& error_message);
+  void moveToNextStatement();
 };
 
 }  // namespace cpplox
