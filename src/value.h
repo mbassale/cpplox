@@ -4,7 +4,7 @@
 #include "common.h"
 #include "object.h"
 
-typedef boost::flyweight<std::string> Symbol;
+typedef std::string Symbol;
 typedef std::variant<nullptr_t, bool, double, std::string, ObjectPtr> BaseValue;
 
 class Value : public BaseValue {

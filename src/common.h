@@ -2,7 +2,6 @@
 #define __cpplox_common_h
 
 #include <array>
-#include <boost/flyweight.hpp>
 #include <cstdbool>
 #include <cstddef>
 #include <cstdint>

@@ -29,9 +29,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-find_package(Boost 1.7)
-include_directories(${Boost_INCLUDE_DIRS})
-
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
 #------------------------------------------------#
@@ -78,7 +75,7 @@ add_executable(
 )
 
 if(UNIX AND NOT APPLE)
-  set(ADDITIONAL_LIBRARIES boost_thread boost_system Threads::Threads)
+  set(ADDITIONAL_LIBRARIES Threads::Threads)
 else()
   set(ADDITIONAL_LIBRARIES "")
 endif()
