@@ -11,21 +11,17 @@ struct Node {
 
   virtual bool isEqual(const Node& other) { return true; }
 };
-typedef std::shared_ptr<Node> NodePtr;
+using NodePtr = std::shared_ptr<Node>;
 
 struct Statement : public Node {
   static std::shared_ptr<Statement> make() {
     return std::make_shared<Statement>();
   }
 };
-typedef std::shared_ptr<Statement> StatementPtr;
-#define AS_STATEMENT(EXPR) \
-  std::dynamic_pointer_cast<cpplox::ast::Statement>(EXPR)
+using StatementPtr = std::shared_ptr<Statement>;
 
 struct Expression : public Node {};
-typedef std::shared_ptr<Expression> ExpressionPtr;
-#define AS_EXPRESSION(EXPR) \
-  std::dynamic_pointer_cast<cpplox::ast::Expression>(EXPR)
+using ExpressionPtr = std::shared_ptr<Expression>;
 
 struct Literal : public Expression {
   Token literal;
@@ -53,7 +49,7 @@ struct Literal : public Expression {
     return std::make_shared<Literal>(Token(TOKEN_FALSE, "false"));
   }
 };
-typedef std::shared_ptr<Literal> LiteralPtr;
+using LiteralPtr = std::shared_ptr<Literal>;
 
 struct Identifier : public Expression {
   Token identifier;
@@ -71,7 +67,7 @@ struct Identifier : public Expression {
     return this->identifier == other.identifier;
   }
 };
-typedef std::shared_ptr<Identifier> IdentifierPtr;
+using IdentifierPtr = std::shared_ptr<Identifier>;
 
 struct Program : public Node {
   std::vector<StatementPtr> statements;
@@ -102,7 +98,7 @@ struct Program : public Node {
     return std::make_shared<Program>(statements);
   }
 };
-typedef std::shared_ptr<Program> ProgramPtr;
+using ProgramPtr = std::shared_ptr<Program>;
 
 struct VarDeclaration : public Statement {
   Token identifier;
@@ -146,7 +142,7 @@ struct VarDeclaration : public Statement {
     return std::make_shared<VarDeclaration>(identifier, initializer);
   }
 };
-typedef std::shared_ptr<VarDeclaration> VarDeclarationPtr;
+using VarDeclarationPtr = std::shared_ptr<VarDeclaration>;
 
 struct Block : public Statement {
   std::vector<StatementPtr> statements;
@@ -176,7 +172,7 @@ struct Block : public Statement {
     return std::make_shared<Block>(statements);
   }
 };
-typedef std::shared_ptr<Block> BlockPtr;
+using BlockPtr = std::shared_ptr<Block>;
 
 struct ForStatement : public Statement {
   ExpressionPtr initializer;
@@ -256,7 +252,7 @@ struct ForStatement : public Statement {
                                           body);
   }
 };
-typedef std::shared_ptr<ForStatement> ForStatementPtr;
+using ForStatementPtr = std::shared_ptr<ForStatement>;
 
 struct WhileStatement : public Statement {
   ExpressionPtr condition;
@@ -299,7 +295,7 @@ struct WhileStatement : public Statement {
     return std::make_shared<WhileStatement>(condition, body);
   }
 };
-typedef std::shared_ptr<WhileStatement> WhileStatementPtr;
+using WhileStatementPtr = std::shared_ptr<WhileStatement>;
 
 struct PrintStatement : public Statement {
   ExpressionPtr expression;
@@ -327,7 +323,7 @@ struct PrintStatement : public Statement {
     return std::make_shared<PrintStatement>(expression);
   }
 };
-typedef std::shared_ptr<PrintStatement> PrintStatementPtr;
+using PrintStatementPtr = std::shared_ptr<PrintStatement>;
 
 struct IfStatement : public Statement {
   ExpressionPtr condition;
@@ -379,7 +375,7 @@ struct IfStatement : public Statement {
     return thenBranchEqual;
   }
 };
-typedef std::shared_ptr<IfStatement> IfStatementPtr;
+using IfStatementPtr = std::shared_ptr<IfStatement>;
 
 struct ReturnStatement : public Statement {
   ExpressionPtr expression;
@@ -407,7 +403,7 @@ struct ReturnStatement : public Statement {
     return std::make_shared<ReturnStatement>(expression);
   }
 };
-typedef std::shared_ptr<ReturnStatement> ReturnStatementPtr;
+using ReturnStatementPtr = std::shared_ptr<ReturnStatement>;
 
 struct ExpressionStatement : public Statement {
   ExpressionPtr expression;
@@ -434,7 +430,7 @@ struct ExpressionStatement : public Statement {
     return std::make_shared<ExpressionStatement>(expression);
   }
 };
-typedef std::shared_ptr<ExpressionStatement> ExpressionStatementPtr;
+using ExpressionStatementPtr = std::shared_ptr<ExpressionStatement>;
 
 template <typename T>
 class NodeVisitor {
