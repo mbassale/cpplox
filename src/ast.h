@@ -392,7 +392,15 @@ struct ReturnStatement : public Statement {
   }
 
   bool isEqual(const ReturnStatement& other) {
-    return expression->isEqual(*other.expression);
+    bool hasLhs = (bool)expression;
+    bool hasRhs = (bool)other.expression;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (hasLhs) {
+      return expression->isEqual(*other.expression);
+    }
+    return true;
   }
 
   static std::shared_ptr<ReturnStatement> make() {

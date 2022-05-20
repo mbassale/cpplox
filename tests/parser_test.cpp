@@ -74,7 +74,10 @@ TEST_F(ParserTest, ParserAssertions) {
       ParserTestData(
           "ReturnStatement", "return true;",
           ast::Program::make(std::vector<ast::StatementPtr>{
-              ast::ReturnStatement::make(ast::Literal::makeTrue())}))};
+              ast::ReturnStatement::make(ast::Literal::makeTrue())})),
+      ParserTestData("ReturnStatement", "return;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ReturnStatement::make()}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);
