@@ -68,10 +68,13 @@ TEST_F(ParserTest, ParserAssertions) {
                              ast::Block::make(std::vector<ast::StatementPtr>{
                                  ast::ExpressionStatement::make(
                                      ast::Literal::makeTrue())}))})),
+      ParserTestData("PrintStatement", "print true;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::PrintStatement::make(ast::Literal::makeTrue())})),
       ParserTestData(
-          "PrintStatement", "print true;",
+          "ReturnStatement", "return true;",
           ast::Program::make(std::vector<ast::StatementPtr>{
-              ast::PrintStatement::make(ast::Literal::makeTrue())}))};
+              ast::ReturnStatement::make(ast::Literal::makeTrue())}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);

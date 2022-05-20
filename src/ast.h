@@ -381,6 +381,34 @@ struct IfStatement : public Statement {
 };
 typedef std::shared_ptr<IfStatement> IfStatementPtr;
 
+struct ReturnStatement : public Statement {
+  ExpressionPtr expression;
+
+  ReturnStatement() : expression(nullptr) {}
+  ReturnStatement(const ExpressionPtr& expression) : expression(expression) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(*this) == typeid(other)) {
+      const auto& otherReturnStmt = dynamic_cast<const ReturnStatement&>(other);
+      return isEqual(otherReturnStmt);
+    }
+    return false;
+  }
+
+  bool isEqual(const ReturnStatement& other) {
+    return expression->isEqual(*other.expression);
+  }
+
+  static std::shared_ptr<ReturnStatement> make() {
+    return std::make_shared<ReturnStatement>();
+  }
+  static std::shared_ptr<ReturnStatement> make(
+      const ExpressionPtr& expression) {
+    return std::make_shared<ReturnStatement>(expression);
+  }
+};
+typedef std::shared_ptr<ReturnStatement> ReturnStatementPtr;
+
 struct ExpressionStatement : public Statement {
   ExpressionPtr expression;
 

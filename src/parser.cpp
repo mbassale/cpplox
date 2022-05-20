@@ -80,6 +80,8 @@ ast::StatementPtr Parser::statement() {
     return whileStatement();
   } else if (match(TOKEN_PRINT)) {
     return printStatement();
+  } else if (match(TOKEN_RETURN)) {
+    return returnStatement();
   } else if (match(TOKEN_SEMICOLON)) {
     return ast::Statement::make();
   } else {
@@ -151,6 +153,20 @@ ast::PrintStatementPtr Parser::printStatement() {
   auto expr = expression();
   consume(TOKEN_SEMICOLON, "Missing semicolon");
   return ast::PrintStatement::make(expr);
+}
+
+/**
+ * returnStatement: "return" expression? ";" ;
+ *
+ * @return ast::ReturnStatementPtr
+ */
+ast::ReturnStatementPtr Parser::returnStatement() {
+  ast::ExpressionPtr expr = nullptr;
+  if (!match(TOKEN_SEMICOLON)) {
+    expr = expression();
+    consume(TOKEN_SEMICOLON, "Missing semicolon");
+  }
+  return ast::ReturnStatement::make(expr);
 }
 
 /**
