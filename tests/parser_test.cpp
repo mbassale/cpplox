@@ -106,6 +106,14 @@ TEST_F(ParserTest, BinaryExprAssertions) {
                   ast::Literal::makeTrue(), Token(TOKEN_EQUAL_EQUAL, "=="),
                   ast::Literal::makeFalse()))})),
       ParserTestData(
+          "EqualRecursive", "true==false==true;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::BinaryExpr::make(
+                  ast::BinaryExpr::make(ast::Literal::makeTrue(),
+                                        Token(TOKEN_EQUAL_EQUAL, "=="),
+                                        ast::Literal::makeFalse()),
+                  Token(TOKEN_EQUAL_EQUAL, "=="), ast::Literal::makeTrue()))})),
+      ParserTestData(
           "NotEqual", "true!=false;",
           ast::Program::make(std::vector<ast::StatementPtr>{
               ast::ExpressionStatement::make(ast::BinaryExpr::make(
@@ -122,6 +130,14 @@ TEST_F(ParserTest, BinaryExprAssertions) {
               ast::ExpressionStatement::make(ast::BinaryExpr::make(
                   ast::Literal::makeTrue(), Token(TOKEN_LESS_EQUAL, "<="),
                   ast::Literal::makeFalse()))})),
+      ParserTestData(
+          "LessEqualRecursive", "true<=false<=true;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::BinaryExpr::make(
+                  ast::BinaryExpr::make(ast::Literal::makeTrue(),
+                                        Token(TOKEN_LESS_EQUAL, "<="),
+                                        ast::Literal::makeFalse()),
+                  Token(TOKEN_LESS_EQUAL, "<="), ast::Literal::makeTrue()))})),
       ParserTestData(
           "Greater",
           "true>false;",

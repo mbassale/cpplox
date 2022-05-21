@@ -199,12 +199,12 @@ ast::ExpressionPtr Parser::assignment() {
  * @return ast::ExpressionPtr
  */
 ast::ExpressionPtr Parser::equality() {
-  const auto expr = comparison();
+  auto expr = comparison();
 
-  if (match(TOKEN_EQUAL_EQUAL) || match(TOKEN_BANG_EQUAL)) {
+  while (match(TOKEN_EQUAL_EQUAL) || match(TOKEN_BANG_EQUAL)) {
     const auto operator_ = previous;
     const auto right = comparison();
-    return ast::BinaryExpr::make(expr, operator_, right);
+    expr = ast::BinaryExpr::make(expr, operator_, right);
   }
 
   return expr;
@@ -216,13 +216,13 @@ ast::ExpressionPtr Parser::equality() {
  * @return ast::ExpressionPtr
  */
 ast::ExpressionPtr Parser::comparison() {
-  const auto expr = term();
+  auto expr = term();
 
-  if (match(TOKEN_GREATER) || match(TOKEN_GREATER_EQUAL) || match(TOKEN_LESS) ||
-      match(TOKEN_LESS_EQUAL)) {
+  while (match(TOKEN_GREATER) || match(TOKEN_GREATER_EQUAL) ||
+         match(TOKEN_LESS) || match(TOKEN_LESS_EQUAL)) {
     const auto operator_ = previous;
     const auto right = term();
-    return ast::BinaryExpr::make(expr, operator_, right);
+    expr = ast::BinaryExpr::make(expr, operator_, right);
   }
 
   return expr;
