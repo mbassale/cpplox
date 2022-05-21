@@ -228,9 +228,29 @@ ast::ExpressionPtr Parser::comparison() {
   return expr;
 }
 
-ast::ExpressionPtr Parser::term() { return factor(); }
+ast::ExpressionPtr Parser::term() {
+  auto expr = factor();
 
-ast::ExpressionPtr Parser::factor() { return unary(); }
+  while (match(TOKEN_PLUS) || match(TOKEN_MINUS)) {
+    const auto operator_ = previous;
+    const auto right = factor();
+    expr = ast::BinaryExpr::make(expr, operator_, right);
+  }
+
+  return expr;
+}
+
+ast::ExpressionPtr Parser::factor() {
+  auto expr = unary();
+
+  while (match(TOKEN_STAR) || match(TOKEN_SLASH)) {
+    const auto operator_ = previous;
+    const auto right = unary();
+    expr = ast::BinaryExpr::make(expr, operator_, right);
+  }
+
+  return expr;
+}
 
 ast::ExpressionPtr Parser::unary() { return primary(); }
 

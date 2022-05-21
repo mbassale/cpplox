@@ -42,6 +42,12 @@ struct Literal : public Expression {
   static std::shared_ptr<Literal> make(const Token& literal) {
     return std::make_shared<Literal>(literal);
   }
+  static std::shared_ptr<Literal> makeNumber(const std::string& value) {
+    return std::make_shared<Literal>(Token(TOKEN_NUMBER, value));
+  }
+  static std::shared_ptr<Literal> makeString(const std::string& value) {
+    return std::make_shared<Literal>(Token(TOKEN_STRING, value));
+  }
   static std::shared_ptr<Literal> makeTrue() {
     return std::make_shared<Literal>(Token(TOKEN_TRUE, "true"));
   }
