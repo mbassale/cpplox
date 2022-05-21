@@ -45,6 +45,8 @@ class Parser {
   ast::ReturnStatementPtr returnStatement();
   ast::ExpressionStatementPtr expressionStatement();
   ast::ExpressionPtr expression();
+  ast::ExpressionPtr assignment();
+  ast::ExpressionPtr equality();
   ast::ExpressionPtr primary();
 
   bool isAtEnd() { return current.type == TOKEN_EOF; }

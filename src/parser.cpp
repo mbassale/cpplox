@@ -182,7 +182,20 @@ ast::ExpressionStatementPtr Parser::expressionStatement() {
   return exprStmt;
 }
 
-ast::ExpressionPtr Parser::expression() { return primary(); }
+ast::ExpressionPtr Parser::expression() { return assignment(); }
+/*
+ * assignment: ( call "." )? IDENTIFIER "=" assignment | equality ;
+ */
+ast::ExpressionPtr Parser::assignment() {
+  auto expr = equality();
+  if (match(TOKEN_EQUAL)) {
+    auto value = assignment();
+    return ast::Assignment::make(expr, value);
+  }
+  return expr;
+}
+
+ast::ExpressionPtr Parser::equality() { return primary(); }
 
 /**
  * primary:
@@ -205,10 +218,11 @@ ast::ExpressionPtr Parser::primary() {
     case TOKEN_NIL:
     case TOKEN_NUMBER:
     case TOKEN_STRING:
+      advance();
+      return ast::Literal::make(previous);
     case TOKEN_IDENTIFIER:
       advance();
-      return std::static_pointer_cast<ast::Expression>(
-          ast::Literal::make(previous));
+      return ast::Identifier::make(previous);
     case TOKEN_LEFT_PAREN: {
       const auto expr = expression();
       consume(TOKEN_RIGHT_PAREN, "Unbalanced parenthesis");

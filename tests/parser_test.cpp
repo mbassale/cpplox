@@ -33,6 +33,11 @@ TEST_F(ParserTest, ParserAssertions) {
           ast::Program::make(std::vector<ast::StatementPtr>{
               ast::ExpressionStatement::make(ast::Literal::makeTrue())})),
       ParserTestData(
+          "AssignmentExpression", "a=true;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::Assignment::make(
+                  ast::Identifier::make("a"), ast::Literal::makeTrue()))})),
+      ParserTestData(
           "VarDeclaration", "var test=true;",
           ast::Program::make(
               std::vector<ast::StatementPtr>{ast::VarDeclaration::make(

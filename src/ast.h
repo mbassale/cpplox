@@ -54,6 +54,7 @@ using LiteralPtr = std::shared_ptr<Literal>;
 struct Identifier : public Expression {
   Token identifier;
   Identifier(const Token& identifier) : identifier(identifier) {}
+  Identifier(Token&& identifier) : identifier(identifier) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(other) == typeid(*this)) {
@@ -66,8 +67,57 @@ struct Identifier : public Expression {
   bool isEqual(const Identifier& other) {
     return this->identifier == other.identifier;
   }
+
+  static std::shared_ptr<Identifier> make(const Token& identifier) {
+    return std::make_shared<Identifier>(identifier);
+  }
+  static std::shared_ptr<Identifier> make(const std::string& variableName) {
+    return std::make_shared<Identifier>(Token(TOKEN_IDENTIFIER, variableName));
+  }
 };
 using IdentifierPtr = std::shared_ptr<Identifier>;
+
+struct Assignment : public Expression {
+  ExpressionPtr variable;
+  ExpressionPtr value;
+
+  Assignment(const ExpressionPtr& variable)
+      : variable(variable), value(nullptr) {}
+  Assignment(const ExpressionPtr& variable, const ExpressionPtr& value)
+      : variable(variable), value(value) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(other) == typeid(*this)) {
+      const auto& otherAssignment = dynamic_cast<const Assignment&>(other);
+      return isEqual(otherAssignment);
+    }
+    return false;
+  }
+
+  bool isEqual(const Assignment& other) {
+    if (!variable->isEqual(*other.variable)) {
+      return false;
+    }
+
+    // compare initializers
+    bool hasLhs = (bool)this->value;
+    bool hasRhs = (bool)other.value;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+
+    return value->isEqual(*other.value);
+  }
+
+  static std::shared_ptr<Assignment> make(const ExpressionPtr& variable) {
+    return std::make_shared<Assignment>(variable);
+  }
+  static std::shared_ptr<Assignment> make(const ExpressionPtr& variable,
+                                          const ExpressionPtr& value) {
+    return std::make_shared<Assignment>(variable, value);
+  }
+};
+using AssignmentPtr = std::shared_ptr<Assignment>;
 
 struct Program : public Node {
   std::vector<StatementPtr> statements;
