@@ -222,7 +222,7 @@ ast::ExpressionPtr Parser::primary() {
       return ast::Literal::make(previous);
     case TOKEN_IDENTIFIER:
       advance();
-      return ast::Identifier::make(previous);
+      return ast::VariableExpr::make(previous);
     case TOKEN_LEFT_PAREN: {
       const auto expr = expression();
       consume(TOKEN_RIGHT_PAREN, "Unbalanced parenthesis");

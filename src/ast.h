@@ -51,31 +51,32 @@ struct Literal : public Expression {
 };
 using LiteralPtr = std::shared_ptr<Literal>;
 
-struct Identifier : public Expression {
+struct VariableExpr : public Expression {
   Token identifier;
-  Identifier(const Token& identifier) : identifier(identifier) {}
-  Identifier(Token&& identifier) : identifier(identifier) {}
+  VariableExpr(const Token& identifier) : identifier(identifier) {}
+  VariableExpr(Token&& identifier) : identifier(identifier) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(other) == typeid(*this)) {
-      const auto& otherIdentifier = dynamic_cast<const Identifier&>(other);
+      const auto& otherIdentifier = dynamic_cast<const VariableExpr&>(other);
       return isEqual(otherIdentifier);
     }
     return false;
   }
 
-  bool isEqual(const Identifier& other) {
+  bool isEqual(const VariableExpr& other) {
     return this->identifier == other.identifier;
   }
 
-  static std::shared_ptr<Identifier> make(const Token& identifier) {
-    return std::make_shared<Identifier>(identifier);
+  static std::shared_ptr<VariableExpr> make(const Token& identifier) {
+    return std::make_shared<VariableExpr>(identifier);
   }
-  static std::shared_ptr<Identifier> make(const std::string& variableName) {
-    return std::make_shared<Identifier>(Token(TOKEN_IDENTIFIER, variableName));
+  static std::shared_ptr<VariableExpr> make(const std::string& variableName) {
+    return std::make_shared<VariableExpr>(
+        Token(TOKEN_IDENTIFIER, variableName));
   }
 };
-using IdentifierPtr = std::shared_ptr<Identifier>;
+using VariableExprPtr = std::shared_ptr<VariableExpr>;
 
 struct Assignment : public Expression {
   ExpressionPtr variable;
