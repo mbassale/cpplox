@@ -25,11 +25,7 @@ ast::ProgramPtr Parser::parse() {
 }
 
 /**
- * declaration:
- *  classDecl
- *   | funDecl
- *   | varDecl
- *   | statement ;
+ * @brief declaration: classDecl | funDecl | varDecl | statement ;
  *
  * @return ast::StatementPtr
  */
@@ -42,7 +38,7 @@ ast::StatementPtr Parser::declaration() {
 }
 
 /**
- * varDeclaration: "var" IDENTIFIER ( "=" expression )? ";" ;
+ * @brief varDeclaration: "var" IDENTIFIER ( "=" expression )? ";" ;
  *
  * @return ast::VarDeclarationPtr
  */
@@ -58,14 +54,8 @@ ast::VarDeclarationPtr Parser::varDeclaration() {
 }
 
 /**
- * statement:
- *  exprStmt
- *  | forStmt
- *  | ifStmt
- *  | printStmt
- *  | returnStmt
- *  | whileStmt
- *  | block ;
+ * @brief statement: exprStmt | forStmt | ifStmt | printStmt | returnStmt |
+ * whileStmt | block ;
  *
  * @return ast::StatementPtr
  */
@@ -132,7 +122,7 @@ ast::IfStatementPtr Parser::ifStatement() {
 }
 
 /**
- * whileStatement: "while" "(" expression ")" statement ;
+ * @brief whileStatement: "while" "(" expression ")" statement ;
  *
  * @return ast::WhileStatementPtr
  */
@@ -145,7 +135,7 @@ ast::WhileStatementPtr Parser::whileStatement() {
 }
 
 /**
- * printStatement: "print" expression ";" ;
+ * @brief printStatement: "print" expression ";" ;
  *
  * @return ast::PrintStatementPtr
  */
@@ -156,7 +146,7 @@ ast::PrintStatementPtr Parser::printStatement() {
 }
 
 /**
- * returnStatement: "return" expression? ";" ;
+ * @brief returnStatement: "return" expression? ";" ;
  *
  * @return ast::ReturnStatementPtr
  */
@@ -170,7 +160,7 @@ ast::ReturnStatementPtr Parser::returnStatement() {
 }
 
 /**
- * expressionStatement: expression ";" ;
+ * @brief expressionStatement: expression ";" ;
  *
  * @return ast::ExpressionStatementPtr
  */
@@ -182,9 +172,17 @@ ast::ExpressionStatementPtr Parser::expressionStatement() {
   return exprStmt;
 }
 
+/**
+ * @brief expression: assignment
+ *
+ * @return ast::ExpressionPtr
+ */
 ast::ExpressionPtr Parser::expression() { return assignment(); }
-/*
- * assignment: ( call "." )? IDENTIFIER "=" assignment | equality ;
+
+/**
+ * @brief assignment: ( call "." )? IDENTIFIER "=" assignment | equality ;
+ *
+ * @return ast::ExpressionPtr
  */
 ast::ExpressionPtr Parser::assignment() {
   auto expr = equality();
@@ -195,7 +193,46 @@ ast::ExpressionPtr Parser::assignment() {
   return expr;
 }
 
-ast::ExpressionPtr Parser::equality() { return primary(); }
+/**
+ * @brief equality: comparison ( ( "!=" | "==" ) comparison )* ;
+ *
+ * @return ast::ExpressionPtr
+ */
+ast::ExpressionPtr Parser::equality() {
+  const auto expr = comparison();
+
+  if (match(TOKEN_EQUAL_EQUAL) || match(TOKEN_BANG_EQUAL)) {
+    const auto operator_ = previous;
+    const auto right = comparison();
+    return ast::BinaryExpr::make(expr, operator_, right);
+  }
+
+  return expr;
+}
+
+/**
+ * @brief comparison: term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+ *
+ * @return ast::ExpressionPtr
+ */
+ast::ExpressionPtr Parser::comparison() {
+  const auto expr = term();
+
+  if (match(TOKEN_GREATER) || match(TOKEN_GREATER_EQUAL) || match(TOKEN_LESS) ||
+      match(TOKEN_LESS_EQUAL)) {
+    const auto operator_ = previous;
+    const auto right = term();
+    return ast::BinaryExpr::make(expr, operator_, right);
+  }
+
+  return expr;
+}
+
+ast::ExpressionPtr Parser::term() { return factor(); }
+
+ast::ExpressionPtr Parser::factor() { return unary(); }
+
+ast::ExpressionPtr Parser::unary() { return primary(); }
 
 /**
  * primary:

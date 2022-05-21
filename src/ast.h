@@ -120,6 +120,41 @@ struct Assignment : public Expression {
 };
 using AssignmentPtr = std::shared_ptr<Assignment>;
 
+struct BinaryExpr : public Expression {
+  ExpressionPtr left;
+  Token operator_;
+  ExpressionPtr right;
+
+  BinaryExpr(const ExpressionPtr& left, const Token& operator_,
+             const ExpressionPtr& right)
+      : left(left), operator_(operator_), right(right) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(other) == typeid(*this)) {
+      const auto& otherAssignment = dynamic_cast<const BinaryExpr&>(other);
+      return isEqual(otherAssignment);
+    }
+    return false;
+  }
+
+  bool isEqual(const BinaryExpr& other) {
+    if (!left->isEqual(*other.left)) {
+      return false;
+    }
+    if (!operator_.isEqual(other.operator_)) {
+      return false;
+    }
+    return right->isEqual(*other.right);
+  }
+
+  static std::shared_ptr<BinaryExpr> make(const ExpressionPtr& left,
+                                          const Token& operator_,
+                                          const ExpressionPtr& right) {
+    return std::make_shared<BinaryExpr>(left, operator_, right);
+  }
+};
+using BinaryExprPtr = std::shared_ptr<BinaryExpr>;
+
 struct Program : public Node {
   std::vector<StatementPtr> statements;
 
