@@ -161,6 +161,35 @@ struct BinaryExpr : public Expression {
 };
 using BinaryExprPtr = std::shared_ptr<BinaryExpr>;
 
+struct UnaryExpr : public Expression {
+  Token operator_;
+  ExpressionPtr right;
+
+  UnaryExpr(const Token& operator_, const ExpressionPtr& right)
+      : operator_(operator_), right(right) {}
+
+  bool isEqual(const Node& other) override {
+    if (typeid(other) == typeid(*this)) {
+      const auto& otherAssignment = dynamic_cast<const UnaryExpr&>(other);
+      return isEqual(otherAssignment);
+    }
+    return false;
+  }
+
+  bool isEqual(const UnaryExpr& other) {
+    if (!operator_.isEqual(other.operator_)) {
+      return false;
+    }
+    return right->isEqual(*other.right);
+  }
+
+  static std::shared_ptr<UnaryExpr> make(const Token& operator_,
+                                         const ExpressionPtr& right) {
+    return std::make_shared<UnaryExpr>(operator_, right);
+  }
+};
+using UnaryExprPtr = std::shared_ptr<UnaryExpr>;
+
 struct Program : public Node {
   std::vector<StatementPtr> statements;
 

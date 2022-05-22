@@ -97,6 +97,28 @@ TEST_F(ParserTest, AssignmentExprAssertions) {
   }
 }
 
+TEST_F(ParserTest, UnaryExprAssertions) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData(
+          "Negation", "!true;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::UnaryExpr::make(
+                  Token(TOKEN_BANG, "!"), ast::Literal::makeTrue()))})),
+      ParserTestData(
+          "Negative", "-1;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::UnaryExpr::make(
+                  Token(TOKEN_MINUS, "-"), ast::Literal::makeNumber("1")))})),
+  };
+
+  for (const auto &testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    const auto actualProgram = parser.parse();
+    ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
+  }
+}
+
 TEST_F(ParserTest, BinaryExprAssertions) {
   std::vector<ParserTestData> testCases = {
       ParserTestData(

@@ -228,6 +228,11 @@ ast::ExpressionPtr Parser::comparison() {
   return expr;
 }
 
+/**
+ * @brief term: factor ( ( "-" | "+" ) factor )* ;
+ *
+ * @return ast::ExpressionPtr
+ */
 ast::ExpressionPtr Parser::term() {
   auto expr = factor();
 
@@ -240,6 +245,11 @@ ast::ExpressionPtr Parser::term() {
   return expr;
 }
 
+/**
+ * @brief factor: unary ( ( "/" | "*" ) unary )* ;
+ *
+ * @return ast::ExpressionPtr
+ */
 ast::ExpressionPtr Parser::factor() {
   auto expr = unary();
 
@@ -252,7 +262,20 @@ ast::ExpressionPtr Parser::factor() {
   return expr;
 }
 
-ast::ExpressionPtr Parser::unary() { return primary(); }
+/**
+ * @brief unary: ( "!" | "-" ) unary | primary ;
+ *
+ * @return ast::ExpressionPtr
+ */
+ast::ExpressionPtr Parser::unary() {
+  if (match(TOKEN_BANG) || match(TOKEN_MINUS)) {
+    const auto operator_ = previous;
+    const auto right = unary();
+    return ast::UnaryExpr::make(operator_, right);
+  }
+
+  return primary();
+}
 
 /**
  * primary:
