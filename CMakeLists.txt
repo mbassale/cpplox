@@ -43,6 +43,8 @@ set(SOURCES
   src/chunk.cpp
   src/compiler.h
   src/compiler.cpp
+  src/compiler_v2.h
+  src/compiler_v2.cpp
   src/config.h
   src/debug.h
   src/debug.cpp
@@ -94,6 +96,7 @@ add_executable(
   tests/scanner_test.cpp
   tests/parser_test.cpp
   tests/compiler_test.cpp
+  tests/compiler_v2_test.cpp
 )
 
 target_link_libraries(
