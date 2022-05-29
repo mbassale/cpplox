@@ -77,6 +77,8 @@ class CompilerV2 {
   void addLocal(const std::string &name);
   void defineVariable(size_t global);
   void markInitialized();
+  void namedVariable(const std::string &name);
+  int resolveLocal(const std::string &name);
 
   // Error routines
   void error(const std::string &message);

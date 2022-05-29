@@ -154,6 +154,11 @@ void CompilerV2::expression(const ExpressionPtr& expr) {
       literal(literalExpr);
       break;
     }
+    case NodeType::VARIABLE_EXPRESSION: {
+      const auto varExpr = std::dynamic_pointer_cast<VariableExpr>(expr);
+      namedVariable(varExpr->identifier.lexeme());
+      break;
+    }
     default: {
       std::ostringstream ss;
       ss << "Unknown Expression Type: " << (int)expr->Type;
@@ -335,6 +340,36 @@ void CompilerV2::defineVariable(size_t global) {
 void CompilerV2::markInitialized() {
   if (scopeDepth == 0) return;
   locals[locals.size() - 1].depth = scopeDepth;
+}
+
+void CompilerV2::namedVariable(const std::string& name) {
+  uint8_t getOp, setOp;
+  int offset = resolveLocal(name);
+  if (offset != -1) {
+    getOp = OP_GET_LOCAL;
+    setOp = OP_SET_LOCAL;
+  } else {
+    offset = makeConstant(Value(name));
+    getOp = OP_GET_GLOBAL;
+    setOp = OP_SET_GLOBAL;
+  }
+
+  emitBytes(getOp, offset);
+}
+
+int CompilerV2::resolveLocal(const std::string& name) {
+  for (int i = locals.size() - 1; i >= 0; i--) {
+    if (name == locals[i].name) {
+      if (locals[i].depth == -1) {
+        std::ostringstream ss;
+        ss << "Can't read local variable '" << name
+           << "' in its own initializer.";
+        error(ss.str());
+      }
+      return i;
+    }
+  }
+  return -1;
 }
 
 void CompilerV2::error(const std::string& message) { errorAt(message); }
