@@ -6,28 +6,73 @@
 
 namespace cpplox::ast {
 
+enum class NodeType {
+
+  /*
+   * COMPILATION UNITS
+   */
+  PROGRAM,
+
+  /*
+   * DECLARATIONS
+   */
+  VAR_DECLARATION,
+
+  /*
+   * EXPRESSIONS
+   */
+  EXPRESSION,
+  VARIABLE_EXPRESSION,
+  ASSIGNMENT_EXPRESSION,
+  BINARY_EXPRESSION,
+  UNARY_EXPRESSION,
+  LITERAL_EXPRESSION,
+
+  /*
+   * STATEMENTS
+   */
+  STATEMENT,
+  EXPRESSION_STATEMENT,
+  EMPTY_STATEMENT,
+  BLOCK_STATEMENT,
+  FOR_STATEMENT,
+  IF_STATEMENT,
+  WHILE_STATEMENT,
+  PRINT_STATEMENT,
+  RETURN_STATEMENT,
+};
+
 struct Node {
-  Node() {}
+  const NodeType Type;
+
+  Node(const NodeType type) : Type(type) {}
 
   virtual bool isEqual(const Node& other) { return true; }
 };
 using NodePtr = std::shared_ptr<Node>;
 
 struct Statement : public Node {
+  Statement() : Node(NodeType::EMPTY_STATEMENT) {}
+  Statement(NodeType type) : Node(type) {}
+
   static std::shared_ptr<Statement> make() {
     return std::make_shared<Statement>();
   }
 };
 using StatementPtr = std::shared_ptr<Statement>;
 
-struct Expression : public Node {};
+struct Expression : public Node {
+  Expression(NodeType type) : Node(type) {}
+};
 using ExpressionPtr = std::shared_ptr<Expression>;
 
 struct Literal : public Expression {
   Token literal;
 
-  Literal(const Token& literal) : literal(literal) {}
-  Literal(Token&& literal) : literal(literal) {}
+  Literal(const Token& literal)
+      : Expression(NodeType::LITERAL_EXPRESSION), literal(literal) {}
+  Literal(Token&& literal)
+      : Expression(NodeType::LITERAL_EXPRESSION), literal(literal) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(other) == typeid(*this)) {
@@ -59,8 +104,10 @@ using LiteralPtr = std::shared_ptr<Literal>;
 
 struct VariableExpr : public Expression {
   Token identifier;
-  VariableExpr(const Token& identifier) : identifier(identifier) {}
-  VariableExpr(Token&& identifier) : identifier(identifier) {}
+  VariableExpr(const Token& identifier)
+      : Expression(NodeType::VARIABLE_EXPRESSION), identifier(identifier) {}
+  VariableExpr(Token&& identifier)
+      : Expression(NodeType::VARIABLE_EXPRESSION), identifier(identifier) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(other) == typeid(*this)) {
@@ -89,9 +136,13 @@ struct Assignment : public Expression {
   ExpressionPtr value;
 
   Assignment(const ExpressionPtr& variable)
-      : variable(variable), value(nullptr) {}
+      : Expression(NodeType::ASSIGNMENT_EXPRESSION),
+        variable(variable),
+        value(nullptr) {}
   Assignment(const ExpressionPtr& variable, const ExpressionPtr& value)
-      : variable(variable), value(value) {}
+      : Expression(NodeType::ASSIGNMENT_EXPRESSION),
+        variable(variable),
+        value(value) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(other) == typeid(*this)) {
@@ -133,7 +184,10 @@ struct BinaryExpr : public Expression {
 
   BinaryExpr(const ExpressionPtr& left, const Token& operator_,
              const ExpressionPtr& right)
-      : left(left), operator_(operator_), right(right) {}
+      : Expression(NodeType::BINARY_EXPRESSION),
+        left(left),
+        operator_(operator_),
+        right(right) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(other) == typeid(*this)) {
@@ -166,7 +220,9 @@ struct UnaryExpr : public Expression {
   ExpressionPtr right;
 
   UnaryExpr(const Token& operator_, const ExpressionPtr& right)
-      : operator_(operator_), right(right) {}
+      : Expression(NodeType::UNARY_EXPRESSION),
+        operator_(operator_),
+        right(right) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(other) == typeid(*this)) {
@@ -193,9 +249,9 @@ using UnaryExprPtr = std::shared_ptr<UnaryExpr>;
 struct Program : public Node {
   std::vector<StatementPtr> statements;
 
-  Program() : statements() {}
+  Program() : Node(NodeType::PROGRAM), statements() {}
   Program(const std::vector<StatementPtr>& statements)
-      : statements(statements) {}
+      : Node(NodeType::PROGRAM), statements(statements) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
@@ -226,9 +282,13 @@ struct VarDeclaration : public Statement {
   ExpressionPtr initializer;
 
   VarDeclaration(const Token& identifier)
-      : identifier(identifier), initializer(nullptr) {}
+      : Statement(NodeType::VAR_DECLARATION),
+        identifier(identifier),
+        initializer(nullptr) {}
   VarDeclaration(const Token& identifier, const ExpressionPtr& initializer)
-      : identifier(identifier), initializer(initializer) {}
+      : Statement(NodeType::VAR_DECLARATION),
+        identifier(identifier),
+        initializer(initializer) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
@@ -268,8 +328,9 @@ using VarDeclarationPtr = std::shared_ptr<VarDeclaration>;
 struct Block : public Statement {
   std::vector<StatementPtr> statements;
 
-  Block() : statements() {}
-  Block(const std::vector<StatementPtr>& statements) : statements(statements) {}
+  Block() : Statement(NodeType::BLOCK_STATEMENT), statements() {}
+  Block(const std::vector<StatementPtr>& statements)
+      : Statement(NodeType::BLOCK_STATEMENT), statements(statements) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
@@ -302,13 +363,15 @@ struct ForStatement : public Statement {
   StatementPtr body;
 
   ForStatement()
-      : initializer(nullptr),
+      : Statement(NodeType::FOR_STATEMENT),
+        initializer(nullptr),
         condition(nullptr),
         increment(nullptr),
         body(nullptr) {}
   ForStatement(const ExpressionPtr& initializer, const ExpressionPtr& condition,
                const ExpressionPtr& increment, const StatementPtr& body)
-      : initializer(initializer),
+      : Statement(NodeType::FOR_STATEMENT),
+        initializer(initializer),
         condition(condition),
         increment(increment),
         body(body) {}
@@ -379,9 +442,14 @@ struct WhileStatement : public Statement {
   ExpressionPtr condition;
   StatementPtr body;
 
-  WhileStatement() : condition(nullptr), body(nullptr) {}
+  WhileStatement()
+      : Statement(NodeType::WHILE_STATEMENT),
+        condition(nullptr),
+        body(nullptr) {}
   WhileStatement(const ExpressionPtr& condition, const StatementPtr& body)
-      : condition(condition), body(body) {}
+      : Statement(NodeType::WHILE_STATEMENT),
+        condition(condition),
+        body(body) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
@@ -421,8 +489,10 @@ using WhileStatementPtr = std::shared_ptr<WhileStatement>;
 struct PrintStatement : public Statement {
   ExpressionPtr expression;
 
-  PrintStatement() : expression(nullptr) {}
-  PrintStatement(const ExpressionPtr& expression) : expression(expression) {}
+  PrintStatement()
+      : Statement(NodeType::PRINT_STATEMENT), expression(nullptr) {}
+  PrintStatement(const ExpressionPtr& expression)
+      : Statement(NodeType::PRINT_STATEMENT), expression(expression) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
@@ -452,12 +522,21 @@ struct IfStatement : public Statement {
   StatementPtr elseBranch;
 
   IfStatement()
-      : condition(nullptr), thenBranch(nullptr), elseBranch(nullptr) {}
+      : Statement(NodeType::IF_STATEMENT),
+        condition(nullptr),
+        thenBranch(nullptr),
+        elseBranch(nullptr) {}
   IfStatement(const ExpressionPtr& condition, const StatementPtr& thenBranch)
-      : condition(condition), thenBranch(thenBranch), elseBranch(nullptr) {}
+      : Statement(NodeType::IF_STATEMENT),
+        condition(condition),
+        thenBranch(thenBranch),
+        elseBranch(nullptr) {}
   IfStatement(const ExpressionPtr& condition, const StatementPtr& thenBranch,
               const StatementPtr& elseBranch)
-      : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
+      : Statement(NodeType::IF_STATEMENT),
+        condition(condition),
+        thenBranch(thenBranch),
+        elseBranch(elseBranch) {}
 
   static std::shared_ptr<IfStatement> make(const ExpressionPtr& condition,
                                            const StatementPtr& thenBranch) {
@@ -501,8 +580,10 @@ using IfStatementPtr = std::shared_ptr<IfStatement>;
 struct ReturnStatement : public Statement {
   ExpressionPtr expression;
 
-  ReturnStatement() : expression(nullptr) {}
-  ReturnStatement(const ExpressionPtr& expression) : expression(expression) {}
+  ReturnStatement()
+      : Statement(NodeType::RETURN_STATEMENT), expression(nullptr) {}
+  ReturnStatement(const ExpressionPtr& expression)
+      : Statement(NodeType::RETURN_STATEMENT), expression(expression) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
@@ -537,9 +618,10 @@ using ReturnStatementPtr = std::shared_ptr<ReturnStatement>;
 struct ExpressionStatement : public Statement {
   ExpressionPtr expression;
 
-  ExpressionStatement() : expression(nullptr) {}
+  ExpressionStatement()
+      : Statement(NodeType::EXPRESSION_STATEMENT), expression(nullptr) {}
   ExpressionStatement(const ExpressionPtr& expression)
-      : expression(expression) {}
+      : Statement(NodeType::EXPRESSION_STATEMENT), expression(expression) {}
 
   bool isEqual(const Node& other) override {
     if (typeid(*this) == typeid(other)) {
