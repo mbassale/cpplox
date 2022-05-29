@@ -29,6 +29,7 @@ class Parser {
 
   ast::ProgramPtr parse();
 
+  inline bool hasErrors() const { return !errors.empty(); }
   inline const std::vector<ParserException>& getErrors() const {
     return errors;
   }

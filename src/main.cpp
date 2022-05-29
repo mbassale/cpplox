@@ -1,8 +1,10 @@
 #include "chunk.h"
 #include "common.h"
-#include "compiler.h"
+#include "compiler_v2.h"
 #include "ctime"
 #include "debug.h"
+#include "parser.h"
+#include "scanner.h"
 #include "vm.h"
 
 #define EXIT_CMDLINE_HELP 64
@@ -46,8 +48,17 @@ class Driver {
 
   InterpretResult interpret(const std::string &source) {
     try {
-      Compiler compiler;
-      auto script = compiler.compile("main", source);
+      Scanner scanner(source);
+      cpplox::Parser parser(scanner);
+      const auto program = parser.parse();
+      if (parser.hasErrors()) {
+        for (const cpplox::ParserException &error : parser.getErrors()) {
+          std::cerr << error.what() << std::endl;
+        }
+        return InterpretResult::INTERPRET_PARSING_ERROR;
+      }
+      cpplox::CompilerV2 compiler;
+      const auto script = compiler.compile("main", program);
       if (compiler.hasErrors()) {
         for (const std::string &error : compiler.getErrors()) {
           std::cerr << error << std::endl;
