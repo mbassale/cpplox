@@ -33,10 +33,15 @@ class CompilerV2 {
   inline const std::list<std::string> &getErrors() const { return errors; }
 
  protected:
-  void compileProgram(const ast::ProgramPtr &program);
+  void compileUnit(const ast::ProgramPtr &program);
   void statement(const ast::StatementPtr &stmt);
+  void expressionStatement(const ast::ExpressionStatementPtr &stmt);
   void printStatement(const ast::PrintStatementPtr &stmt);
+  void returnStatement(const ast::ReturnStatementPtr &stmt);
   void expression(const ast::ExpressionPtr &expr);
+  void binary(const ast::BinaryExprPtr &expr);
+  void unary(const ast::UnaryExprPtr &expr);
+  void literal(const ast::LiteralPtr &expr);
 
   inline Chunk &currentChunk() { return function->getChunk(); }
   void emitByte(uint8_t byte);
@@ -44,13 +49,11 @@ class CompilerV2 {
   size_t makeConstant(Value value);
   void emitEpilogue();
   void emitConstant(Value value);
-  void emitReturn();
   size_t emitJump(uint8_t instruction);
   void patchJump(size_t offset);
   void emitLoop(size_t loopStart);
 
   // Error routines
-  void synchronize();
   void error(const std::string &message);
   void errorAtCurrent(const std::string &message);
   void errorAt(const std::string &message);

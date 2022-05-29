@@ -29,38 +29,7 @@ TEST_F(CompilerV2Test, CompileAssertions) {
                                VMInstr(OP_CONSTANT), VMInstr(OP_DIVIDE),
                                VMInstr(OP_ADD), VMInstr(OP_PRINT),
                                VMInstr(OP_NIL), VMInstr(OP_RETURN)}),
-      CompilerV2TestData("VarStmt", "var test=1+2;",
-                         std::vector<VMInstr>{
-                             VMInstr::makeConstant(0), VMInstr::makeConstant(1),
-                             VMInstr(OP_ADD), VMInstr::makeDefineGlobal(0),
-                             VMInstr(OP_NIL), VMInstr(OP_RETURN)}),
-      CompilerV2TestData(
-          "IfStmt", "if(1<1+1){print true;}else{print false;}",
-          std::vector<VMInstr>{
-              VMInstr::makeConstant(0), VMInstr::makeConstant(1),
-              VMInstr::makeConstant(2), VMInstr(OP_ADD), VMInstr(OP_LESS),
-              VMInstr(OP_JUMP_IF_FALSE), VMInstr(OP_POP), VMInstr(OP_TRUE),
-              VMInstr(OP_PRINT), VMInstr(OP_JUMP), VMInstr(OP_POP),
-              VMInstr(OP_FALSE), VMInstr(OP_PRINT), VMInstr(OP_NIL),
-              VMInstr(OP_RETURN)}),
-      CompilerV2TestData(
-          "WhileStmt", "while(true){print true;}",
-          std::vector<VMInstr>{
-              VMInstr(OP_TRUE), VMInstr(OP_JUMP_IF_FALSE), VMInstr(OP_POP),
-              VMInstr(OP_TRUE), VMInstr(OP_PRINT), VMInstr(OP_LOOP),
-              VMInstr(OP_POP), VMInstr(OP_NIL), VMInstr(OP_RETURN)}),
-      CompilerV2TestData(
-          "ForStmt", "for(var i=0;i<10;i=i+1){print i;}",
-          std::vector<VMInstr>{VMInstr::makeConstant(0),  VMInstr(OP_GET_LOCAL),
-                               VMInstr::makeConstant(1),  VMInstr(OP_LESS),
-                               VMInstr(OP_JUMP_IF_FALSE), VMInstr(OP_POP),
-                               VMInstr(OP_JUMP),          VMInstr(OP_GET_LOCAL),
-                               VMInstr::makeConstant(2),  VMInstr(OP_ADD),
-                               VMInstr(OP_SET_LOCAL),     VMInstr(OP_POP),
-                               VMInstr(OP_LOOP),          VMInstr(OP_GET_LOCAL),
-                               VMInstr(OP_PRINT),         VMInstr(OP_LOOP),
-                               VMInstr(OP_POP),           VMInstr(OP_POP),
-                               VMInstr(OP_NIL),           VMInstr(OP_RETURN)})};
+  };
 
   for (const auto &testCase : testCases) {
     CompilerConfig config;

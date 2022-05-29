@@ -2,6 +2,7 @@
 #define __cpplox_common_h
 
 #include <array>
+#include <cassert>
 #include <cstdbool>
 #include <cstddef>
 #include <cstdint>

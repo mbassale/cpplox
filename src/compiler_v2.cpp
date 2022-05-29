@@ -13,31 +13,161 @@ CompilerV2::CompilerV2(const CompilerConfig& config) : config(config) {
 }
 
 FunctionPtr CompilerV2::compile(const std::string& name,
-                                const ast::ProgramPtr& program) {
+                                const ProgramPtr& program) {
   function = std::make_shared<Function>(FunctionType::TYPE_SCRIPT, name);
-  compileProgram(program);
+  compileUnit(program);
   emitEpilogue();
   return hadError ? nullptr : std::move(function);
 }
 
-void CompilerV2::compileProgram(const ast::ProgramPtr& program) {
+void CompilerV2::compileUnit(const ProgramPtr& program) {
   for (const auto& stmt : program->statements) {
     statement(stmt);
   }
 }
-void CompilerV2::statement(const ast::StatementPtr& stmt) {
-  if (typeid(*stmt) == typeid(ast::PrintStatement)) {
-    const auto printStmt = std::dynamic_pointer_cast<ast::PrintStatement>(stmt);
-    printStatement(printStmt);
+void CompilerV2::statement(const StatementPtr& stmt) {
+  switch (stmt->Type) {
+    case NodeType::EXPRESSION_STATEMENT: {
+      const auto expressionStmt =
+          std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+      expressionStatement(expressionStmt);
+      break;
+    }
+    case NodeType::PRINT_STATEMENT: {
+      const auto printStmt = std::dynamic_pointer_cast<PrintStatement>(stmt);
+      printStatement(printStmt);
+      break;
+    }
+    default: {
+      std::ostringstream ss;
+      ss << "Unknown Statement Type: " << (int)stmt->Type;
+      throw CompilerError(ss.str());
+    }
   }
 }
 
-void CompilerV2::printStatement(const ast::PrintStatementPtr& stmt) {
+void CompilerV2::expressionStatement(const ast::ExpressionStatementPtr& stmt) {
+  expression(stmt->expression);
+  emitByte(OP_POP);
+}
+
+void CompilerV2::printStatement(const PrintStatementPtr& stmt) {
   expression(stmt->expression);
   emitByte(OP_PRINT);
 }
 
-void CompilerV2::expression(const ast::ExpressionPtr& expr) {}
+void CompilerV2::returnStatement(const ast::ReturnStatementPtr& stmt) {
+  if (stmt->expression) {
+    expression(stmt->expression);
+    emitByte(OP_RETURN);
+  } else {
+    emitByte(OP_NIL);
+    emitByte(OP_RETURN);
+  }
+}
+
+void CompilerV2::expression(const ExpressionPtr& expr) {
+  switch (expr->Type) {
+    case NodeType::BINARY_EXPRESSION: {
+      const auto binaryExpr = std::dynamic_pointer_cast<BinaryExpr>(expr);
+      binary(binaryExpr);
+      break;
+    }
+    case NodeType::UNARY_EXPRESSION: {
+      const auto unaryExpr = std::dynamic_pointer_cast<UnaryExpr>(expr);
+      unary(unaryExpr);
+      break;
+    }
+    case NodeType::LITERAL_EXPRESSION: {
+      const auto literalExpr = std::dynamic_pointer_cast<Literal>(expr);
+      literal(literalExpr);
+      break;
+    }
+    default: {
+      std::ostringstream ss;
+      ss << "Unknown Expression Type: " << (int)expr->Type;
+      throw CompilerError(ss.str());
+    }
+  }
+}
+
+void CompilerV2::binary(const ast::BinaryExprPtr& expr) {
+  expression(expr->left);
+  expression(expr->right);
+  const auto operatorType = expr->operator_.type;
+  switch (operatorType) {
+    case TokenType::TOKEN_BANG_EQUAL:
+      emitBytes(OP_EQUAL, OP_NOT);
+      break;
+    case TokenType::TOKEN_EQUAL_EQUAL:
+      emitByte(OP_EQUAL);
+      break;
+    case TokenType::TOKEN_GREATER:
+      emitByte(OP_GREATER);
+      break;
+    case TokenType::TOKEN_GREATER_EQUAL:
+      emitBytes(OP_LESS, OP_NOT);
+      break;
+    case TokenType::TOKEN_LESS:
+      emitByte(OP_LESS);
+      break;
+    case TokenType::TOKEN_LESS_EQUAL:
+      emitBytes(OP_GREATER, OP_NOT);
+      break;
+    case TokenType::TOKEN_PLUS:
+      emitByte(OP_ADD);
+      break;
+    case TokenType::TOKEN_MINUS:
+      emitByte(OP_SUBTRACT);
+      break;
+    case TokenType::TOKEN_STAR:
+      emitByte(OP_MULTIPLY);
+      break;
+    case TokenType::TOKEN_SLASH:
+      emitByte(OP_DIVIDE);
+      break;
+    default:
+      assert(false);  // unreachable
+      break;
+  }
+}
+
+void CompilerV2::unary(const ast::UnaryExprPtr& expr) {
+  expression(expr->right);
+  const auto operatorType = expr->operator_.type;
+  switch (operatorType) {
+    case TokenType::TOKEN_BANG:
+      emitByte(OP_NOT);
+      break;
+    case TokenType::TOKEN_MINUS:
+      emitByte(OP_NEGATE);
+      break;
+    default:
+      assert(false);  // unreachable
+      break;
+  }
+}
+
+void CompilerV2::literal(const ast::LiteralPtr& expr) {
+  switch (expr->TokenType_) {
+    case TokenType::TOKEN_NUMBER:
+    case TokenType::TOKEN_STRING:
+      emitConstant(expr->Value_);
+      break;
+    case TokenType::TOKEN_NIL:
+      emitByte(OP_NIL);
+      break;
+    case TokenType::TOKEN_TRUE:
+      emitByte(OP_TRUE);
+      break;
+    case TokenType::TOKEN_FALSE:
+      emitByte(OP_FALSE);
+      break;
+    default:
+      assert(false);  // unreachable
+      break;
+  }
+}
 
 void CompilerV2::emitByte(uint8_t byte) { currentChunk().write(byte); }
 
@@ -56,15 +186,13 @@ size_t CompilerV2::makeConstant(Value value) {
   return constantOffset;
 }
 
-void CompilerV2::emitEpilogue() { emitReturn(); }
+void CompilerV2::emitEpilogue() {
+  emitByte(OP_NIL);
+  emitByte(OP_RETURN);
+}
 
 void CompilerV2::emitConstant(Value value) {
   emitBytes(OP_CONSTANT, makeConstant(value));
-}
-
-void CompilerV2::emitReturn() {
-  emitByte(OP_NIL);
-  emitByte(OP_RETURN);
 }
 
 size_t CompilerV2::emitJump(uint8_t instruction) {
@@ -73,8 +201,6 @@ size_t CompilerV2::emitJump(uint8_t instruction) {
   emitByte(0xff);
   return currentChunk().size() - 2;
 }
-
-void CompilerV2::synchronize() { panicMode = false; }
 
 void CompilerV2::error(const std::string& message) { errorAt(message); }
 
