@@ -22,12 +22,22 @@ FunctionPtr CompilerV2::compile(const std::string& name,
 
 void CompilerV2::compileProgram(const ast::ProgramPtr& program) {
   for (const auto& stmt : program->statements) {
-    compileStatement(stmt);
+    statement(stmt);
   }
 }
-void CompilerV2::compileStatement(const ast::StatementPtr& stmt) {}
+void CompilerV2::statement(const ast::StatementPtr& stmt) {
+  if (typeid(*stmt) == typeid(ast::PrintStatement)) {
+    const auto printStmt = std::dynamic_pointer_cast<ast::PrintStatement>(stmt);
+    printStatement(printStmt);
+  }
+}
 
-void CompilerV2::compilePrintStatement(const ast::PrintStatementPtr& stmt) {}
+void CompilerV2::printStatement(const ast::PrintStatementPtr& stmt) {
+  expression(stmt->expression);
+  emitByte(OP_PRINT);
+}
+
+void CompilerV2::expression(const ast::ExpressionPtr& expr) {}
 
 void CompilerV2::emitByte(uint8_t byte) { currentChunk().write(byte); }
 

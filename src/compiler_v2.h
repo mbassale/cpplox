@@ -34,8 +34,9 @@ class CompilerV2 {
 
  protected:
   void compileProgram(const ast::ProgramPtr &program);
-  void compileStatement(const ast::StatementPtr &stmt);
-  void compilePrintStatement(const ast::PrintStatementPtr &stmt);
+  void statement(const ast::StatementPtr &stmt);
+  void printStatement(const ast::PrintStatementPtr &stmt);
+  void expression(const ast::ExpressionPtr &expr);
 
   inline Chunk &currentChunk() { return function->getChunk(); }
   void emitByte(uint8_t byte);
