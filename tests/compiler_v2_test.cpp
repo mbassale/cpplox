@@ -29,6 +29,11 @@ TEST_F(CompilerV2Test, CompileAssertions) {
                                VMInstr(OP_CONSTANT), VMInstr(OP_DIVIDE),
                                VMInstr(OP_ADD), VMInstr(OP_PRINT),
                                VMInstr(OP_NIL), VMInstr(OP_RETURN)}),
+      CompilerV2TestData("VarStmt", "var test=1+2;",
+                         std::vector<VMInstr>{
+                             VMInstr::makeConstant(0), VMInstr::makeConstant(1),
+                             VMInstr(OP_ADD), VMInstr::makeDefineGlobal(0),
+                             VMInstr(OP_NIL), VMInstr(OP_RETURN)}),
       CompilerV2TestData(
           "IfStmt", "if(1<1+1){print true;}else{print false;}",
           std::vector<VMInstr>{

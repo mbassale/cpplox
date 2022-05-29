@@ -22,9 +22,34 @@ FunctionPtr CompilerV2::compile(const std::string& name,
 
 void CompilerV2::compileUnit(const ProgramPtr& program) {
   for (const auto& stmt : program->statements) {
-    statement(stmt);
+    declaration(stmt);
   }
 }
+
+void CompilerV2::declaration(const StatementPtr& stmt) {
+  switch (stmt->Type) {
+    case NodeType::VAR_DECLARATION: {
+      const auto varDeclarationStmt =
+          std::dynamic_pointer_cast<VarDeclaration>(stmt);
+      varDeclaration(varDeclarationStmt);
+      break;
+    }
+    default:
+      statement(stmt);
+  }
+}
+
+void CompilerV2::varDeclaration(const VarDeclarationPtr& stmt) {
+  const auto name = stmt->identifier.lexeme();
+  uint8_t global = declareVariable(name);
+  if (stmt->initializer) {
+    expression(stmt->initializer);
+  } else {
+    emitByte(OP_NIL);
+  }
+  defineVariable(global);
+}
+
 void CompilerV2::statement(const StatementPtr& stmt) {
   switch (stmt->Type) {
     case NodeType::EXPRESSION_STATEMENT: {
@@ -264,6 +289,52 @@ void CompilerV2::emitLoop(size_t loopStart) {
   if (offset > UINT16_MAX) error("Loop body too large.");
   emitByte((offset >> 8) & 0xff);
   emitByte(offset & 0xff);
+}
+
+int CompilerV2::declareVariable(const std::string& name) {
+  declareLocal(name);
+  if (scopeDepth > 0) return 0;
+
+  return makeConstant(Value(name));
+}
+
+void CompilerV2::declareLocal(const std::string& name) {
+  if (scopeDepth == 0) return;
+
+  auto it = locals.rbegin();
+  while (it != locals.rend()) {
+    if (it->depth != -1 && it->depth < scopeDepth) break;
+
+    if (name == it->name) {
+      std::ostringstream ss;
+      ss << "Already a variable named '" << name << "' in this scope.";
+      error(ss.str());
+    }
+
+    it++;
+  }
+
+  addLocal(name);
+}
+
+void CompilerV2::addLocal(const std::string& name) {
+  Local local;
+  local.name = name;
+  local.depth = -1;
+  locals.push_back(local);
+}
+
+void CompilerV2::defineVariable(size_t global) {
+  if (scopeDepth > 0) {
+    markInitialized();
+    return;
+  }
+  emitBytes(OP_DEFINE_GLOBAL, global);
+}
+
+void CompilerV2::markInitialized() {
+  if (scopeDepth == 0) return;
+  locals[locals.size() - 1].depth = scopeDepth;
 }
 
 void CompilerV2::error(const std::string& message) { errorAt(message); }

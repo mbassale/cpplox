@@ -4,11 +4,25 @@
 #include "ast.h"
 #include "chunk.h"
 #include "common.h"
-#include "compiler.h"
 #include "function.h"
 #include "scanner.h"
 
 namespace cpplox {
+
+class CompilerError : public std::runtime_error {
+ public:
+  CompilerError(const std::string &message) : std::runtime_error(message) {}
+};
+
+struct CompilerConfig {
+  bool dumpTokens;
+  bool disassembleInstructions;
+};
+
+struct Local {
+  std::string name;
+  int depth;
+};
 
 class CompilerV2 {
  private:
@@ -21,7 +35,6 @@ class CompilerV2 {
   bool panicMode{false};
   std::list<std::string> errors{};
   std::vector<Local> locals{};
-  std::vector<UpvalueItem> upvalues{};
   int scopeDepth{0};
 
  public:
@@ -34,6 +47,8 @@ class CompilerV2 {
 
  protected:
   void compileUnit(const ast::ProgramPtr &program);
+  void declaration(const ast::StatementPtr &stmt);
+  void varDeclaration(const ast::VarDeclarationPtr &stmt);
   void statement(const ast::StatementPtr &stmt);
   void expressionStatement(const ast::ExpressionStatementPtr &stmt);
   void blockStatement(const ast::BlockPtr &stmt);
@@ -55,6 +70,13 @@ class CompilerV2 {
   size_t emitJump(uint8_t instruction);
   void patchJump(size_t offset);
   void emitLoop(size_t loopStart);
+
+  // Locals routines
+  int declareVariable(const std::string &name);
+  void declareLocal(const std::string &name);
+  void addLocal(const std::string &name);
+  void defineVariable(size_t global);
+  void markInitialized();
 
   // Error routines
   void error(const std::string &message);

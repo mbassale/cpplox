@@ -75,7 +75,7 @@ class Driver {
     } catch (VMRuntimeError &err) {
       std::cerr << "RuntimeError: " << err.what() << std::endl;
       return InterpretResult::INTERPRET_RUNTIME_ERROR;
-    } catch (CompilerError &err) {
+    } catch (cpplox::CompilerError &err) {
       std::cerr << "CompilerError: " << err.what() << std::endl;
       return InterpretResult::INTERPRET_COMPILE_ERROR;
     }
