@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "scanner.h"
+#include "value.h"
 
 namespace cpplox::ast {
 
@@ -67,12 +68,17 @@ struct Expression : public Node {
 using ExpressionPtr = std::shared_ptr<Expression>;
 
 struct Literal : public Expression {
-  Token literal;
+  const TokenType TokenType_;
+  const Value Value_;
 
-  Literal(const Token& literal)
-      : Expression(NodeType::LITERAL_EXPRESSION), literal(literal) {}
-  Literal(Token&& literal)
-      : Expression(NodeType::LITERAL_EXPRESSION), literal(literal) {}
+  Literal(const TokenType tokenType, const Value& value)
+      : Expression(NodeType::LITERAL_EXPRESSION),
+        TokenType_(tokenType),
+        Value_(value) {}
+  Literal(const TokenType tokenType, Value&& value)
+      : Expression(NodeType::LITERAL_EXPRESSION),
+        TokenType_(tokenType),
+        Value_(value) {}
 
   bool isEqual(const Node& other) override {
     if (Type == other.Type) {
@@ -82,22 +88,24 @@ struct Literal : public Expression {
     return false;
   }
 
-  bool isEqual(const Literal& other) { return this->literal == other.literal; }
-
-  static std::shared_ptr<Literal> make(const Token& literal) {
-    return std::make_shared<Literal>(literal);
+  bool isEqual(const Literal& other) {
+    return TokenType_ == other.TokenType_ && Value_ == other.Value_;
   }
-  static std::shared_ptr<Literal> makeNumber(const std::string& value) {
-    return std::make_shared<Literal>(Token(TokenType::TOKEN_NUMBER, value));
+
+  static std::shared_ptr<Literal> makeNumber(const double value) {
+    return std::make_shared<Literal>(TokenType::TOKEN_NUMBER, Value(value));
   }
   static std::shared_ptr<Literal> makeString(const std::string& value) {
-    return std::make_shared<Literal>(Token(TokenType::TOKEN_STRING, value));
+    return std::make_shared<Literal>(TokenType::TOKEN_STRING, Value(value));
   }
   static std::shared_ptr<Literal> makeTrue() {
-    return std::make_shared<Literal>(Token(TokenType::TOKEN_TRUE, "true"));
+    return std::make_shared<Literal>(TokenType::TOKEN_TRUE, Value(true));
   }
   static std::shared_ptr<Literal> makeFalse() {
-    return std::make_shared<Literal>(Token(TokenType::TOKEN_FALSE, "false"));
+    return std::make_shared<Literal>(TokenType::TOKEN_FALSE, Value(false));
+  }
+  static std::shared_ptr<Literal> makeNil() {
+    return std::make_shared<Literal>(TokenType::TOKEN_NIL, Value(nullptr));
   }
 };
 using LiteralPtr = std::shared_ptr<Literal>;

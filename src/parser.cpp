@@ -296,12 +296,20 @@ ast::ExpressionPtr Parser::unary() {
 ast::ExpressionPtr Parser::primary() {
   switch (current.type) {
     case TokenType::TOKEN_TRUE:
+      advance();
+      return ast::Literal::makeTrue();
     case TokenType::TOKEN_FALSE:
+      advance();
+      return ast::Literal::makeFalse();
     case TokenType::TOKEN_NIL:
+      advance();
+      return ast::Literal::makeNil();
     case TokenType::TOKEN_NUMBER:
+      advance();
+      return ast::Literal::makeNumber(std::stod(previous.lexeme()));
     case TokenType::TOKEN_STRING:
       advance();
-      return ast::Literal::make(previous);
+      return ast::Literal::makeString(previous.lexeme());
     case TokenType::TOKEN_IDENTIFIER:
       advance();
       return ast::VariableExpr::make(previous);

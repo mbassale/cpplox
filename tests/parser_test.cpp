@@ -108,7 +108,7 @@ TEST_F(ParserTest, UnaryExprAssertions) {
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::UnaryExpr::make(
                              Token(TokenType::TOKEN_MINUS, "-"),
-                             ast::Literal::makeNumber("1")))})),
+                             ast::Literal::makeNumber(1)))})),
   };
 
   for (const auto &testCase : testCases) {
@@ -178,27 +178,27 @@ TEST_F(ParserTest, BinaryExprAssertions) {
       ParserTestData("Plus", "1+2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
-                             ast::Literal::makeNumber("1"),
+                             ast::Literal::makeNumber(1),
                              Token(TokenType::TOKEN_PLUS, "+"),
-                             ast::Literal::makeNumber("2")))})),
+                             ast::Literal::makeNumber(2)))})),
       ParserTestData("Minus", "1-2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
-                             ast::Literal::makeNumber("1"),
+                             ast::Literal::makeNumber(1),
                              Token(TokenType::TOKEN_MINUS, "-"),
-                             ast::Literal::makeNumber("2")))})),
+                             ast::Literal::makeNumber(2)))})),
       ParserTestData("Multiply", "1*2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
-                             ast::Literal::makeNumber("1"),
+                             ast::Literal::makeNumber(1),
                              Token(TokenType::TOKEN_STAR, "*"),
-                             ast::Literal::makeNumber("2")))})),
+                             ast::Literal::makeNumber(2)))})),
       ParserTestData("Division", "1/2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
-                             ast::Literal::makeNumber("1"),
+                             ast::Literal::makeNumber(1),
                              Token(TokenType::TOKEN_SLASH, "/"),
-                             ast::Literal::makeNumber("2")))})),
+                             ast::Literal::makeNumber(2)))})),
   };
 
   for (const auto &testCase : testCases) {
