@@ -43,6 +43,11 @@ void CompilerV2::statement(const StatementPtr& stmt) {
       ifStatement(ifStmt);
       break;
     }
+    case NodeType::WHILE_STATEMENT: {
+      const auto whileStmt = std::dynamic_pointer_cast<WhileStatement>(stmt);
+      whileStatement(whileStmt);
+      break;
+    }
     case NodeType::PRINT_STATEMENT: {
       const auto printStmt = std::dynamic_pointer_cast<PrintStatement>(stmt);
       printStatement(printStmt);
@@ -79,6 +84,17 @@ void CompilerV2::ifStatement(const ast::IfStatementPtr& stmt) {
     statement(stmt->elseBranch);
   }
   patchJump(elseJump);
+}
+
+void CompilerV2::whileStatement(const ast::WhileStatementPtr& stmt) {
+  const auto loopStart = currentChunk().size();
+  expression(stmt->condition);
+  const auto exitJump = emitJump(OP_JUMP_IF_FALSE);
+  emitByte(OP_POP);
+  statement(stmt->body);
+  emitLoop(loopStart);
+  patchJump(exitJump);
+  emitByte(OP_POP);
 }
 
 void CompilerV2::printStatement(const PrintStatementPtr& stmt) {
@@ -240,6 +256,14 @@ void CompilerV2::patchJump(size_t offset) {
   uint8_t* code = currentChunk().data();
   code[offset] = (jump >> 8) & 0xFF;
   code[offset + 1] = jump & 0xFF;
+}
+
+void CompilerV2::emitLoop(size_t loopStart) {
+  emitByte(OP_LOOP);
+  const auto offset = currentChunk().size() - loopStart + 2;
+  if (offset > UINT16_MAX) error("Loop body too large.");
+  emitByte((offset >> 8) & 0xff);
+  emitByte(offset & 0xff);
 }
 
 void CompilerV2::error(const std::string& message) { errorAt(message); }

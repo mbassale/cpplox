@@ -38,6 +38,12 @@ TEST_F(CompilerV2Test, CompileAssertions) {
               VMInstr(OP_PRINT), VMInstr(OP_JUMP), VMInstr(OP_POP),
               VMInstr(OP_FALSE), VMInstr(OP_PRINT), VMInstr(OP_NIL),
               VMInstr(OP_RETURN)}),
+      CompilerV2TestData(
+          "WhileStmt", "while(true){print true;}",
+          std::vector<VMInstr>{
+              VMInstr(OP_TRUE), VMInstr(OP_JUMP_IF_FALSE), VMInstr(OP_POP),
+              VMInstr(OP_TRUE), VMInstr(OP_PRINT), VMInstr(OP_LOOP),
+              VMInstr(OP_POP), VMInstr(OP_NIL), VMInstr(OP_RETURN)}),
   };
 
   for (const auto &testCase : testCases) {

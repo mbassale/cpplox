@@ -38,6 +38,7 @@ class CompilerV2 {
   void expressionStatement(const ast::ExpressionStatementPtr &stmt);
   void blockStatement(const ast::BlockPtr &stmt);
   void ifStatement(const ast::IfStatementPtr &stmt);
+  void whileStatement(const ast::WhileStatementPtr &stmt);
   void printStatement(const ast::PrintStatementPtr &stmt);
   void returnStatement(const ast::ReturnStatementPtr &stmt);
   void expression(const ast::ExpressionPtr &expr);
