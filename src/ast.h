@@ -43,16 +43,16 @@ struct Literal : public Expression {
     return std::make_shared<Literal>(literal);
   }
   static std::shared_ptr<Literal> makeNumber(const std::string& value) {
-    return std::make_shared<Literal>(Token(TOKEN_NUMBER, value));
+    return std::make_shared<Literal>(Token(TokenType::TOKEN_NUMBER, value));
   }
   static std::shared_ptr<Literal> makeString(const std::string& value) {
-    return std::make_shared<Literal>(Token(TOKEN_STRING, value));
+    return std::make_shared<Literal>(Token(TokenType::TOKEN_STRING, value));
   }
   static std::shared_ptr<Literal> makeTrue() {
-    return std::make_shared<Literal>(Token(TOKEN_TRUE, "true"));
+    return std::make_shared<Literal>(Token(TokenType::TOKEN_TRUE, "true"));
   }
   static std::shared_ptr<Literal> makeFalse() {
-    return std::make_shared<Literal>(Token(TOKEN_FALSE, "false"));
+    return std::make_shared<Literal>(Token(TokenType::TOKEN_FALSE, "false"));
   }
 };
 using LiteralPtr = std::shared_ptr<Literal>;
@@ -79,7 +79,7 @@ struct VariableExpr : public Expression {
   }
   static std::shared_ptr<VariableExpr> make(const std::string& variableName) {
     return std::make_shared<VariableExpr>(
-        Token(TOKEN_IDENTIFIER, variableName));
+        Token(TokenType::TOKEN_IDENTIFIER, variableName));
   }
 };
 using VariableExprPtr = std::shared_ptr<VariableExpr>;

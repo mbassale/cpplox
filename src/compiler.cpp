@@ -25,7 +25,7 @@ FunctionPtr Compiler::compile(const std::string &name,
                               const std::string &source) {
   function = std::make_shared<Function>(FunctionType::TYPE_SCRIPT, name);
   Local local;
-  Token token(TOKEN_IDENTIFIER);
+  Token token(TokenType::TOKEN_IDENTIFIER);
   token.start = name.begin();
   token.length = name.length();
   local.name = token;
@@ -36,7 +36,7 @@ FunctionPtr Compiler::compile(const std::string &name,
 
   ParseFnArgs args;
   args.canAssign = true;
-  while (!match(TOKEN_EOF)) {
+  while (!match(TokenType::TOKEN_EOF)) {
     declaration(args);
   }
 
@@ -50,8 +50,8 @@ FunctionPtr Compiler::compileFunction(Compiler &compiler,
   function = std::make_shared<Function>(functionType, name);
   scanner = compiler.scanner;
   beginScope();
-  consume(TOKEN_LEFT_PAREN, "Expect '(' after function name.");
-  if (!check(TOKEN_RIGHT_PAREN)) {
+  consume(TokenType::TOKEN_LEFT_PAREN, "Expect '(' after function name.");
+  if (!check(TokenType::TOKEN_RIGHT_PAREN)) {
     do {
       auto arity = function->incrArity();
       if (arity > 255) {
@@ -59,10 +59,10 @@ FunctionPtr Compiler::compileFunction(Compiler &compiler,
       }
       uint8_t param = parseVariable("Expect parameter name.");
       defineVariable(param);
-    } while (match(TOKEN_COMMA));
+    } while (match(TokenType::TOKEN_COMMA));
   }
-  consume(TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
-  consume(TOKEN_LEFT_BRACE, "Expect '{' before function body.");
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
+  consume(TokenType::TOKEN_LEFT_BRACE, "Expect '{' before function body.");
   block();
   emitReturn();
   return function;
@@ -75,7 +75,7 @@ void Compiler::advance() {
     if (config.dumpTokens) {
       std::cout << current.str() << std::endl;
     }
-    if (current.type != TOKEN_ERROR) break;
+    if (current.type != TokenType::TOKEN_ERROR) break;
     errorAtCurrent(current.lexeme());
   }
 }
@@ -88,9 +88,9 @@ bool Compiler::match(TokenType type) {
 bool Compiler::check(TokenType type) { return current.type == type; }
 
 void Compiler::declaration(const ParseFnArgs &args) {
-  if (match(TOKEN_FUN)) {
+  if (match(TokenType::TOKEN_FUN)) {
     funDeclaration(args);
-  } else if (match(TOKEN_VAR)) {
+  } else if (match(TokenType::TOKEN_VAR)) {
     varDeclarationStatement(args);
   } else {
     statement(args);
@@ -115,28 +115,28 @@ void Compiler::funDeclaration(const ParseFnArgs &args) {
 void Compiler::varDeclarationStatement(const ParseFnArgs &args) {
   uint8_t global = parseVariable("Expect variable name.");
 
-  if (match(TOKEN_EQUAL)) {
+  if (match(TokenType::TOKEN_EQUAL)) {
     expression(args);
   } else {
     emitByte(OP_NIL);
   }
-  consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+  consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
 
   defineVariable(global);
 }
 
 void Compiler::statement(const ParseFnArgs &args) {
-  if (match(TOKEN_PRINT)) {
+  if (match(TokenType::TOKEN_PRINT)) {
     printStatement(args);
-  } else if (match(TOKEN_FOR)) {
+  } else if (match(TokenType::TOKEN_FOR)) {
     forStatement(args);
-  } else if (match(TOKEN_IF)) {
+  } else if (match(TokenType::TOKEN_IF)) {
     ifStatement(args);
-  } else if (match(TOKEN_RETURN)) {
+  } else if (match(TokenType::TOKEN_RETURN)) {
     returnStatement(args);
-  } else if (match(TOKEN_WHILE)) {
+  } else if (match(TokenType::TOKEN_WHILE)) {
     whileStatement(args);
-  } else if (match(TOKEN_LEFT_BRACE)) {
+  } else if (match(TokenType::TOKEN_LEFT_BRACE)) {
     beginScope();
     block();
     endScope();
@@ -147,7 +147,7 @@ void Compiler::statement(const ParseFnArgs &args) {
 
 void Compiler::printStatement(const ParseFnArgs &args) {
   expression(args);
-  consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+  consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after value.");
   emitByte(OP_PRINT);
 }
 
@@ -155,21 +155,21 @@ void Compiler::returnStatement(const ParseFnArgs &args) {
   if (function->getType() == FunctionType::TYPE_SCRIPT) {
     error("Can't return from top-level code.");
   }
-  if (match(TOKEN_SEMICOLON)) {
+  if (match(TokenType::TOKEN_SEMICOLON)) {
     emitReturn();
   } else {
     expression(args);
-    consume(TOKEN_SEMICOLON, "Expect ';' after return value.");
+    consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after return value.");
     emitByte(OP_RETURN);
   }
 }
 
 void Compiler::forStatement(const ParseFnArgs &args) {
   beginScope();
-  consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for.");
-  if (match(TOKEN_SEMICOLON)) {
+  consume(TokenType::TOKEN_LEFT_PAREN, "Expect '(' after 'for.");
+  if (match(TokenType::TOKEN_SEMICOLON)) {
     // no initializer.
-  } else if (match(TOKEN_VAR)) {
+  } else if (match(TokenType::TOKEN_VAR)) {
     varDeclarationStatement(args);
   } else {
     expressionStatement(args);
@@ -177,20 +177,20 @@ void Compiler::forStatement(const ParseFnArgs &args) {
 
   int loopStart = currentChunk().size();
   int exitJump = -1;
-  if (!match(TOKEN_SEMICOLON)) {
+  if (!match(TokenType::TOKEN_SEMICOLON)) {
     expression(args);
-    consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.");
+    consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after loop condition.");
 
     exitJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);  // condition
   }
 
-  if (!match(TOKEN_RIGHT_PAREN)) {
+  if (!match(TokenType::TOKEN_RIGHT_PAREN)) {
     int bodyJump = emitJump(OP_JUMP);
     int incrementStart = currentChunk().size();
     expression(args);
     emitByte(OP_POP);
-    consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
+    consume(TokenType::TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.");
 
     emitLoop(loopStart);
     loopStart = incrementStart;
@@ -209,9 +209,9 @@ void Compiler::forStatement(const ParseFnArgs &args) {
 }
 
 void Compiler::ifStatement(const ParseFnArgs &args) {
-  consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+  consume(TokenType::TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
   expression(args);
-  consume(TOKEN_RIGHT_PAREN, "Exprect ')' after condition.");
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Exprect ')' after condition.");
 
   size_t thenJump = emitJump(OP_JUMP_IF_FALSE);
   emitByte(OP_POP);
@@ -219,15 +219,15 @@ void Compiler::ifStatement(const ParseFnArgs &args) {
   size_t elseJump = emitJump(OP_JUMP);
   patchJump(thenJump);
   emitByte(OP_POP);
-  if (match(TOKEN_ELSE)) statement(args);
+  if (match(TokenType::TOKEN_ELSE)) statement(args);
   patchJump(elseJump);
 }
 
 void Compiler::whileStatement(const ParseFnArgs &args) {
   const auto loopStart = currentChunk().size();
-  consume(TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
+  consume(TokenType::TOKEN_LEFT_PAREN, "Expect '(' after 'while'.");
   expression(args);
-  consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
 
   const auto exitJump = emitJump(OP_JUMP_IF_FALSE);
   emitByte(OP_POP);
@@ -240,7 +240,7 @@ void Compiler::whileStatement(const ParseFnArgs &args) {
 
 void Compiler::expressionStatement(const ParseFnArgs &args) {
   expression(args);
-  consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+  consume(TokenType::TOKEN_SEMICOLON, "Expect ';' after expression.");
   emitByte(OP_POP);
 }
 
@@ -255,7 +255,7 @@ void Compiler::number(const ParseFnArgs &args) {
 
 void Compiler::grouping(const ParseFnArgs &args) {
   expression(args);
-  consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
 void Compiler::unary(const ParseFnArgs &args) {
@@ -266,10 +266,10 @@ void Compiler::unary(const ParseFnArgs &args) {
 
   // Emit the operator instruction.
   switch (operatorType) {
-    case TOKEN_BANG:
+    case TokenType::TOKEN_BANG:
       emitByte(OP_NOT);
       break;
-    case TOKEN_MINUS:
+    case TokenType::TOKEN_MINUS:
       emitByte(OP_NEGATE);
       break;
 
@@ -284,34 +284,34 @@ void Compiler::binary(const ParseFnArgs &args) {
   parsePrecedence((Precedence)(rule.precedence + 1));
 
   switch (operatorType) {
-    case TOKEN_BANG_EQUAL:
+    case TokenType::TOKEN_BANG_EQUAL:
       emitBytes(OP_EQUAL, OP_NOT);
       break;
-    case TOKEN_EQUAL_EQUAL:
+    case TokenType::TOKEN_EQUAL_EQUAL:
       emitByte(OP_EQUAL);
       break;
-    case TOKEN_GREATER:
+    case TokenType::TOKEN_GREATER:
       emitByte(OP_GREATER);
       break;
-    case TOKEN_GREATER_EQUAL:
+    case TokenType::TOKEN_GREATER_EQUAL:
       emitBytes(OP_LESS, OP_NOT);
       break;
-    case TOKEN_LESS:
+    case TokenType::TOKEN_LESS:
       emitByte(OP_LESS);
       break;
-    case TOKEN_LESS_EQUAL:
+    case TokenType::TOKEN_LESS_EQUAL:
       emitBytes(OP_GREATER, OP_NOT);
       break;
-    case TOKEN_PLUS:
+    case TokenType::TOKEN_PLUS:
       emitByte(OP_ADD);
       break;
-    case TOKEN_MINUS:
+    case TokenType::TOKEN_MINUS:
       emitByte(OP_SUBTRACT);
       break;
-    case TOKEN_STAR:
+    case TokenType::TOKEN_STAR:
       emitByte(OP_MULTIPLY);
       break;
-    case TOKEN_SLASH:
+    case TokenType::TOKEN_SLASH:
       emitByte(OP_DIVIDE);
       break;
     default:  // Unreachable.
@@ -326,13 +326,13 @@ void Compiler::call(const ParseFnArgs &args) {
 
 void Compiler::literal(const ParseFnArgs &args) {
   switch (previous.type) {
-    case TOKEN_FALSE:
+    case TokenType::TOKEN_FALSE:
       emitByte(OP_FALSE);
       break;
-    case TOKEN_NIL:
+    case TokenType::TOKEN_NIL:
       emitByte(OP_NIL);
       break;
-    case TOKEN_TRUE:
+    case TokenType::TOKEN_TRUE:
       emitByte(OP_TRUE);
       break;
     default:  // Unreachable.
@@ -383,13 +383,13 @@ void Compiler::parsePrecedence(Precedence precedence) {
     std::invoke(infixRule, *this, args);
   }
 
-  if (args.canAssign && match(TOKEN_EQUAL)) {
+  if (args.canAssign && match(TokenType::TOKEN_EQUAL)) {
     error("Invalid assignment target.");
   }
 }
 
 int Compiler::parseVariable(const std::string &errorMessage) {
-  consume(TOKEN_IDENTIFIER, errorMessage);
+  consume(TokenType::TOKEN_IDENTIFIER, errorMessage);
 
   declareVariable();
   if (scopeDepth > 0) return 0;
@@ -416,7 +416,7 @@ void Compiler::namedVariable(const Token &name, bool canAssign) {
     setOp = OP_SET_GLOBAL;
   }
 
-  if (canAssign && match(TOKEN_EQUAL)) {
+  if (canAssign && match(TokenType::TOKEN_EQUAL)) {
     ParseFnArgs args;
     args.canAssign = true;
     expression(args);
@@ -427,7 +427,7 @@ void Compiler::namedVariable(const Token &name, bool canAssign) {
 }
 
 ParseRule &Compiler::getRule(TokenType tokenType) {
-  return PARSE_RULES[tokenType];
+  return PARSE_RULES[(int)tokenType];
 }
 
 void Compiler::defineVariable(size_t global) {
@@ -440,16 +440,16 @@ void Compiler::defineVariable(size_t global) {
 
 uint8_t Compiler::argumentList(const ParseFnArgs &args) {
   uint8_t argCount = 0;
-  if (!check(TOKEN_RIGHT_PAREN)) {
+  if (!check(TokenType::TOKEN_RIGHT_PAREN)) {
     do {
       expression(args);
       if (argCount == 255) {
         error("Can't have more than 255 arguments.");
       }
       argCount++;
-    } while (match(TOKEN_COMMA));
+    } while (match(TokenType::TOKEN_COMMA));
   }
-  consume(TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
   return argCount;
 }
 
@@ -540,12 +540,12 @@ int Compiler::addUpvalue(uint8_t index, bool isLocal) {
 void Compiler::beginScope() { scopeDepth++; }
 
 void Compiler::block() {
-  while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+  while (!check(TokenType::TOKEN_RIGHT_BRACE) && !check(TokenType::TOKEN_EOF)) {
     ParseFnArgs args{true};
     declaration(args);
   }
 
-  consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+  consume(TokenType::TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
 void Compiler::compileDefinition(FunctionType type, const std::string &name) {
@@ -636,17 +636,17 @@ void Compiler::consume(TokenType tokenType, const std::string &errorMessage) {
 void Compiler::synchronize() {
   panicMode = false;
 
-  while (current.type != TOKEN_EOF) {
-    if (previous.type == TOKEN_SEMICOLON) return;
+  while (current.type != TokenType::TOKEN_EOF) {
+    if (previous.type == TokenType::TOKEN_SEMICOLON) return;
     switch (current.type) {
-      case TOKEN_CLASS:
-      case TOKEN_FUN:
-      case TOKEN_VAR:
-      case TOKEN_FOR:
-      case TOKEN_IF:
-      case TOKEN_WHILE:
-      case TOKEN_PRINT:
-      case TOKEN_RETURN:
+      case TokenType::TOKEN_CLASS:
+      case TokenType::TOKEN_FUN:
+      case TokenType::TOKEN_VAR:
+      case TokenType::TOKEN_FOR:
+      case TokenType::TOKEN_IF:
+      case TokenType::TOKEN_WHILE:
+      case TokenType::TOKEN_PRINT:
+      case TokenType::TOKEN_RETURN:
         return;
       default:
         break;
@@ -667,9 +667,9 @@ void Compiler::errorAt(Token &token, const std::string &message) {
   panicMode = true;
   std::ostringstream ss;
   ss << "[line " << token.line << "] Error";
-  if (token.type == TOKEN_EOF) {
+  if (token.type == TokenType::TOKEN_EOF) {
     ss << " at end";
-  } else if (token.type == TOKEN_ERROR) {
+  } else if (token.type == TokenType::TOKEN_ERROR) {
     // omit
   } else {
     ss << " at " << token.length;

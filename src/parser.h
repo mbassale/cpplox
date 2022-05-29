@@ -53,7 +53,7 @@ class Parser {
   ast::ExpressionPtr unary();
   ast::ExpressionPtr primary();
 
-  bool isAtEnd() { return current.type == TOKEN_EOF; }
+  bool isAtEnd() { return current.type == TokenType::TOKEN_EOF; }
   bool match(TokenType tokenType);
   void advance();
   void consume(TokenType tokenType, const std::string& error_message);

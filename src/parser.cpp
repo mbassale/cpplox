@@ -30,7 +30,7 @@ ast::ProgramPtr Parser::parse() {
  * @return ast::StatementPtr
  */
 ast::StatementPtr Parser::declaration() {
-  if (match(TOKEN_VAR)) {
+  if (match(TokenType::TOKEN_VAR)) {
     return varDeclaration();
   } else {
     return statement();
@@ -44,12 +44,12 @@ ast::StatementPtr Parser::declaration() {
  */
 ast::VarDeclarationPtr Parser::varDeclaration() {
   auto identifier = current;
-  consume(TOKEN_IDENTIFIER, "Invalid identifier");
+  consume(TokenType::TOKEN_IDENTIFIER, "Invalid identifier");
   ast::ExpressionPtr initializer = nullptr;
-  if (match(TOKEN_EQUAL)) {
+  if (match(TokenType::TOKEN_EQUAL)) {
     initializer = expression();
   }
-  consume(TOKEN_SEMICOLON, "Missing semicolon");
+  consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon");
   return ast::VarDeclaration::make(identifier, initializer);
 }
 
@@ -60,19 +60,19 @@ ast::VarDeclarationPtr Parser::varDeclaration() {
  * @return ast::StatementPtr
  */
 ast::StatementPtr Parser::statement() {
-  if (match(TOKEN_LEFT_BRACE)) {
+  if (match(TokenType::TOKEN_LEFT_BRACE)) {
     return block();
-  } else if (match(TOKEN_FOR)) {
+  } else if (match(TokenType::TOKEN_FOR)) {
     return forStatement();
-  } else if (match(TOKEN_IF)) {
+  } else if (match(TokenType::TOKEN_IF)) {
     return ifStatement();
-  } else if (match(TOKEN_WHILE)) {
+  } else if (match(TokenType::TOKEN_WHILE)) {
     return whileStatement();
-  } else if (match(TOKEN_PRINT)) {
+  } else if (match(TokenType::TOKEN_PRINT)) {
     return printStatement();
-  } else if (match(TOKEN_RETURN)) {
+  } else if (match(TokenType::TOKEN_RETURN)) {
     return returnStatement();
-  } else if (match(TOKEN_SEMICOLON)) {
+  } else if (match(TokenType::TOKEN_SEMICOLON)) {
     return ast::Statement::make();
   } else {
     return expressionStatement();
@@ -81,7 +81,7 @@ ast::StatementPtr Parser::statement() {
 
 ast::BlockPtr Parser::block() {
   auto blockStmt = std::make_shared<ast::Block>();
-  while (!match(TOKEN_RIGHT_BRACE) && !isAtEnd()) {
+  while (!match(TokenType::TOKEN_RIGHT_BRACE) && !isAtEnd()) {
     auto stmt = statement();
     blockStmt->statements.push_back(stmt);
   }
@@ -89,33 +89,33 @@ ast::BlockPtr Parser::block() {
 }
 
 ast::ForStatementPtr Parser::forStatement() {
-  consume(TOKEN_LEFT_PAREN, "Missing left paren");
+  consume(TokenType::TOKEN_LEFT_PAREN, "Missing left paren");
   ast::ExpressionPtr initializer{nullptr};
-  if (!match(TOKEN_SEMICOLON)) {
+  if (!match(TokenType::TOKEN_SEMICOLON)) {
     initializer = expression();
-    consume(TOKEN_SEMICOLON, "Missing semicolon after initializer");
+    consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon after initializer");
   }
   ast::ExpressionPtr condition{nullptr};
-  if (!match(TOKEN_SEMICOLON)) {
+  if (!match(TokenType::TOKEN_SEMICOLON)) {
     condition = expression();
-    consume(TOKEN_SEMICOLON, "Missing semicolon after initializer");
+    consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon after initializer");
   }
   ast::ExpressionPtr increment{nullptr};
-  if (!match(TOKEN_RIGHT_PAREN)) {
+  if (!match(TokenType::TOKEN_RIGHT_PAREN)) {
     increment = expression();
-    consume(TOKEN_RIGHT_PAREN, "Missing right paren");
+    consume(TokenType::TOKEN_RIGHT_PAREN, "Missing right paren");
   }
   auto body = statement();
   return ast::ForStatement::make(initializer, condition, increment, body);
 }
 
 ast::IfStatementPtr Parser::ifStatement() {
-  consume(TOKEN_LEFT_PAREN, "Missing left paren");
+  consume(TokenType::TOKEN_LEFT_PAREN, "Missing left paren");
   auto condition = expression();
-  consume(TOKEN_RIGHT_PAREN, "Missing right paren");
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Missing right paren");
   auto thenBranch = statement();
   ast::StatementPtr elseBranch{nullptr};
-  if (match(TOKEN_ELSE)) {
+  if (match(TokenType::TOKEN_ELSE)) {
     elseBranch = statement();
   }
   return ast::IfStatement::make(condition, thenBranch, elseBranch);
@@ -127,9 +127,9 @@ ast::IfStatementPtr Parser::ifStatement() {
  * @return ast::WhileStatementPtr
  */
 ast::WhileStatementPtr Parser::whileStatement() {
-  consume(TOKEN_LEFT_PAREN, "Missing left paren");
+  consume(TokenType::TOKEN_LEFT_PAREN, "Missing left paren");
   auto condition = expression();
-  consume(TOKEN_RIGHT_PAREN, "Missing right paren");
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Missing right paren");
   auto body = statement();
   return ast::WhileStatement::make(condition, body);
 }
@@ -141,7 +141,7 @@ ast::WhileStatementPtr Parser::whileStatement() {
  */
 ast::PrintStatementPtr Parser::printStatement() {
   auto expr = expression();
-  consume(TOKEN_SEMICOLON, "Missing semicolon");
+  consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon");
   return ast::PrintStatement::make(expr);
 }
 
@@ -152,9 +152,9 @@ ast::PrintStatementPtr Parser::printStatement() {
  */
 ast::ReturnStatementPtr Parser::returnStatement() {
   ast::ExpressionPtr expr = nullptr;
-  if (!match(TOKEN_SEMICOLON)) {
+  if (!match(TokenType::TOKEN_SEMICOLON)) {
     expr = expression();
-    consume(TOKEN_SEMICOLON, "Missing semicolon");
+    consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon");
   }
   return ast::ReturnStatement::make(expr);
 }
@@ -166,7 +166,7 @@ ast::ReturnStatementPtr Parser::returnStatement() {
  */
 ast::ExpressionStatementPtr Parser::expressionStatement() {
   const auto expr = expression();
-  consume(TOKEN_SEMICOLON, "Missing semicolon");
+  consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon");
   auto exprStmt = std::make_shared<ast::ExpressionStatement>();
   exprStmt->expression = expr;
   return exprStmt;
@@ -186,7 +186,7 @@ ast::ExpressionPtr Parser::expression() { return assignment(); }
  */
 ast::ExpressionPtr Parser::assignment() {
   auto expr = equality();
-  if (match(TOKEN_EQUAL)) {
+  if (match(TokenType::TOKEN_EQUAL)) {
     auto value = assignment();
     return ast::Assignment::make(expr, value);
   }
@@ -201,7 +201,8 @@ ast::ExpressionPtr Parser::assignment() {
 ast::ExpressionPtr Parser::equality() {
   auto expr = comparison();
 
-  while (match(TOKEN_EQUAL_EQUAL) || match(TOKEN_BANG_EQUAL)) {
+  while (match(TokenType::TOKEN_EQUAL_EQUAL) ||
+         match(TokenType::TOKEN_BANG_EQUAL)) {
     const auto operator_ = previous;
     const auto right = comparison();
     expr = ast::BinaryExpr::make(expr, operator_, right);
@@ -218,8 +219,9 @@ ast::ExpressionPtr Parser::equality() {
 ast::ExpressionPtr Parser::comparison() {
   auto expr = term();
 
-  while (match(TOKEN_GREATER) || match(TOKEN_GREATER_EQUAL) ||
-         match(TOKEN_LESS) || match(TOKEN_LESS_EQUAL)) {
+  while (match(TokenType::TOKEN_GREATER) ||
+         match(TokenType::TOKEN_GREATER_EQUAL) ||
+         match(TokenType::TOKEN_LESS) || match(TokenType::TOKEN_LESS_EQUAL)) {
     const auto operator_ = previous;
     const auto right = term();
     expr = ast::BinaryExpr::make(expr, operator_, right);
@@ -236,7 +238,7 @@ ast::ExpressionPtr Parser::comparison() {
 ast::ExpressionPtr Parser::term() {
   auto expr = factor();
 
-  while (match(TOKEN_PLUS) || match(TOKEN_MINUS)) {
+  while (match(TokenType::TOKEN_PLUS) || match(TokenType::TOKEN_MINUS)) {
     const auto operator_ = previous;
     const auto right = factor();
     expr = ast::BinaryExpr::make(expr, operator_, right);
@@ -253,7 +255,7 @@ ast::ExpressionPtr Parser::term() {
 ast::ExpressionPtr Parser::factor() {
   auto expr = unary();
 
-  while (match(TOKEN_STAR) || match(TOKEN_SLASH)) {
+  while (match(TokenType::TOKEN_STAR) || match(TokenType::TOKEN_SLASH)) {
     const auto operator_ = previous;
     const auto right = unary();
     expr = ast::BinaryExpr::make(expr, operator_, right);
@@ -268,7 +270,7 @@ ast::ExpressionPtr Parser::factor() {
  * @return ast::ExpressionPtr
  */
 ast::ExpressionPtr Parser::unary() {
-  if (match(TOKEN_BANG) || match(TOKEN_MINUS)) {
+  if (match(TokenType::TOKEN_BANG) || match(TokenType::TOKEN_MINUS)) {
     const auto operator_ = previous;
     const auto right = unary();
     return ast::UnaryExpr::make(operator_, right);
@@ -293,19 +295,19 @@ ast::ExpressionPtr Parser::unary() {
  */
 ast::ExpressionPtr Parser::primary() {
   switch (current.type) {
-    case TOKEN_TRUE:
-    case TOKEN_FALSE:
-    case TOKEN_NIL:
-    case TOKEN_NUMBER:
-    case TOKEN_STRING:
+    case TokenType::TOKEN_TRUE:
+    case TokenType::TOKEN_FALSE:
+    case TokenType::TOKEN_NIL:
+    case TokenType::TOKEN_NUMBER:
+    case TokenType::TOKEN_STRING:
       advance();
       return ast::Literal::make(previous);
-    case TOKEN_IDENTIFIER:
+    case TokenType::TOKEN_IDENTIFIER:
       advance();
       return ast::VariableExpr::make(previous);
-    case TOKEN_LEFT_PAREN: {
+    case TokenType::TOKEN_LEFT_PAREN: {
       const auto expr = expression();
-      consume(TOKEN_RIGHT_PAREN, "Unbalanced parenthesis");
+      consume(TokenType::TOKEN_RIGHT_PAREN, "Unbalanced parenthesis");
       return expr;
     }
     default:

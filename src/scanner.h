@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-enum TokenType {
+enum class TokenType {
   TOKEN_EMPTY,
 
   // Single-character tokens.
@@ -64,7 +64,7 @@ struct Token {
   std::string error;
   std::string _lexeme;
 
-  explicit Token() : type(TOKEN_EMPTY) {}
+  explicit Token() : type(TokenType::TOKEN_EMPTY) {}
   explicit Token(TokenType type) : type(type), start(), length(), line() {}
   explicit Token(TokenType type, const std::string &lexeme)
       : type(type), _lexeme(lexeme), line(1) {
@@ -81,7 +81,7 @@ struct Token {
   const std::string str() const {
     std::ostringstream ss;
     ss << std::setfill('0') << std::setw(4) << line << " " << std::setfill('0')
-       << std::setw(2) << type << " " << lexeme();
+       << std::setw(2) << (int)type << " " << lexeme();
     return ss.str();
   }
 
