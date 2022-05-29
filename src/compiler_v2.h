@@ -36,6 +36,8 @@ class CompilerV2 {
   void compileUnit(const ast::ProgramPtr &program);
   void statement(const ast::StatementPtr &stmt);
   void expressionStatement(const ast::ExpressionStatementPtr &stmt);
+  void blockStatement(const ast::BlockPtr &stmt);
+  void ifStatement(const ast::IfStatementPtr &stmt);
   void printStatement(const ast::PrintStatementPtr &stmt);
   void returnStatement(const ast::ReturnStatementPtr &stmt);
   void expression(const ast::ExpressionPtr &expr);

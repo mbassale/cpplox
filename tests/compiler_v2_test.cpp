@@ -29,6 +29,15 @@ TEST_F(CompilerV2Test, CompileAssertions) {
                                VMInstr(OP_CONSTANT), VMInstr(OP_DIVIDE),
                                VMInstr(OP_ADD), VMInstr(OP_PRINT),
                                VMInstr(OP_NIL), VMInstr(OP_RETURN)}),
+      CompilerV2TestData(
+          "IfStmt", "if(1<1+1){print true;}else{print false;}",
+          std::vector<VMInstr>{
+              VMInstr::makeConstant(0), VMInstr::makeConstant(1),
+              VMInstr::makeConstant(2), VMInstr(OP_ADD), VMInstr(OP_LESS),
+              VMInstr(OP_JUMP_IF_FALSE), VMInstr(OP_POP), VMInstr(OP_TRUE),
+              VMInstr(OP_PRINT), VMInstr(OP_JUMP), VMInstr(OP_POP),
+              VMInstr(OP_FALSE), VMInstr(OP_PRINT), VMInstr(OP_NIL),
+              VMInstr(OP_RETURN)}),
   };
 
   for (const auto &testCase : testCases) {

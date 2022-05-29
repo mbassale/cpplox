@@ -33,6 +33,16 @@ void CompilerV2::statement(const StatementPtr& stmt) {
       expressionStatement(expressionStmt);
       break;
     }
+    case NodeType::BLOCK_STATEMENT: {
+      const auto blockStmt = std::dynamic_pointer_cast<Block>(stmt);
+      blockStatement(blockStmt);
+      break;
+    }
+    case NodeType::IF_STATEMENT: {
+      const auto ifStmt = std::dynamic_pointer_cast<IfStatement>(stmt);
+      ifStatement(ifStmt);
+      break;
+    }
     case NodeType::PRINT_STATEMENT: {
       const auto printStmt = std::dynamic_pointer_cast<PrintStatement>(stmt);
       printStatement(printStmt);
@@ -49,6 +59,26 @@ void CompilerV2::statement(const StatementPtr& stmt) {
 void CompilerV2::expressionStatement(const ast::ExpressionStatementPtr& stmt) {
   expression(stmt->expression);
   emitByte(OP_POP);
+}
+
+void CompilerV2::blockStatement(const ast::BlockPtr& stmt) {
+  for (const auto& innerStmt : stmt->statements) {
+    statement(innerStmt);
+  }
+}
+
+void CompilerV2::ifStatement(const ast::IfStatementPtr& stmt) {
+  expression(stmt->condition);
+  const auto thenJump = emitJump(OP_JUMP_IF_FALSE);
+  emitByte(OP_POP);
+  statement(stmt->thenBranch);
+  const auto elseJump = emitJump(OP_JUMP);
+  patchJump(thenJump);
+  emitByte(OP_POP);
+  if (stmt->elseBranch) {
+    statement(stmt->elseBranch);
+  }
+  patchJump(elseJump);
 }
 
 void CompilerV2::printStatement(const PrintStatementPtr& stmt) {
@@ -200,6 +230,16 @@ size_t CompilerV2::emitJump(uint8_t instruction) {
   emitByte(0xff);
   emitByte(0xff);
   return currentChunk().size() - 2;
+}
+
+void CompilerV2::patchJump(size_t offset) {
+  size_t jump = currentChunk().size() - offset - 2;
+  if (jump > UINT16_MAX) {
+    error("Too much code to jump over.");
+  }
+  uint8_t* code = currentChunk().data();
+  code[offset] = (jump >> 8) & 0xFF;
+  code[offset + 1] = jump & 0xFF;
 }
 
 void CompilerV2::error(const std::string& message) { errorAt(message); }
