@@ -75,7 +75,7 @@ struct Literal : public Expression {
       : Expression(NodeType::LITERAL_EXPRESSION), literal(literal) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(other) == typeid(*this)) {
+    if (Type == other.Type) {
       const auto& otherLiteral = dynamic_cast<const Literal&>(other);
       return isEqual(otherLiteral);
     }
@@ -110,7 +110,7 @@ struct VariableExpr : public Expression {
       : Expression(NodeType::VARIABLE_EXPRESSION), identifier(identifier) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(other) == typeid(*this)) {
+    if (Type == other.Type) {
       const auto& otherIdentifier = dynamic_cast<const VariableExpr&>(other);
       return isEqual(otherIdentifier);
     }
@@ -145,7 +145,7 @@ struct Assignment : public Expression {
         value(value) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(other) == typeid(*this)) {
+    if (Type == other.Type) {
       const auto& otherAssignment = dynamic_cast<const Assignment&>(other);
       return isEqual(otherAssignment);
     }
@@ -190,7 +190,7 @@ struct BinaryExpr : public Expression {
         right(right) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(other) == typeid(*this)) {
+    if (Type == other.Type) {
       const auto& otherAssignment = dynamic_cast<const BinaryExpr&>(other);
       return isEqual(otherAssignment);
     }
@@ -225,7 +225,7 @@ struct UnaryExpr : public Expression {
         right(right) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(other) == typeid(*this)) {
+    if (Type == other.Type) {
       const auto& otherAssignment = dynamic_cast<const UnaryExpr&>(other);
       return isEqual(otherAssignment);
     }
@@ -254,7 +254,7 @@ struct Program : public Node {
       : Node(NodeType::PROGRAM), statements(statements) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherProgram = dynamic_cast<const Program&>(other);
       return isEqual(otherProgram);
     }
@@ -291,7 +291,7 @@ struct VarDeclaration : public Statement {
         initializer(initializer) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherProgram = dynamic_cast<const VarDeclaration&>(other);
       return isEqual(otherProgram);
     }
@@ -333,7 +333,7 @@ struct Block : public Statement {
       : Statement(NodeType::BLOCK_STATEMENT), statements(statements) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherBlock = dynamic_cast<const Block&>(other);
       return isEqual(otherBlock);
     }
@@ -377,7 +377,7 @@ struct ForStatement : public Statement {
         body(body) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherFor = dynamic_cast<const ForStatement&>(other);
       return isEqual(otherFor);
     }
@@ -452,7 +452,7 @@ struct WhileStatement : public Statement {
         body(body) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherWhile = dynamic_cast<const WhileStatement&>(other);
       return isEqual(otherWhile);
     }
@@ -495,7 +495,7 @@ struct PrintStatement : public Statement {
       : Statement(NodeType::PRINT_STATEMENT), expression(expression) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherPrint = dynamic_cast<const PrintStatement&>(other);
       return isEqual(otherPrint);
     }
@@ -549,7 +549,7 @@ struct IfStatement : public Statement {
   }
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherFor = dynamic_cast<const IfStatement&>(other);
       return isEqual(otherFor);
     }
@@ -586,7 +586,7 @@ struct ReturnStatement : public Statement {
       : Statement(NodeType::RETURN_STATEMENT), expression(expression) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherReturnStmt = dynamic_cast<const ReturnStatement&>(other);
       return isEqual(otherReturnStmt);
     }
@@ -624,7 +624,7 @@ struct ExpressionStatement : public Statement {
       : Statement(NodeType::EXPRESSION_STATEMENT), expression(expression) {}
 
   bool isEqual(const Node& other) override {
-    if (typeid(*this) == typeid(other)) {
+    if (Type == other.Type) {
       const auto& otherExprStmt =
           dynamic_cast<const ExpressionStatement&>(other);
       return isEqual(otherExprStmt);
