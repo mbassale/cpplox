@@ -156,7 +156,7 @@ void CompilerV2::expression(const ExpressionPtr& expr) {
     }
     case NodeType::VARIABLE_EXPRESSION: {
       const auto varExpr = std::dynamic_pointer_cast<VariableExpr>(expr);
-      namedVariable(varExpr->identifier.lexeme());
+      namedVariable(varExpr->identifier);
       break;
     }
     default: {

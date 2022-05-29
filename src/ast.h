@@ -111,10 +111,11 @@ struct Literal : public Expression {
 using LiteralPtr = std::shared_ptr<Literal>;
 
 struct VariableExpr : public Expression {
-  Token identifier;
-  VariableExpr(const Token& identifier)
+  std::string identifier;
+
+  VariableExpr(const std::string& identifier)
       : Expression(NodeType::VARIABLE_EXPRESSION), identifier(identifier) {}
-  VariableExpr(Token&& identifier)
+  VariableExpr(std::string&& identifier)
       : Expression(NodeType::VARIABLE_EXPRESSION), identifier(identifier) {}
 
   bool isEqual(const Node& other) override {
@@ -129,12 +130,8 @@ struct VariableExpr : public Expression {
     return this->identifier == other.identifier;
   }
 
-  static std::shared_ptr<VariableExpr> make(const Token& identifier) {
-    return std::make_shared<VariableExpr>(identifier);
-  }
   static std::shared_ptr<VariableExpr> make(const std::string& variableName) {
-    return std::make_shared<VariableExpr>(
-        Token(TokenType::TOKEN_IDENTIFIER, variableName));
+    return std::make_shared<VariableExpr>(variableName);
   }
 };
 using VariableExprPtr = std::shared_ptr<VariableExpr>;
