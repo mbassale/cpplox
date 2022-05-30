@@ -54,12 +54,15 @@ class CompilerV2 {
   void blockStatement(const ast::BlockPtr &stmt);
   void ifStatement(const ast::IfStatementPtr &stmt);
   void whileStatement(const ast::WhileStatementPtr &stmt);
+  void forStatement(const ast::ForStatementPtr &stmt);
   void printStatement(const ast::PrintStatementPtr &stmt);
   void returnStatement(const ast::ReturnStatementPtr &stmt);
   void expression(const ast::ExpressionPtr &expr);
   void binary(const ast::BinaryExprPtr &expr);
   void unary(const ast::UnaryExprPtr &expr);
   void literal(const ast::LiteralPtr &expr);
+  void namedVariableExpression(const std::string &name,
+                               const ast::ExpressionPtr value);
 
   inline Chunk &currentChunk() { return function->getChunk(); }
   void emitByte(uint8_t byte);
@@ -72,12 +75,13 @@ class CompilerV2 {
   void emitLoop(size_t loopStart);
 
   // Locals routines
+  void beginScope();
+  void endScope();
   int declareVariable(const std::string &name);
   void declareLocal(const std::string &name);
   void addLocal(const std::string &name);
   void defineVariable(size_t global);
   void markInitialized();
-  void namedVariable(const std::string &name);
   int resolveLocal(const std::string &name);
 
   // Error routines

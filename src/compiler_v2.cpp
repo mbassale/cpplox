@@ -73,6 +73,11 @@ void CompilerV2::statement(const StatementPtr& stmt) {
       whileStatement(whileStmt);
       break;
     }
+    case NodeType::FOR_STATEMENT: {
+      const auto forStmt = std::dynamic_pointer_cast<ForStatement>(stmt);
+      forStatement(forStmt);
+      break;
+    }
     case NodeType::PRINT_STATEMENT: {
       const auto printStmt = std::dynamic_pointer_cast<PrintStatement>(stmt);
       printStatement(printStmt);
@@ -92,9 +97,11 @@ void CompilerV2::expressionStatement(const ast::ExpressionStatementPtr& stmt) {
 }
 
 void CompilerV2::blockStatement(const ast::BlockPtr& stmt) {
+  beginScope();
   for (const auto& innerStmt : stmt->statements) {
-    statement(innerStmt);
+    declaration(innerStmt);
   }
+  endScope();
 }
 
 void CompilerV2::ifStatement(const ast::IfStatementPtr& stmt) {
@@ -120,6 +127,42 @@ void CompilerV2::whileStatement(const ast::WhileStatementPtr& stmt) {
   emitLoop(loopStart);
   patchJump(exitJump);
   emitByte(OP_POP);
+}
+
+void CompilerV2::forStatement(const ast::ForStatementPtr& stmt) {
+  beginScope();
+
+  if (stmt->initializer) {
+    declaration(stmt->initializer);
+  }
+
+  auto loopStart = currentChunk().size();
+  auto exitJump = -1;
+  if (stmt->condition) {
+    expression(stmt->condition);
+    exitJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+  }
+
+  if (stmt->increment) {
+    auto bodyJump = emitJump(OP_JUMP);
+    auto incrementStart = currentChunk().size();
+    expression(stmt->increment);
+    emitByte(OP_POP);
+    emitLoop(loopStart);
+    loopStart = incrementStart;
+    patchJump(bodyJump);
+  }
+
+  statement(stmt->body);
+  emitLoop(loopStart);
+
+  if (exitJump != -1) {
+    patchJump(exitJump);
+    emitByte(OP_POP);
+  }
+
+  endScope();
 }
 
 void CompilerV2::printStatement(const PrintStatementPtr& stmt) {
@@ -156,7 +199,13 @@ void CompilerV2::expression(const ExpressionPtr& expr) {
     }
     case NodeType::VARIABLE_EXPRESSION: {
       const auto varExpr = std::dynamic_pointer_cast<VariableExpr>(expr);
-      namedVariable(varExpr->identifier);
+      namedVariableExpression(varExpr->identifier, nullptr);
+      break;
+    }
+    case NodeType::ASSIGNMENT_EXPRESSION: {
+      const auto assignmentExpr = std::dynamic_pointer_cast<Assignment>(expr);
+      namedVariableExpression(assignmentExpr->identifier,
+                              assignmentExpr->value);
       break;
     }
     default: {
@@ -242,6 +291,27 @@ void CompilerV2::literal(const ast::LiteralPtr& expr) {
     default:
       assert(false);  // unreachable
       break;
+  }
+}
+
+void CompilerV2::namedVariableExpression(const std::string& name,
+                                         const ExpressionPtr value) {
+  uint8_t getOp, setOp;
+  int offset = resolveLocal(name);
+  if (offset != -1) {
+    getOp = OP_GET_LOCAL;
+    setOp = OP_SET_LOCAL;
+  } else {
+    offset = makeConstant(Value(name));
+    getOp = OP_GET_GLOBAL;
+    setOp = OP_SET_GLOBAL;
+  }
+
+  if (value) {
+    expression(value);
+    emitBytes(setOp, offset);
+  } else {
+    emitBytes(getOp, offset);
   }
 }
 
@@ -342,21 +412,6 @@ void CompilerV2::markInitialized() {
   locals[locals.size() - 1].depth = scopeDepth;
 }
 
-void CompilerV2::namedVariable(const std::string& name) {
-  uint8_t getOp, setOp;
-  int offset = resolveLocal(name);
-  if (offset != -1) {
-    getOp = OP_GET_LOCAL;
-    setOp = OP_SET_LOCAL;
-  } else {
-    offset = makeConstant(Value(name));
-    getOp = OP_GET_GLOBAL;
-    setOp = OP_SET_GLOBAL;
-  }
-
-  emitBytes(getOp, offset);
-}
-
 int CompilerV2::resolveLocal(const std::string& name) {
   for (int i = locals.size() - 1; i >= 0; i--) {
     if (name == locals[i].name) {
@@ -370,6 +425,16 @@ int CompilerV2::resolveLocal(const std::string& name) {
     }
   }
   return -1;
+}
+
+void CompilerV2::beginScope() { scopeDepth++; }
+
+void CompilerV2::endScope() {
+  scopeDepth--;
+  while (locals.size() > 0 && locals[locals.size() - 1].depth > scopeDepth) {
+    emitByte(OP_POP);
+    locals.pop_back();
+  }
 }
 
 void CompilerV2::error(const std::string& message) { errorAt(message); }

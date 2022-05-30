@@ -82,11 +82,10 @@ TEST_F(ParserTest, ParserAssertions) {
 
 TEST_F(ParserTest, AssignmentExprAssertions) {
   std::vector<ParserTestData> testCases = {
-      ParserTestData(
-          "AssignmentExpression", "a=true;",
-          ast::Program::make(std::vector<ast::StatementPtr>{
-              ast::ExpressionStatement::make(ast::Assignment::make(
-                  ast::VariableExpr::make("a"), ast::Literal::makeTrue()))})),
+      ParserTestData("AssignmentExpression", "a=true;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::Assignment::make(
+                             "a", ast::Literal::makeTrue()))})),
   };
 
   for (const auto &testCase : testCases) {

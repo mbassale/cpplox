@@ -137,16 +137,16 @@ struct VariableExpr : public Expression {
 using VariableExprPtr = std::shared_ptr<VariableExpr>;
 
 struct Assignment : public Expression {
-  ExpressionPtr variable;
+  std::string identifier;
   ExpressionPtr value;
 
-  Assignment(const ExpressionPtr& variable)
+  Assignment(const std::string& identifier)
       : Expression(NodeType::ASSIGNMENT_EXPRESSION),
-        variable(variable),
+        identifier(identifier),
         value(nullptr) {}
-  Assignment(const ExpressionPtr& variable, const ExpressionPtr& value)
+  Assignment(const std::string& identifier, const ExpressionPtr& value)
       : Expression(NodeType::ASSIGNMENT_EXPRESSION),
-        variable(variable),
+        identifier(identifier),
         value(value) {}
 
   bool isEqual(const Node& other) override {
@@ -158,7 +158,7 @@ struct Assignment : public Expression {
   }
 
   bool isEqual(const Assignment& other) {
-    if (!variable->isEqual(*other.variable)) {
+    if (identifier != other.identifier) {
       return false;
     }
 
@@ -172,12 +172,12 @@ struct Assignment : public Expression {
     return value->isEqual(*other.value);
   }
 
-  static std::shared_ptr<Assignment> make(const ExpressionPtr& variable) {
-    return std::make_shared<Assignment>(variable);
+  static std::shared_ptr<Assignment> make(const std::string& identifier) {
+    return std::make_shared<Assignment>(identifier);
   }
-  static std::shared_ptr<Assignment> make(const ExpressionPtr& variable,
+  static std::shared_ptr<Assignment> make(const std::string& identifier,
                                           const ExpressionPtr& value) {
-    return std::make_shared<Assignment>(variable, value);
+    return std::make_shared<Assignment>(identifier, value);
   }
 };
 using AssignmentPtr = std::shared_ptr<Assignment>;
@@ -362,7 +362,7 @@ struct Block : public Statement {
 using BlockPtr = std::shared_ptr<Block>;
 
 struct ForStatement : public Statement {
-  ExpressionPtr initializer;
+  StatementPtr initializer;
   ExpressionPtr condition;
   ExpressionPtr increment;
   StatementPtr body;
@@ -373,7 +373,7 @@ struct ForStatement : public Statement {
         condition(nullptr),
         increment(nullptr),
         body(nullptr) {}
-  ForStatement(const ExpressionPtr& initializer, const ExpressionPtr& condition,
+  ForStatement(const StatementPtr& initializer, const ExpressionPtr& condition,
                const ExpressionPtr& increment, const StatementPtr& body)
       : Statement(NodeType::FOR_STATEMENT),
         initializer(initializer),
@@ -433,7 +433,7 @@ struct ForStatement : public Statement {
     return std::make_shared<ForStatement>();
   }
 
-  static std::shared_ptr<ForStatement> make(const ExpressionPtr& initializer,
+  static std::shared_ptr<ForStatement> make(const StatementPtr& initializer,
                                             const ExpressionPtr& condition,
                                             const ExpressionPtr& increment,
                                             const StatementPtr& body) {

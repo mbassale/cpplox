@@ -90,10 +90,13 @@ ast::BlockPtr Parser::block() {
 
 ast::ForStatementPtr Parser::forStatement() {
   consume(TokenType::TOKEN_LEFT_PAREN, "Missing left paren");
-  ast::ExpressionPtr initializer{nullptr};
-  if (!match(TokenType::TOKEN_SEMICOLON)) {
-    initializer = expression();
-    consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon after initializer");
+  ast::StatementPtr initializer{nullptr};
+  if (match(TokenType::TOKEN_SEMICOLON)) {
+    // no initializer.
+  } else if (match(TokenType::TOKEN_VAR)) {
+    initializer = varDeclaration();
+  } else {
+    initializer = expressionStatement();
   }
   ast::ExpressionPtr condition{nullptr};
   if (!match(TokenType::TOKEN_SEMICOLON)) {
@@ -188,7 +191,11 @@ ast::ExpressionPtr Parser::assignment() {
   auto expr = equality();
   if (match(TokenType::TOKEN_EQUAL)) {
     auto value = assignment();
-    return ast::Assignment::make(expr, value);
+    if (expr->Type == ast::NodeType::VARIABLE_EXPRESSION) {
+      const auto varExpr = std::dynamic_pointer_cast<ast::VariableExpr>(expr);
+      return ast::Assignment::make(varExpr->identifier, value);
+    }
+    throw ParserException("Invalid assignment target", current);
   }
   return expr;
 }
