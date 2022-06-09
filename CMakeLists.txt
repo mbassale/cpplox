@@ -21,9 +21,12 @@ if(UNIX AND NOT APPLE)
 endif()
 
 include(FetchContent)
+
+# GoogleTest
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+  GIT_REPOSITORY  git@github.com:google/googletest.git
+  GIT_TAG         release-1.11.0
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -79,7 +82,7 @@ add_executable(
 if(UNIX AND NOT APPLE)
   set(ADDITIONAL_LIBRARIES Threads::Threads)
 else()
-  set(ADDITIONAL_LIBRARIES "")
+  set(ADDITIONAL_LIBRARIES)
 endif()
 
 target_link_libraries(cpplox libcpplox ${ADDITIONAL_LIBRARIES})
