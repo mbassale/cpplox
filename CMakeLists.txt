@@ -22,6 +22,14 @@ endif()
 
 include(FetchContent)
 
+# GoogleFlags
+FetchContent_Declare(
+  gflags
+  GIT_REPOSITORY git@github.com:gflags/gflags.git
+  GIT_TAG        v2.2.2
+)
+FetchContent_MakeAvailable(gflags)
+
 # GoogleTest
 FetchContent_Declare(
   googletest
@@ -80,9 +88,9 @@ add_executable(
 )
 
 if(UNIX AND NOT APPLE)
-  set(ADDITIONAL_LIBRARIES Threads::Threads)
+  set(ADDITIONAL_LIBRARIES Threads::Threads gflags::gflags)
 else()
-  set(ADDITIONAL_LIBRARIES)
+  set(ADDITIONAL_LIBRARIES gflags::gflags)
 endif()
 
 target_link_libraries(cpplox libcpplox ${ADDITIONAL_LIBRARIES})
