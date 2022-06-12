@@ -1,3 +1,5 @@
+#include <gflags/gflags.h>
+
 #include "chunk.h"
 #include "common.h"
 #include "compiler_v2.h"
@@ -8,6 +10,8 @@
 #include "vm.h"
 
 #define EXIT_CMDLINE_HELP 64
+
+DEFINE_bool(trace, false, "Enable all tracing");
 
 static Value clockNative(int argCount, Value *args) {
   return Value((double)clock() / CLOCKS_PER_SEC);
@@ -57,7 +61,8 @@ class Driver {
         }
         return InterpretResult::INTERPRET_PARSING_ERROR;
       }
-      cpplox::CompilerV2 compiler;
+      const auto compilerConfig = buildCompilerConfig();
+      cpplox::CompilerV2 compiler(compilerConfig);
       const auto script = compiler.compile("main", program);
       if (compiler.hasErrors()) {
         for (const std::string &error : compiler.getErrors()) {
@@ -80,17 +85,29 @@ class Driver {
       return InterpretResult::INTERPRET_COMPILE_ERROR;
     }
   }
+
+ private:
+  cpplox::CompilerConfig buildCompilerConfig() {
+    cpplox::CompilerConfig compilerConfig;
+    compilerConfig.disassembleInstructions = FLAGS_trace;
+    compilerConfig.dumpTokens = FLAGS_trace;
+    return compilerConfig;
+  }
 };
 
 int main(int argc, char *argv[]) {
   Driver driver;
+
+  std::ostringstream usage_ss;
+  usage_ss << argv[0] << " [script-path]";
+  gflags::SetUsageMessage(usage_ss.str());
+  gflags::ParseCommandLineFlags(&argc, &argv, false);
 
   if (argc == 1) {
     driver.repl();
   } else if (argc == 2) {
     driver.runFile(argv[1]);
   } else {
-    std::cerr << "Usage: cpplox [path]\n";
     exit(EXIT_CMDLINE_HELP);
   }
 

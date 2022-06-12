@@ -22,14 +22,6 @@ endif()
 
 include(FetchContent)
 
-# GoogleFlags
-FetchContent_Declare(
-  gflags
-  GIT_REPOSITORY git@github.com:gflags/gflags.git
-  GIT_TAG        v2.2.2
-)
-FetchContent_MakeAvailable(gflags)
-
 # GoogleTest
 FetchContent_Declare(
   googletest
@@ -40,12 +32,16 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# GFlags
+find_package(gflags REQUIRED)
+message(STATUS "GFLAGS include path: ${gflags_INCLUDE_DIR}")
+
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
 #------------------------------------------------#
-configure_file(config.h.in src/config.h)
+configure_file(config.h.in ${PROJECT_SOURCE_DIR}/src/config.h)
 
-include_directories(src)
+include_directories(src ${gflags_INCLUDE_DIR})
 set(SOURCES
   src/common.h
   src/ast.h
@@ -88,12 +84,12 @@ add_executable(
 )
 
 if(UNIX AND NOT APPLE)
-  set(ADDITIONAL_LIBRARIES Threads::Threads gflags::gflags)
+  set(ADDITIONAL_LIBRARIES Threads::Threads)
 else()
-  set(ADDITIONAL_LIBRARIES gflags::gflags)
+  set(ADDITIONAL_LIBRARIES)
 endif()
 
-target_link_libraries(cpplox libcpplox ${ADDITIONAL_LIBRARIES})
+target_link_libraries(cpplox libcpplox ${ADDITIONAL_LIBRARIES} gflags)
 
 #------------------------------------------------#
 # GOOGLE TEST                                    #
