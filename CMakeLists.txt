@@ -20,21 +20,11 @@ if(UNIX AND NOT APPLE)
   find_package(Threads REQUIRED)
 endif()
 
-include(FetchContent)
-
-# GoogleTest
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY  git@github.com:google/googletest.git
-  GIT_TAG         release-1.11.0
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+# GTest
+find_package(GTest REQUIRED)
 
 # GFlags
 find_package(gflags REQUIRED)
-message(STATUS "GFLAGS include path: ${gflags_INCLUDE_DIR}")
 
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
