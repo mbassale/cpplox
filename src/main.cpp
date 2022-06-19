@@ -58,7 +58,8 @@ class Driver {
       const auto program = parser.parse();
       if (parser.hasErrors()) {
         for (const cpplox::ParserException &error : parser.getErrors()) {
-          LOG(ERROR) << error.what();
+          LOG(ERROR) << "Parse error at line " << error.getLocation().line
+                     << ": " << error.what();
         }
         return InterpretResult::INTERPRET_PARSING_ERROR;
       }
@@ -70,7 +71,7 @@ class Driver {
       const auto script = compiler.compile("main", program);
       if (compiler.hasErrors()) {
         for (const std::string &error : compiler.getErrors()) {
-          LOG(ERROR) << error;
+          LOG(ERROR) << "Compile error: " << error;
         }
         return InterpretResult::INTERPRET_COMPILE_ERROR;
       }

@@ -14,6 +14,8 @@ class ParserException : public std::runtime_error {
  public:
   ParserException(const std::string& error_message, const Token& location)
       : std::runtime_error(error_message), location(location) {}
+
+  const Token getLocation() const { return location; }
 };
 
 class Parser {

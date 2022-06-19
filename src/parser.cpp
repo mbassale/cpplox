@@ -14,7 +14,6 @@ ast::ProgramPtr Parser::parse() {
       const auto stmt = declaration();
       programNode->statements.push_back(stmt);
     } catch (ParserException& ex) {
-      std::cerr << "Error: " << ex.what() << std::endl;
       errors.push_back(ex);
       // TODO: move to next statement to keep gathering errors
       break;
