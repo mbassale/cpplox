@@ -26,6 +26,9 @@ find_package(GTest REQUIRED)
 # GFlags
 find_package(gflags REQUIRED)
 
+# GLog
+find_package (glog REQUIRED)
+
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
 #------------------------------------------------#
@@ -79,7 +82,7 @@ else()
   set(ADDITIONAL_LIBRARIES)
 endif()
 
-target_link_libraries(cpplox libcpplox ${ADDITIONAL_LIBRARIES} gflags)
+target_link_libraries(cpplox libcpplox ${ADDITIONAL_LIBRARIES} gflags glog::glog)
 
 #------------------------------------------------#
 # GOOGLE TEST                                    #
@@ -101,6 +104,7 @@ target_link_libraries(
   libcpplox
   gtest
   gtest_main
+  glog::glog
   ${ADDITIONAL_LIBRARIES}
 )
 
