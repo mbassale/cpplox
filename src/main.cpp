@@ -70,12 +70,16 @@ class Driver {
         }
         return InterpretResult::INTERPRET_COMPILE_ERROR;
       }
-      Disassembler disassembler(script->getChunk());
-      const auto instructions = disassembler.disassemble();
-      OpCodePrinter printer(script->getChunk(), instructions);
-      printer.print();
+      if (FLAGS_trace) {
+        Disassembler disassembler(script->getChunk());
+        const auto instructions = disassembler.disassemble();
+        OpCodePrinter printer(script->getChunk(), instructions);
+        printer.print();
+      }
 
-      std::cout << "== execution ==" << std::endl;
+      if (FLAGS_trace) {
+        std::cout << "== execution ==" << std::endl;
+      }
       return vm.interpret(script);
     } catch (VMRuntimeError &err) {
       std::cerr << "RuntimeError: " << err.what() << std::endl;

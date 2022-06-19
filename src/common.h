@@ -1,6 +1,8 @@
 #ifndef __cpplox_common_h
 #define __cpplox_common_h
 
+#include <glog/logging.h>
+
 #include <array>
 #include <cassert>
 #include <cstdbool>
