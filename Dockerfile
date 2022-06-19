@@ -4,6 +4,7 @@ ENV HOME /root
 
 SHELL ["/bin/bash", "-c"]
 
+# Install dependencies
 RUN apt-get update && apt-get -y --no-install-recommends install \
   build-essential \
   clang \
@@ -11,7 +12,9 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
   gdb \
   wget \
   git \
+  openssh-server \
   unzip \
-  curl
-
-RUN apt-get -y install libgtest-dev libgflags-dev libgoogle-glog-dev
+  curl \ 
+  libgtest-dev \
+  libgflags-dev \
+  libgoogle-glog-dev

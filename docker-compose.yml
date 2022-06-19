@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  interpreter:
+    build: .
+    volumes:
+      - cpplox_vol:/src
+      - ~/.ssh:/root/.ssh:ro
+volumes:
+  cpplox_vol:
