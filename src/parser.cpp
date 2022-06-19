@@ -9,6 +9,7 @@ ast::ProgramPtr Parser::parse() {
 
   previous = Token();
   current = scanner.next();
+  VLOG(1) << "TOKEN: " << current.str();
   while (!isAtEnd()) {
     try {
       const auto stmt = declaration();
@@ -340,6 +341,7 @@ bool Parser::match(TokenType tokenType) {
 void Parser::advance() {
   previous = current;
   current = scanner.next();
+  VLOG(1) << "TOKEN: " << current.str();
 }
 
 void Parser::consume(TokenType tokenType, const std::string& error_message) {
