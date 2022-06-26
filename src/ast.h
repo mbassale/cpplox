@@ -330,6 +330,55 @@ struct VarDeclaration : public Statement {
 };
 using VarDeclarationPtr = std::shared_ptr<VarDeclaration>;
 
+struct FunctionDeclaration : public Statement {
+  Token identifier;
+  StatementPtr body;
+
+  FunctionDeclaration(const Token& identifier)
+      : Statement(NodeType::VAR_DECLARATION),
+        identifier(identifier),
+        body(nullptr) {}
+  FunctionDeclaration(const Token& identifier, const StatementPtr& body)
+      : Statement(NodeType::VAR_DECLARATION),
+        identifier(identifier),
+        body(body) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherProgram =
+          dynamic_cast<const FunctionDeclaration&>(other);
+      return isEqual(otherProgram);
+    }
+    return false;
+  }
+
+  bool isEqual(const FunctionDeclaration& other) {
+    if (!identifier.isEqual(other.identifier)) {
+      return false;
+    }
+
+    // compare body
+    bool hasLhs = (bool)this->body;
+    bool hasRhs = (bool)other.body;
+    if (hasLhs != hasRhs) {
+      return false;
+    }
+    if (this->body && other.body) {
+      if (!this->body->isEqual(*other.body)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  static std::shared_ptr<FunctionDeclaration> make(const Token& identifier,
+                                                   const StatementPtr& body) {
+    return std::make_shared<FunctionDeclaration>(identifier, body);
+  }
+};
+using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
+
 struct Block : public Statement {
   std::vector<StatementPtr> statements;
 
