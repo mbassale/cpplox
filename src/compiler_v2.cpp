@@ -34,6 +34,12 @@ void CompilerV2::declaration(const StatementPtr& stmt) {
       varDeclaration(varDeclarationStmt);
       break;
     }
+    case NodeType::FUNCTION_DECLARATION: {
+      const auto functionDeclarationStmt =
+          std::dynamic_pointer_cast<FunctionDeclaration>(stmt);
+      functionDeclaration(functionDeclarationStmt);
+      break;
+    }
     default:
       statement(stmt);
   }
@@ -49,6 +55,8 @@ void CompilerV2::varDeclaration(const VarDeclarationPtr& stmt) {
   }
   defineVariable(global);
 }
+
+void CompilerV2::functionDeclaration(const FunctionDeclarationPtr& stmt) {}
 
 void CompilerV2::statement(const StatementPtr& stmt) {
   switch (stmt->Type) {

@@ -49,6 +49,7 @@ class CompilerV2 {
   void compileUnit(const ast::ProgramPtr &program);
   void declaration(const ast::StatementPtr &stmt);
   void varDeclaration(const ast::VarDeclarationPtr &stmt);
+  void functionDeclaration(const ast::FunctionDeclarationPtr &stmt);
   void statement(const ast::StatementPtr &stmt);
   void expressionStatement(const ast::ExpressionStatementPtr &stmt);
   void blockStatement(const ast::BlockPtr &stmt);
