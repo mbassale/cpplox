@@ -18,6 +18,7 @@ enum class NodeType {
    * DECLARATIONS
    */
   VAR_DECLARATION,
+  FUNCTION_DECLARATION,
 
   /*
    * EXPRESSIONS
@@ -332,15 +333,19 @@ using VarDeclarationPtr = std::shared_ptr<VarDeclaration>;
 
 struct FunctionDeclaration : public Statement {
   Token identifier;
+  std::vector<Token> params;
   StatementPtr body;
 
   FunctionDeclaration(const Token& identifier)
-      : Statement(NodeType::VAR_DECLARATION),
+      : Statement(NodeType::FUNCTION_DECLARATION),
         identifier(identifier),
+        params(),
         body(nullptr) {}
-  FunctionDeclaration(const Token& identifier, const StatementPtr& body)
-      : Statement(NodeType::VAR_DECLARATION),
+  FunctionDeclaration(const Token& identifier, const std::vector<Token>& params,
+                      const StatementPtr& body)
+      : Statement(NodeType::FUNCTION_DECLARATION),
         identifier(identifier),
+        params(params),
         body(body) {}
 
   bool isEqual(const Node& other) override {
@@ -354,6 +359,11 @@ struct FunctionDeclaration : public Statement {
 
   bool isEqual(const FunctionDeclaration& other) {
     if (!identifier.isEqual(other.identifier)) {
+      return false;
+    }
+
+    // compare args
+    if (params != other.params) {
       return false;
     }
 
@@ -372,9 +382,10 @@ struct FunctionDeclaration : public Statement {
     return true;
   }
 
-  static std::shared_ptr<FunctionDeclaration> make(const Token& identifier,
-                                                   const StatementPtr& body) {
-    return std::make_shared<FunctionDeclaration>(identifier, body);
+  static std::shared_ptr<FunctionDeclaration> make(
+      const Token& identifier, const std::vector<Token>& params,
+      const StatementPtr& body) {
+    return std::make_shared<FunctionDeclaration>(identifier, params, body);
   }
 };
 using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;

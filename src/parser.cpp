@@ -15,6 +15,7 @@ ast::ProgramPtr Parser::parse() {
       const auto stmt = declaration();
       programNode->statements.push_back(stmt);
     } catch (ParserException& ex) {
+      LOG(ERROR) << ex.what();
       errors.push_back(ex);
       // TODO: move to next statement to keep gathering errors
       break;
@@ -25,13 +26,16 @@ ast::ProgramPtr Parser::parse() {
 }
 
 /**
- * @brief declaration: classDecl | funDecl | varDecl | statement ;
+ * @brief declaration: classDecl | functionDeclaration | varDeclaration |
+ * statement ;
  *
  * @return ast::StatementPtr
  */
 ast::StatementPtr Parser::declaration() {
   if (match(TokenType::TOKEN_VAR)) {
     return varDeclaration();
+  } else if (match(TokenType::TOKEN_FUN)) {
+    return functionDeclaration();
   } else {
     return statement();
   }
@@ -51,6 +55,27 @@ ast::VarDeclarationPtr Parser::varDeclaration() {
   }
   consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon");
   return ast::VarDeclaration::make(identifier, initializer);
+}
+
+/**
+ * @brief functionDeclaration: "fun" function ;
+ * function: IDENTIFIER "(" parameters? ")" block ;
+ *
+ * @return ast::FunctionDeclarationPtr
+ */
+ast::FunctionDeclarationPtr Parser::functionDeclaration() {
+  auto identifier = current;
+  consume(TokenType::TOKEN_IDENTIFIER, "Invalid identifier");
+  consume(TokenType::TOKEN_LEFT_PAREN, "Missing left paren");
+  std::vector<Token> params;
+  while (match(TokenType::TOKEN_IDENTIFIER)) {
+    params.push_back(previous);
+    match(TokenType::TOKEN_COMMA);
+  }
+  consume(TokenType::TOKEN_RIGHT_PAREN, "Missing right paren");
+  consume(TokenType::TOKEN_LEFT_BRACE, "Missing right brace");
+  auto body = block();
+  return ast::FunctionDeclaration::make(identifier, params, body);
 }
 
 /**

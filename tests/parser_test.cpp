@@ -37,6 +37,25 @@ TEST_F(ParserTest, ParserAssertions) {
                          ast::VarDeclaration::make(
                              Token(TokenType::TOKEN_IDENTIFIER, "test"),
                              ast::Literal::makeTrue())})),
+      ParserTestData("FunctionDeclaration No Args", "fun test() { true; }",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::FunctionDeclaration::make(
+                             Token(TokenType::TOKEN_IDENTIFIER, "test"),
+                             std::vector<Token>{},
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ExpressionStatement::make(
+                                     ast::Literal::makeTrue())}))})),
+      ParserTestData(
+          "FunctionDeclaration Multiple Args", "fun test(arg1, arg2) { true; }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::FunctionDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "test"),
+                  std::vector<Token>{
+                      Token(TokenType::TOKEN_IDENTIFIER, "arg1"),
+                      Token(TokenType::TOKEN_IDENTIFIER, "arg2")},
+                  ast::Block::make(std::vector<ast::StatementPtr>{
+                      ast::ExpressionStatement::make(
+                          ast::Literal::makeTrue())}))})),
       ParserTestData("IfStatement", "if(true){true;}",
                      ast::Program::make(
                          std::vector<ast::StatementPtr>{ast::IfStatement::make(

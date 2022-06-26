@@ -39,6 +39,7 @@ class Parser {
  private:
   ast::StatementPtr declaration();
   ast::VarDeclarationPtr varDeclaration();
+  ast::FunctionDeclarationPtr functionDeclaration();
   ast::BlockPtr block();
   ast::StatementPtr statement();
   ast::ForStatementPtr forStatement();
