@@ -39,15 +39,7 @@ set(SOURCES
   src/common.h
   src/ast.h
   src/ast.cpp
-  src/chunk.h
-  src/chunk.cpp
-  src/compiler.h
-  src/compiler.cpp
-  src/compiler_v2.h
-  src/compiler_v2.cpp
   src/config.h
-  src/debug.h
-  src/debug.cpp
   src/lineinfo.h
   src/lineinfo.cpp
   src/scanner.h
@@ -56,18 +48,6 @@ set(SOURCES
   src/parser.cpp
   src/object.h
   src/object.cpp
-  src/function.h
-  src/function.cpp
-  src/native.h
-  src/native.cpp
-  src/closure.h
-  src/closure.cpp
-  src/upvalue.h
-  src/upvalue.cpp
-  src/value.h
-  src/value.cpp
-  src/vm.h
-  src/vm.cpp
 )
 add_library(libcpplox STATIC ${SOURCES})
 
@@ -92,11 +72,8 @@ enable_testing()
 
 add_executable(
   cpplox_test
-  tests/value_test.cpp
   tests/scanner_test.cpp
   tests/parser_test.cpp
-  tests/compiler_test.cpp
-  tests/compiler_v2_test.cpp
 )
 
 target_link_libraries(

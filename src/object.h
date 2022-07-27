@@ -3,12 +3,17 @@
 
 #include "common.h"
 
-enum ObjectType {
+enum class ObjectType {
   OBJ_EMPTY = 0,
+  OBJ_INTEGER,
+  OBJ_BOOLEAN,
+  OBJ_STRING,
+  OBJ_NULL,
+  OBJ_RETURN_VALUE,
+  OBJ_ERROR,
   OBJ_FUNCTION,
+  OBJ_ARRAY,
   OBJ_NATIVE,
-  OBJ_CLOSURE,
-  OBJ_UPVALUE,
 };
 
 class Object {
@@ -16,7 +21,7 @@ class Object {
   ObjectType type;
 
  public:
-  Object() : type(OBJ_EMPTY) {}
+  Object() : type(ObjectType::OBJ_EMPTY) {}
   Object(const Object &obj) : type(obj.type) {}
   Object(ObjectType type) : type(type) {}
 

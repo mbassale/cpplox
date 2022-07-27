@@ -2,8 +2,8 @@
 #define __cpplox_ast_h
 
 #include "common.h"
+#include "object.h"
 #include "scanner.h"
-#include "value.h"
 
 namespace cpplox::ast {
 
@@ -28,7 +28,10 @@ enum class NodeType {
   ASSIGNMENT_EXPRESSION,
   BINARY_EXPRESSION,
   UNARY_EXPRESSION,
-  LITERAL_EXPRESSION,
+  INTEGER_LITERAL,
+  BOOLEAN_LITERAL,
+  STRING_LITERAL,
+  NIL_LITERAL,
 
   /*
    * STATEMENTS
@@ -68,48 +71,92 @@ struct Expression : public Node {
 };
 using ExpressionPtr = std::shared_ptr<Expression>;
 
-struct Literal : public Expression {
-  const TokenType TokenType_;
-  const Value Value_;
+struct IntegerLiteral : public Expression {
+  const int64_t Value;
 
-  Literal(const TokenType tokenType, const Value& value)
-      : Expression(NodeType::LITERAL_EXPRESSION),
-        TokenType_(tokenType),
-        Value_(value) {}
-  Literal(const TokenType tokenType, Value&& value)
-      : Expression(NodeType::LITERAL_EXPRESSION),
-        TokenType_(tokenType),
-        Value_(value) {}
+  IntegerLiteral(const int64_t value)
+      : Expression(NodeType::INTEGER_LITERAL), Value(value) {}
 
   bool isEqual(const Node& other) override {
     if (Type == other.Type) {
-      const auto& otherLiteral = dynamic_cast<const Literal&>(other);
+      const auto& otherLiteral = dynamic_cast<const IntegerLiteral&>(other);
       return isEqual(otherLiteral);
     }
     return false;
   }
 
-  bool isEqual(const Literal& other) {
-    return TokenType_ == other.TokenType_ && Value_ == other.Value_;
-  }
+  bool isEqual(const IntegerLiteral& other) { return Value == other.Value; }
 
-  static std::shared_ptr<Literal> makeNumber(const double value) {
-    return std::make_shared<Literal>(TokenType::TOKEN_NUMBER, Value(value));
-  }
-  static std::shared_ptr<Literal> makeString(const std::string& value) {
-    return std::make_shared<Literal>(TokenType::TOKEN_STRING, Value(value));
-  }
-  static std::shared_ptr<Literal> makeTrue() {
-    return std::make_shared<Literal>(TokenType::TOKEN_TRUE, Value(true));
-  }
-  static std::shared_ptr<Literal> makeFalse() {
-    return std::make_shared<Literal>(TokenType::TOKEN_FALSE, Value(false));
-  }
-  static std::shared_ptr<Literal> makeNil() {
-    return std::make_shared<Literal>(TokenType::TOKEN_NIL, Value(nullptr));
+  static std::shared_ptr<IntegerLiteral> make(const int64_t value) {
+    return std::make_shared<IntegerLiteral>(value);
   }
 };
-using LiteralPtr = std::shared_ptr<Literal>;
+using IntegerLiteralPtr = std::shared_ptr<IntegerLiteral>;
+
+struct BooleanLiteral : public Expression {
+  const int64_t Value;
+
+  BooleanLiteral(const int64_t value)
+      : Expression(NodeType::BOOLEAN_LITERAL), Value(value) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherLiteral = dynamic_cast<const BooleanLiteral&>(other);
+      return isEqual(otherLiteral);
+    }
+    return false;
+  }
+
+  bool isEqual(const BooleanLiteral& other) { return Value == other.Value; }
+
+  static std::shared_ptr<BooleanLiteral> makeTrue() {
+    return std::make_shared<BooleanLiteral>(true);
+  }
+
+  static std::shared_ptr<BooleanLiteral> makeFalse() {
+    return std::make_shared<BooleanLiteral>(false);
+  }
+
+  static std::shared_ptr<BooleanLiteral> make(const bool value) {
+    return std::make_shared<BooleanLiteral>(value);
+  }
+};
+using BooleanLiteralPtr = std::shared_ptr<BooleanLiteral>;
+
+struct StringLiteral : public Expression {
+  const std::string Value;
+
+  StringLiteral(const std::string& value)
+      : Expression(NodeType::STRING_LITERAL), Value(value) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherLiteral = dynamic_cast<const StringLiteral&>(other);
+      return isEqual(otherLiteral);
+    }
+    return false;
+  }
+
+  bool isEqual(const StringLiteral& other) { return Value == other.Value; }
+
+  static std::shared_ptr<StringLiteral> make(const std::string& value) {
+    return std::make_shared<StringLiteral>(value);
+  }
+};
+using StringLiteralPtr = std::shared_ptr<StringLiteral>;
+
+struct NilLiteral : public Expression {
+  NilLiteral() : Expression(NodeType::NIL_LITERAL) {}
+
+  bool isEqual(const Node& other) override { return Type == other.Type; }
+
+  bool isEqual(const NilLiteral& other) { return true; }
+
+  static std::shared_ptr<NilLiteral> make() {
+    return std::make_shared<NilLiteral>();
+  }
+};
+using NilLiteralPtr = std::shared_ptr<NilLiteral>;
 
 struct VariableExpr : public Expression {
   std::string identifier;

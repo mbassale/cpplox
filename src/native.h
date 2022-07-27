@@ -1,7 +1,6 @@
 #ifndef __cpplox_native_h
 #define __cpplox_native_h
 
-#include "chunk.h"
 #include "common.h"
 #include "object.h"
 
