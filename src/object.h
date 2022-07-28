@@ -19,7 +19,6 @@ enum class ObjectType {
 struct Object {
   const ObjectType Type;
 
- public:
   Object() : Type(ObjectType::OBJ_EMPTY) {}
   Object(const Object &obj) : Type(obj.Type) {}
   Object(const ObjectType type) : Type(type) {}
@@ -31,15 +30,15 @@ struct Object {
 
  protected:
   friend bool operator==(const Object &, const Object &);
+  friend bool operator!=(const Object &, const Object &);
 };
 
 typedef std::shared_ptr<Object> ObjectPtr;
-typedef std::weak_ptr<Object> ObjectWeakPtr;
 
 bool operator==(const Object &lhs, const Object &rhs);
+bool operator!=(const Object &lhs, const Object &rhs);
 
 struct IntegerObject : public Object {
- public:
   int64_t Value;
 
   IntegerObject(const int64_t value)
@@ -61,5 +60,27 @@ struct IntegerObject : public Object {
     return false;
   }
 };
+
+typedef std::shared_ptr<IntegerObject> IntegerObjectPtr;
+
+struct BooleanObject : public Object {
+  bool Value;
+
+  BooleanObject(const bool value)
+      : Object(ObjectType::OBJ_INTEGER), Value(value) {}
+
+  std::string toString() const override { return Value ? "true" : "false"; }
+
+  bool isFalsey() const override { return !Value; }
+  bool isTruthy() const override { return Value; }
+  bool isEqual(const Object &obj) const override {
+    if (obj.Type == Type) {
+      const auto &rhs = dynamic_cast<const BooleanObject &>(obj);
+      return Value == rhs.Value;
+    }
+  }
+};
+
+typedef std::shared_ptr<BooleanObject> BooleanObjectPtr;
 
 #endif  // __cpplox_object_h

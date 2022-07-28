@@ -74,6 +74,7 @@ add_executable(
   cpplox_test
   tests/scanner_test.cpp
   tests/parser_test.cpp
+  tests/object_test.cpp
 )
 
 target_link_libraries(
