@@ -48,6 +48,8 @@ set(SOURCES
   src/parser.cpp
   src/object.h
   src/object.cpp
+  src/environment.h
+  src/environment.cpp
 )
 add_library(libcpplox STATIC ${SOURCES})
 
@@ -75,6 +77,7 @@ add_executable(
   tests/scanner_test.cpp
   tests/parser_test.cpp
   tests/object_test.cpp
+  tests/environment_test.cpp
 )
 
 target_link_libraries(

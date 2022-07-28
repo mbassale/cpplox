@@ -38,6 +38,19 @@ typedef std::shared_ptr<Object> ObjectPtr;
 bool operator==(const Object &lhs, const Object &rhs);
 bool operator!=(const Object &lhs, const Object &rhs);
 
+struct NullObject : public Object {
+  NullObject() : Object(ObjectType::OBJ_NULL) {}
+
+  virtual std::string toString() const { return "nil"; }
+  virtual bool isFalsey() const { return true; }
+  virtual bool isTruthy() const { return false; }
+  virtual bool isEqual(const Object &obj) const {
+    return obj.Type == ObjectType::OBJ_NULL;
+  }
+};
+
+typedef std::shared_ptr<NullObject> NullObjectPtr;
+
 struct IntegerObject : public Object {
   int64_t Value;
 
@@ -54,7 +67,7 @@ struct IntegerObject : public Object {
   bool isTruthy() const override { return Value != 0; }
   bool isEqual(const Object &obj) const override {
     if (obj.Type == Type) {
-      const auto &rhs = dynamic_cast<const IntegerObject &>(obj);
+      const auto &rhs = static_cast<const IntegerObject &>(obj);
       return Value == rhs.Value;
     }
     return false;
@@ -75,12 +88,17 @@ struct BooleanObject : public Object {
   bool isTruthy() const override { return Value; }
   bool isEqual(const Object &obj) const override {
     if (obj.Type == Type) {
-      const auto &rhs = dynamic_cast<const BooleanObject &>(obj);
+      const auto &rhs = static_cast<const BooleanObject &>(obj);
       return Value == rhs.Value;
     }
+    return false;
   }
 };
 
 typedef std::shared_ptr<BooleanObject> BooleanObjectPtr;
+
+static auto NULL_OBJECT_PTR = std::make_shared<NullObject>();
+static auto TRUE_OBJECT_PTR = std::make_shared<BooleanObject>(true);
+static auto FALSE_OBJECT_PTR = std::make_shared<BooleanObject>(false);
 
 #endif  // __cpplox_object_h
