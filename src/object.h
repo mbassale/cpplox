@@ -97,6 +97,25 @@ struct BooleanObject : public Object {
 
 typedef std::shared_ptr<BooleanObject> BooleanObjectPtr;
 
+struct StringObject : public Object {
+  std::string Value;
+
+  StringObject(const std::string &value)
+      : Object(ObjectType::OBJ_STRING), Value(value) {}
+
+  std::string toString() const override { return Value; }
+
+  bool isFalsey() const override { return Value.length() == 0; }
+  bool isTruthy() const override { return Value.length() > 0; }
+  bool isEqual(const Object &obj) const override {
+    if (obj.Type == Type) {
+      const auto &rhs = static_cast<const StringObject &>(obj);
+      return Value == rhs.Value;
+    }
+    return false;
+  }
+};
+
 static auto NULL_OBJECT_PTR = std::make_shared<NullObject>();
 static auto TRUE_OBJECT_PTR = std::make_shared<BooleanObject>(true);
 static auto FALSE_OBJECT_PTR = std::make_shared<BooleanObject>(false);
