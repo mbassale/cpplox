@@ -116,6 +116,8 @@ struct StringObject : public Object {
   }
 };
 
+typedef std::shared_ptr<StringObject> StringObjectPtr;
+
 static auto NULL_OBJECT_PTR = std::make_shared<NullObject>();
 static auto TRUE_OBJECT_PTR = std::make_shared<BooleanObject>(true);
 static auto FALSE_OBJECT_PTR = std::make_shared<BooleanObject>(false);

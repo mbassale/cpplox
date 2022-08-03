@@ -23,6 +23,7 @@ class Evaluator {
   IntegerObjectPtr evalIntegerLiteral(ast::IntegerLiteralPtr expr);
   BooleanObjectPtr evalBooleanLiteral(ast::BooleanLiteralPtr expr);
   NullObjectPtr evalNilLiteral(ast::NilLiteralPtr expr);
+  StringObjectPtr evalStringLiteral(ast::StringLiteralPtr expr);
 };
 
 }  // namespace cpplox

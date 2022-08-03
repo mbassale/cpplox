@@ -34,7 +34,8 @@ ObjectPtr Evaluator::evalExpression(ExpressionPtr expr) {
       return evalBooleanLiteral(boolExpr);
     }
     case NodeType::STRING_LITERAL: {
-      break;
+      auto stringExpr = std::static_pointer_cast<StringLiteral>(expr);
+      return evalStringLiteral(stringExpr);
     }
     case NodeType::NIL_LITERAL: {
       auto nilExpr = std::static_pointer_cast<NilLiteral>(expr);
@@ -60,6 +61,10 @@ BooleanObjectPtr Evaluator::evalBooleanLiteral(ast::BooleanLiteralPtr expr) {
 
 NullObjectPtr Evaluator::evalNilLiteral(ast::NilLiteralPtr expr) {
   return NULL_OBJECT_PTR;
+}
+
+StringObjectPtr Evaluator::evalStringLiteral(ast::StringLiteralPtr expr) {
+  return std::make_shared<StringObject>(expr->Value);
 }
 
 }  // namespace cpplox

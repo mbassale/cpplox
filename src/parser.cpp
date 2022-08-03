@@ -339,9 +339,13 @@ ast::ExpressionPtr Parser::primary() {
     case TokenType::TOKEN_NUMBER:
       advance();
       return ast::IntegerLiteral::make(std::stod(previous.lexeme()));
-    case TokenType::TOKEN_STRING:
+    case TokenType::TOKEN_STRING: {
       advance();
-      return ast::StringLiteral::make(previous.lexeme());
+      const auto lexeme = previous.lexeme();
+      assert(lexeme.size() >= 2);
+      const auto strLiteral = lexeme.substr(1, lexeme.size() - 2);
+      return ast::StringLiteral::make(strLiteral);
+    }
     case TokenType::TOKEN_IDENTIFIER:
       advance();
       return ast::VariableExpr::make(previous.lexeme());

@@ -16,10 +16,11 @@ TEST_F(EvaluatorTest, TestLiterals) {
     string source;
     string expectedValue;
   };
-  array<TestCase, 5> testCases = {TestCase{"true;", "true"},
-                                  TestCase{"false;", "false"},
-                                  TestCase{"nil;", "nil"}, TestCase{"1;", "1"},
-                                  TestCase{"10000;", "10000"}};
+  array<TestCase, 7> testCases = {
+      TestCase{"true;", "true"},   TestCase{"false;", "false"},
+      TestCase{"nil;", "nil"},     TestCase{"1;", "1"},
+      TestCase{"10000;", "10000"}, TestCase{"\"test\";", "test"},
+      TestCase{"\"\";", ""}};
 
   for (const auto testCase : testCases) {
     Scanner scanner(testCase.source);
