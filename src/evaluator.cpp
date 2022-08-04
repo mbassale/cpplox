@@ -41,6 +41,10 @@ ObjectPtr Evaluator::evalExpression(ExpressionPtr expr) {
       auto nilExpr = std::static_pointer_cast<NilLiteral>(expr);
       return evalNilLiteral(nilExpr);
     }
+    case NodeType::UNARY_EXPRESSION: {
+      auto unaryExpr = std::static_pointer_cast<UnaryExpr>(expr);
+      return evalUnaryExpression(unaryExpr);
+    }
     default:
       break;
   }
@@ -65,6 +69,34 @@ NullObjectPtr Evaluator::evalNilLiteral(ast::NilLiteralPtr expr) {
 
 StringObjectPtr Evaluator::evalStringLiteral(ast::StringLiteralPtr expr) {
   return std::make_shared<StringObject>(expr->Value);
+}
+
+ObjectPtr Evaluator::evalUnaryExpression(ast::UnaryExprPtr expr) {
+  auto rhsValue = evalExpression(expr->right);
+
+  switch (expr->operator_.type) {
+    case TokenType::TOKEN_MINUS: {
+      return evalMinusOperator(rhsValue);
+    }
+    case TokenType::TOKEN_BANG: {
+      return evalBangOperator(rhsValue);
+    }
+    default:
+      // TODO: throw RuntimeError
+      return NULL_OBJECT_PTR;
+  }
+}
+
+ObjectPtr Evaluator::evalMinusOperator(ObjectPtr rhsValue) {
+  if (rhsValue->Type != ObjectType::OBJ_INTEGER) {
+    // TODO: throw RuntimeError
+  }
+  auto intObj = std::static_pointer_cast<IntegerObject>(rhsValue);
+  return IntegerObject::make(-intObj->Value);
+}
+
+ObjectPtr Evaluator::evalBangOperator(ObjectPtr rhsValue) {
+  return BooleanObject::make(!rhsValue->isTruthy());
 }
 
 }  // namespace cpplox

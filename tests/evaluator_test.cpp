@@ -32,3 +32,26 @@ TEST_F(EvaluatorTest, TestLiterals) {
     EXPECT_EQ(testCase.expectedValue, value->toString());
   }
 }
+
+TEST_F(EvaluatorTest, TestUnaryExpression) {
+  struct TestCase {
+    string source;
+    std::optional<int> expectedIntValue;
+    std::optional<bool> expectedBoolValue;
+  };
+  array<TestCase, 2> testCases = {TestCase{"-1;", -1, nullopt},
+                                  TestCase{"!true;", nullopt, false}};
+  for (const auto testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    EXPECT_FALSE(parser.hasErrors());
+    Evaluator evaluator;
+    const auto value = evaluator.eval(program);
+    if (testCase.expectedIntValue.has_value()) {
+      EXPECT_EQ(value->Type, ObjectType::OBJ_INTEGER);
+    } else if (testCase.expectedBoolValue.has_value()) {
+      EXPECT_EQ(value->Type, ObjectType::OBJ_BOOLEAN);
+    }
+  }
+}

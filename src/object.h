@@ -72,6 +72,10 @@ struct IntegerObject : public Object {
     }
     return false;
   }
+
+  static std::shared_ptr<IntegerObject> make(const int64_t value) {
+    return std::make_shared<IntegerObject>(value);
+  }
 };
 
 typedef std::shared_ptr<IntegerObject> IntegerObjectPtr;
@@ -80,7 +84,7 @@ struct BooleanObject : public Object {
   bool Value;
 
   BooleanObject(const bool value)
-      : Object(ObjectType::OBJ_INTEGER), Value(value) {}
+      : Object(ObjectType::OBJ_BOOLEAN), Value(value) {}
 
   std::string toString() const override { return Value ? "true" : "false"; }
 
@@ -92,6 +96,10 @@ struct BooleanObject : public Object {
       return Value == rhs.Value;
     }
     return false;
+  }
+
+  static std::shared_ptr<BooleanObject> make(const bool value) {
+    return std::make_shared<BooleanObject>(value);
   }
 };
 
