@@ -33,7 +33,7 @@ struct Object {
   friend bool operator!=(const Object &, const Object &);
 };
 
-typedef std::shared_ptr<Object> ObjectPtr;
+using ObjectPtr = std::shared_ptr<Object>;
 
 bool operator==(const Object &lhs, const Object &rhs);
 bool operator!=(const Object &lhs, const Object &rhs);
@@ -49,7 +49,7 @@ struct NullObject : public Object {
   }
 };
 
-typedef std::shared_ptr<NullObject> NullObjectPtr;
+using NullObjectPtr = std::shared_ptr<NullObject>;
 
 struct IntegerObject : public Object {
   int64_t Value;
@@ -78,7 +78,7 @@ struct IntegerObject : public Object {
   }
 };
 
-typedef std::shared_ptr<IntegerObject> IntegerObjectPtr;
+using IntegerObjectPtr = std::shared_ptr<IntegerObject>;
 
 struct BooleanObject : public Object {
   bool Value;
@@ -103,7 +103,7 @@ struct BooleanObject : public Object {
   }
 };
 
-typedef std::shared_ptr<BooleanObject> BooleanObjectPtr;
+using BooleanObjectPtr = std::shared_ptr<BooleanObject>;
 
 struct StringObject : public Object {
   std::string Value;
@@ -124,7 +124,7 @@ struct StringObject : public Object {
   }
 };
 
-typedef std::shared_ptr<StringObject> StringObjectPtr;
+using StringObjectPtr = std::shared_ptr<StringObject>;
 
 static auto NULL_OBJECT_PTR = std::make_shared<NullObject>();
 static auto TRUE_OBJECT_PTR = std::make_shared<BooleanObject>(true);
