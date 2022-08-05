@@ -16,6 +16,9 @@ class Evaluator {
   Evaluator();
 
   ObjectPtr eval(ast::ProgramPtr program);
+  ObjectPtr getGlobalValue(const std::string& identifier) const {
+    return globalEnv->get(identifier);
+  }
 
  private:
   ObjectPtr evalStatement(ast::StatementPtr stmt);

@@ -13,8 +13,8 @@ class Environment {
   Environment() {}
   Environment(std::shared_ptr<Environment> enclosing) : enclosing(enclosing) {}
 
-  void set(std::string identifier, ObjectPtr value);
-  ObjectPtr get(std::string identifier);
+  void set(const std::string& identifier, ObjectPtr value);
+  ObjectPtr get(const std::string& identifier);
 };
 
 #endif  // __cpplox_environment_h

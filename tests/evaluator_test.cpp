@@ -63,10 +63,13 @@ TEST_F(EvaluatorTest, TestUnaryExpression) {
 TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
   struct TestCase {
     string source;
-    std::optional<int> expectedValue;
+    std::unordered_map<std::string, int> expectedValues;
   };
-  array<TestCase, 2> testCases = {TestCase{"var test;", nullopt},
-                                  TestCase{"var a=1;", 1}};
+  array<TestCase, 4> testCases = {
+      TestCase{"var test;", {}}, TestCase{"var a=1;", {{"a", 1}}},
+      TestCase{"var a=-1;", {{"a", -1}}},
+      TestCase{"var a=1; var b=2; var c=3;", {{"a", 1}, {"b", 2}, {"c", 3}}}};
+
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
@@ -74,10 +77,16 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
     EXPECT_FALSE(parser.hasErrors());
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
-    if (testCase.expectedValue.has_value()) {
-      EXPECT_EQ(value->Type, ObjectType::OBJ_INTEGER);
-      auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedValue);
+    if (testCase.expectedValues.size() > 0) {
+      auto it = testCase.expectedValues.begin();
+      while (it != testCase.expectedValues.end()) {
+        auto actualValue = evaluator.getGlobalValue(it->first);
+        EXPECT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER);
+        auto actualIntValue =
+            std::static_pointer_cast<IntegerObject>(actualValue);
+        EXPECT_EQ(actualIntValue->Value, it->second);
+        it++;
+      }
     } else {
       EXPECT_EQ(value->Type, ObjectType::OBJ_NULL);
     }
