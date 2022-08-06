@@ -92,3 +92,27 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
     }
   }
 }
+
+TEST_F(EvaluatorTest, TestBlockStmts) {
+  struct TestCase {
+    string source;
+    std::optional<int> expectedValue;
+  };
+  array<TestCase, 3> testCases = {TestCase{"{}", nullopt},
+                                  TestCase{"{ 1; 2; 3; }", 3},
+                                  TestCase{"{ true; 1; }", 1}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    EXPECT_FALSE(parser.hasErrors());
+    Evaluator evaluator;
+    const auto value = evaluator.eval(program);
+    if (testCase.expectedValue.has_value()) {
+      EXPECT_EQ(value->Type, ObjectType::OBJ_INTEGER);
+      const auto intValue = std::static_pointer_cast<IntegerObject>(value);
+      EXPECT_EQ(intValue->Value, *testCase.expectedValue);
+    }
+  }
+}

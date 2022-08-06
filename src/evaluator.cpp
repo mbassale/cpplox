@@ -23,6 +23,13 @@ ObjectPtr Evaluator::evalStatement(StatementPtr stmt) {
       auto varDeclStmt = std::static_pointer_cast<VarDeclaration>(stmt);
       return evalVarDeclarationStatement(varDeclStmt);
     }
+    case NodeType::BLOCK_STATEMENT: {
+      auto blockStmt = std::static_pointer_cast<Block>(stmt);
+      return evalBlockStatement(blockStmt);
+    }
+    case NodeType::EMPTY_STATEMENT: {
+      break;
+    }
   }
   return NULL_OBJECT_PTR;
 }
@@ -36,6 +43,14 @@ ObjectPtr Evaluator::evalVarDeclarationStatement(VarDeclarationPtr stmt) {
   const auto identifier = stmt->identifier.lexeme();
   globalEnv->set(identifier, value);
   return value;
+}
+
+ObjectPtr Evaluator::evalBlockStatement(ast::BlockPtr stmt) {
+  ObjectPtr lastValue = NULL_OBJECT_PTR;
+  for (const auto& stmt : stmt->statements) {
+    lastValue = evalStatement(stmt);
+  }
+  return lastValue;
 }
 
 ObjectPtr Evaluator::evalExpression(ExpressionPtr expr) {

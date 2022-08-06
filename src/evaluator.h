@@ -23,6 +23,7 @@ class Evaluator {
  private:
   ObjectPtr evalStatement(ast::StatementPtr stmt);
   ObjectPtr evalVarDeclarationStatement(ast::VarDeclarationPtr stmt);
+  ObjectPtr evalBlockStatement(ast::BlockPtr stmt);
   ObjectPtr evalExpression(ast::ExpressionPtr expr);
   IntegerObjectPtr evalIntegerLiteral(ast::IntegerLiteralPtr expr);
   BooleanObjectPtr evalBooleanLiteral(ast::BooleanLiteralPtr expr);
