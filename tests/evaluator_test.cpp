@@ -116,3 +116,26 @@ TEST_F(EvaluatorTest, TestBlockStmts) {
     }
   }
 }
+
+TEST_F(EvaluatorTest, TestIfStmts) {
+  struct TestCase {
+    string source;
+    std::optional<int> expectedValue;
+  };
+  vector<TestCase> testCases = {TestCase{"if(true){ 1; } else { 2; }", 1},
+                                TestCase{"if(false){ 1; } else { 2; }", 2}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors());
+    Evaluator evaluator;
+    auto value = evaluator.eval(program);
+    if (testCase.expectedValue.has_value()) {
+      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
+      auto intValue = std::static_pointer_cast<IntegerObject>(value);
+      EXPECT_EQ(intValue->Value, *testCase.expectedValue);
+    }
+  }
+}

@@ -27,6 +27,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto blockStmt = std::static_pointer_cast<Block>(stmt);
       return evalBlockStatement(ctx, blockStmt);
     }
+    case NodeType::IF_STATEMENT: {
+      auto ifStmt = std::static_pointer_cast<IfStatement>(stmt);
+      return evalIfStatement(ctx, ifStmt);
+    }
     case NodeType::EMPTY_STATEMENT: {
       break;
     }
@@ -54,6 +58,15 @@ ObjectPtr Evaluator::evalBlockStatement(EvalContextPtr ctx,
     lastValue = evalStatement(localCtx, stmt);
   }
   return lastValue;
+}
+
+ObjectPtr Evaluator::evalIfStatement(EvalContextPtr ctx, IfStatementPtr stmt) {
+  auto conditionValue = evalExpression(ctx, stmt->condition);
+  if (conditionValue->isTruthy()) {
+    return evalStatement(ctx, stmt->thenBranch);
+  } else {
+    return evalStatement(ctx, stmt->elseBranch);
+  }
 }
 
 ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {

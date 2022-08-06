@@ -43,6 +43,8 @@ class Evaluator {
   ObjectPtr evalStatement(EvalContextPtr ctx, ast::StatementPtr stmt);
   ObjectPtr evalVarDeclarationStatement(EvalContextPtr ctx,
                                         ast::VarDeclarationPtr stmt);
+  ObjectPtr evalIfStatement(EvalContextPtr ctx, ast::IfStatementPtr stmt);
+
   ObjectPtr evalBlockStatement(EvalContextPtr ctx, ast::BlockPtr stmt);
   ObjectPtr evalExpression(EvalContextPtr ctx, ast::ExpressionPtr expr);
   IntegerObjectPtr evalIntegerLiteral(EvalContextPtr ctx,
