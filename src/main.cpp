@@ -1,6 +1,7 @@
 #include <gflags/gflags.h>
 
 #include "common.h"
+#include "evaluator.h"
 #include "parser.h"
 #include "scanner.h"
 
@@ -52,6 +53,11 @@ class Driver {
         return false;
       }
       VLOG(0) << "======== PARSING END ========";
+      VLOG(0) << "======== EVALUATOR START ====";
+      cpplox::Evaluator evaluator;
+      const auto value = evaluator.eval(program);
+      VLOG(0) << "ret: " << value->toString();
+      VLOG(0) << "======== EVALUATOR END ======";
       return true;
     } catch (std::exception &ex) {
       LOG(ERROR) << "RuntimeError: " << ex.what();
