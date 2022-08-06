@@ -45,15 +45,15 @@ TEST_F(EvaluatorTest, TestUnaryExpression) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
     auto program = parser.parse();
-    EXPECT_FALSE(parser.hasErrors());
+    ASSERT_FALSE(parser.hasErrors());
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedIntValue.has_value()) {
-      EXPECT_EQ(value->Type, ObjectType::OBJ_INTEGER);
+      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
       auto intValue = std::static_pointer_cast<IntegerObject>(value);
       EXPECT_EQ(intValue->Value, *testCase.expectedIntValue);
     } else if (testCase.expectedBoolValue.has_value()) {
-      EXPECT_EQ(value->Type, ObjectType::OBJ_BOOLEAN);
+      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN);
       auto boolValue = std::static_pointer_cast<BooleanObject>(value);
       EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue);
     }
@@ -74,14 +74,14 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
     auto program = parser.parse();
-    EXPECT_FALSE(parser.hasErrors());
+    ASSERT_FALSE(parser.hasErrors());
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedValues.size() > 0) {
       auto it = testCase.expectedValues.begin();
       while (it != testCase.expectedValues.end()) {
         auto actualValue = evaluator.getGlobalValue(it->first);
-        EXPECT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER);
+        ASSERT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER);
         auto actualIntValue =
             std::static_pointer_cast<IntegerObject>(actualValue);
         EXPECT_EQ(actualIntValue->Value, it->second);
