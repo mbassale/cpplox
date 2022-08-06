@@ -31,6 +31,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto ifStmt = std::static_pointer_cast<IfStatement>(stmt);
       return evalIfStatement(ctx, ifStmt);
     }
+    case NodeType::FOR_STATEMENT: {
+      auto forStmt = std::static_pointer_cast<ForStatement>(stmt);
+      return evalForStatement(ctx, forStmt);
+    }
     case NodeType::EMPTY_STATEMENT: {
       break;
     }
@@ -67,6 +71,24 @@ ObjectPtr Evaluator::evalIfStatement(EvalContextPtr ctx, IfStatementPtr stmt) {
   } else {
     return evalStatement(ctx, stmt->elseBranch);
   }
+}
+
+ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
+                                      ast::ForStatementPtr stmt) {
+  auto localCtx = EvalContext::make(ctx);
+  auto lastValue = evalStatement(localCtx, stmt->initializer);
+  auto keepLooping = true;
+  while (keepLooping) {
+    auto conditionValue = evalExpression(localCtx, stmt->condition);
+    lastValue = conditionValue;
+    if (conditionValue->isFalsey()) {
+      break;
+    }
+    lastValue = evalStatement(localCtx, stmt->body);
+    lastValue = evalExpression(localCtx, stmt->increment);
+    LOG(INFO) << lastValue->toString();
+  }
+  return lastValue;
 }
 
 ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
