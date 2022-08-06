@@ -16,7 +16,7 @@ TEST_F(EvaluatorTest, TestLiterals) {
     string source;
     string expectedValue;
   };
-  array<TestCase, 7> testCases = {
+  vector<TestCase> testCases = {
       TestCase{"true;", "true"},   TestCase{"false;", "false"},
       TestCase{"nil;", "nil"},     TestCase{"1;", "1"},
       TestCase{"10000;", "10000"}, TestCase{"\"test\";", "test"},
@@ -39,8 +39,8 @@ TEST_F(EvaluatorTest, TestUnaryExpression) {
     std::optional<int> expectedIntValue;
     std::optional<bool> expectedBoolValue;
   };
-  array<TestCase, 2> testCases = {TestCase{"-1;", -1, nullopt},
-                                  TestCase{"!true;", nullopt, false}};
+  vector<TestCase> testCases = {TestCase{"-1;", -1, nullopt},
+                                TestCase{"!true;", nullopt, false}};
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
@@ -65,7 +65,7 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
     string source;
     std::unordered_map<std::string, int> expectedValues;
   };
-  array<TestCase, 4> testCases = {
+  vector<TestCase> testCases = {
       TestCase{"var test;", {}}, TestCase{"var a=1;", {{"a", 1}}},
       TestCase{"var a=-1;", {{"a", -1}}},
       TestCase{"var a=1; var b=2; var c=3;", {{"a", 1}, {"b", 2}, {"c", 3}}}};
@@ -98,20 +98,20 @@ TEST_F(EvaluatorTest, TestBlockStmts) {
     string source;
     std::optional<int> expectedValue;
   };
-  array<TestCase, 3> testCases = {TestCase{"{}", nullopt},
-                                  TestCase{"{ 1; 2; 3; }", 3},
-                                  TestCase{"{ true; 1; }", 1}};
+  vector<TestCase> testCases = {TestCase{"{}", nullopt},
+                                TestCase{"{ 1; 2; 3; }", 3},
+                                TestCase{"{ true; 1; }", 1}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
     auto program = parser.parse();
-    EXPECT_FALSE(parser.hasErrors());
+    ASSERT_FALSE(parser.hasErrors());
     Evaluator evaluator;
-    const auto value = evaluator.eval(program);
+    auto value = evaluator.eval(program);
     if (testCase.expectedValue.has_value()) {
-      EXPECT_EQ(value->Type, ObjectType::OBJ_INTEGER);
-      const auto intValue = std::static_pointer_cast<IntegerObject>(value);
+      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
+      auto intValue = std::static_pointer_cast<IntegerObject>(value);
       EXPECT_EQ(intValue->Value, *testCase.expectedValue);
     }
   }
