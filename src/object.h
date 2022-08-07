@@ -28,6 +28,16 @@ struct Object {
   virtual bool isTruthy() const { return false; }
   virtual bool isEqual(const Object &obj) const { return true; }
 
+  inline bool isNumeric() {
+    switch (Type) {
+      case ObjectType::OBJ_INTEGER:
+        return true;
+    }
+    return false;
+  }
+
+  inline bool isString() { return Type == ObjectType::OBJ_STRING; }
+
  protected:
   friend bool operator==(const Object &, const Object &);
   friend bool operator!=(const Object &, const Object &);

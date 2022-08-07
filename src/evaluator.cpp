@@ -3,6 +3,8 @@
 namespace cpplox {
 using namespace ast;
 
+static IntegerObjectPtr tryCastAsInteger(ObjectPtr obj);
+
 Evaluator::Evaluator() { globalCtx = EvalContext::make(); }
 
 ObjectPtr Evaluator::eval(ProgramPtr program) {
@@ -113,6 +115,10 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
       auto unaryExpr = std::static_pointer_cast<UnaryExpr>(expr);
       return evalUnaryExpression(ctx, unaryExpr);
     }
+    case NodeType::BINARY_EXPRESSION: {
+      auto binaryExpr = std::static_pointer_cast<BinaryExpr>(expr);
+      return evalBinaryExpression(ctx, binaryExpr);
+    }
     default:
       break;
   }
@@ -143,6 +149,24 @@ StringObjectPtr Evaluator::evalStringLiteral(EvalContextPtr ctx,
   return std::make_shared<StringObject>(expr->Value);
 }
 
+ObjectPtr Evaluator::evalBinaryExpression(EvalContextPtr ctx,
+                                          ast::BinaryExprPtr expr) {
+  switch (expr->operator_.type) {
+    case TokenType::TOKEN_PLUS:
+    case TokenType::TOKEN_MINUS:
+    case TokenType::TOKEN_STAR:
+    case TokenType::TOKEN_SLASH: {
+      auto leftValue = evalExpression(ctx, expr->left);
+      auto rightValue = evalExpression(ctx, expr->right);
+      return evalBinaryOperator(ctx, leftValue, expr->operator_.type,
+                                rightValue);
+    }
+    default:
+      // TODO: throw RuntimeError
+      return NULL_OBJECT_PTR;
+  }
+}
+
 ObjectPtr Evaluator::evalUnaryExpression(EvalContextPtr ctx,
                                          ast::UnaryExprPtr expr) {
   auto rhsValue = evalExpression(ctx, expr->right);
@@ -160,6 +184,37 @@ ObjectPtr Evaluator::evalUnaryExpression(EvalContextPtr ctx,
   }
 }
 
+ObjectPtr Evaluator::evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+                                        TokenType operator_,
+                                        ObjectPtr rhsValue) {
+  if (lhsValue->isNumeric() && rhsValue->isNumeric()) {
+    auto lhsIntValue = tryCastAsInteger(lhsValue);
+    auto rhsIntValue = tryCastAsInteger(rhsValue);
+    int64_t result;
+    switch (operator_) {
+      case TokenType::TOKEN_STAR:
+        result = lhsIntValue->Value * rhsIntValue->Value;
+        break;
+      case TokenType::TOKEN_SLASH:
+        result = lhsIntValue->Value / rhsIntValue->Value;
+        break;
+      case TokenType::TOKEN_PLUS:
+        result = lhsIntValue->Value + rhsIntValue->Value;
+        break;
+      case TokenType::TOKEN_MINUS:
+        result = lhsIntValue->Value - rhsIntValue->Value;
+        break;
+      default:
+        // TODO: throw RuntimeError
+        return NULL_OBJECT_PTR;
+        break;
+    }
+    return IntegerObject::make(result);
+  }
+  // TODO: throw RuntimeError
+  return NULL_OBJECT_PTR;
+}
+
 ObjectPtr Evaluator::evalMinusOperator(EvalContextPtr ctx, ObjectPtr rhsValue) {
   if (rhsValue->Type != ObjectType::OBJ_INTEGER) {
     // TODO: throw RuntimeError
@@ -170,6 +225,14 @@ ObjectPtr Evaluator::evalMinusOperator(EvalContextPtr ctx, ObjectPtr rhsValue) {
 
 ObjectPtr Evaluator::evalBangOperator(EvalContextPtr ctx, ObjectPtr rhsValue) {
   return BooleanObject::make(!rhsValue->isTruthy());
+}
+
+IntegerObjectPtr tryCastAsInteger(ObjectPtr obj) {
+  if (obj->Type == ObjectType::OBJ_INTEGER) {
+    return std::static_pointer_cast<IntegerObject>(obj);
+  }
+  // TODO: throw RuntimeError
+  return IntegerObject::make(0);
 }
 
 }  // namespace cpplox

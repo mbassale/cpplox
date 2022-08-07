@@ -45,9 +45,11 @@ class Evaluator {
                                         ast::VarDeclarationPtr stmt);
   ObjectPtr evalIfStatement(EvalContextPtr ctx, ast::IfStatementPtr stmt);
   ObjectPtr evalForStatement(EvalContextPtr ctx, ast::ForStatementPtr stmt);
-
   ObjectPtr evalBlockStatement(EvalContextPtr ctx, ast::BlockPtr stmt);
+
   ObjectPtr evalExpression(EvalContextPtr ctx, ast::ExpressionPtr expr);
+  ObjectPtr evalBinaryExpression(EvalContextPtr ctx, ast::BinaryExprPtr expr);
+  ObjectPtr evalUnaryExpression(EvalContextPtr ctx, ast::UnaryExprPtr expr);
   IntegerObjectPtr evalIntegerLiteral(EvalContextPtr ctx,
                                       ast::IntegerLiteralPtr expr);
   BooleanObjectPtr evalBooleanLiteral(EvalContextPtr ctx,
@@ -55,7 +57,8 @@ class Evaluator {
   NullObjectPtr evalNilLiteral(EvalContextPtr ctx, ast::NilLiteralPtr expr);
   StringObjectPtr evalStringLiteral(EvalContextPtr ctx,
                                     ast::StringLiteralPtr expr);
-  ObjectPtr evalUnaryExpression(EvalContextPtr ctx, ast::UnaryExprPtr expr);
+  ObjectPtr evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+                               TokenType operator_, ObjectPtr rhsValue);
   ObjectPtr evalMinusOperator(EvalContextPtr ctx, ObjectPtr rhsValue);
   ObjectPtr evalBangOperator(EvalContextPtr ctx, ObjectPtr rhsValue);
 };
