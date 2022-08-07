@@ -10,6 +10,9 @@
 DEFINE_bool(trace, false, "Enable all tracing");
 
 class Driver {
+ private:
+  cpplox::Evaluator evaluator;
+
  public:
   Driver() {}
 
@@ -54,7 +57,7 @@ class Driver {
       }
       VLOG(0) << "======== PARSING END ========";
       VLOG(0) << "======== EVALUATOR START ====";
-      cpplox::Evaluator evaluator;
+
       const auto value = evaluator.eval(program);
       VLOG(0) << "ret: " << value->toString();
       VLOG(0) << "======== EVALUATOR END ======";
