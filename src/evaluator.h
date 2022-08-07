@@ -59,6 +59,8 @@ class Evaluator {
                                     ast::StringLiteralPtr expr);
   ObjectPtr evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
                                TokenType operator_, ObjectPtr rhsValue);
+  ObjectPtr evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+                              TokenType operator_, ObjectPtr rhsValue);
   ObjectPtr evalMinusOperator(EvalContextPtr ctx, ObjectPtr rhsValue);
   ObjectPtr evalBangOperator(EvalContextPtr ctx, ObjectPtr rhsValue);
 };

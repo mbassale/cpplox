@@ -155,16 +155,19 @@ StringObjectPtr Evaluator::evalStringLiteral(EvalContextPtr ctx,
 
 ObjectPtr Evaluator::evalBinaryExpression(EvalContextPtr ctx,
                                           ast::BinaryExprPtr expr) {
+  auto leftValue = evalExpression(ctx, expr->left);
+  auto rightValue = evalExpression(ctx, expr->right);
   switch (expr->operator_.type) {
     case TokenType::TOKEN_PLUS:
     case TokenType::TOKEN_MINUS:
     case TokenType::TOKEN_STAR:
-    case TokenType::TOKEN_SLASH: {
-      auto leftValue = evalExpression(ctx, expr->left);
-      auto rightValue = evalExpression(ctx, expr->right);
+    case TokenType::TOKEN_SLASH:
       return evalBinaryOperator(ctx, leftValue, expr->operator_.type,
                                 rightValue);
-    }
+    case TokenType::TOKEN_AND:
+    case TokenType::TOKEN_OR:
+      return evalLogicOperator(ctx, leftValue, expr->operator_.type,
+                               rightValue);
     default:
       // TODO: throw RuntimeError
       return NULL_OBJECT_PTR;
@@ -186,6 +189,26 @@ ObjectPtr Evaluator::evalUnaryExpression(EvalContextPtr ctx,
       // TODO: throw RuntimeError
       return NULL_OBJECT_PTR;
   }
+}
+
+ObjectPtr Evaluator::evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+                                       TokenType operator_,
+                                       ObjectPtr rhsValue) {
+  auto lhsBoolValue = lhsValue->isTruthy();
+  auto rhsBoolValue = rhsValue->isTruthy();
+  bool result = false;
+  switch (operator_) {
+    case TokenType::TOKEN_AND:
+      result = lhsBoolValue && rhsBoolValue;
+      break;
+    case TokenType::TOKEN_OR:
+      result = lhsBoolValue || rhsBoolValue;
+      break;
+    default:
+      // TODO: throw RuntimeError
+      return NULL_OBJECT_PTR;
+  }
+  return BooleanObject::make(result);
 }
 
 ObjectPtr Evaluator::evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
