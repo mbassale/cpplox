@@ -50,6 +50,8 @@ class Parser {
   ast::ExpressionStatementPtr expressionStatement();
   ast::ExpressionPtr expression();
   ast::ExpressionPtr assignment();
+  ast::ExpressionPtr logicOr();
+  ast::ExpressionPtr logicAnd();
   ast::ExpressionPtr equality();
   ast::ExpressionPtr comparison();
   ast::ExpressionPtr term();

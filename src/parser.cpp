@@ -208,12 +208,12 @@ ast::ExpressionStatementPtr Parser::expressionStatement() {
 ast::ExpressionPtr Parser::expression() { return assignment(); }
 
 /**
- * @brief assignment: ( call "." )? IDENTIFIER "=" assignment | equality ;
+ * @brief assignment: ( call "." )? IDENTIFIER "=" assignment | logicOr ;
  *
  * @return ast::ExpressionPtr
  */
 ast::ExpressionPtr Parser::assignment() {
-  auto expr = equality();
+  auto expr = logicOr();
   if (match(TokenType::TOKEN_EQUAL)) {
     auto value = assignment();
     if (expr->Type == ast::NodeType::VARIABLE_EXPRESSION) {
@@ -222,6 +222,40 @@ ast::ExpressionPtr Parser::assignment() {
     }
     throw ParserException("Invalid assignment target", current);
   }
+  return expr;
+}
+
+/**
+ * @brief logicOr: logicAnd ( "or" logicAnd )* ;
+ *
+ * @return ast::ExpressionPtr
+ */
+ast::ExpressionPtr Parser::logicOr() {
+  auto expr = logicAnd();
+
+  if (match(TokenType::TOKEN_OR)) {
+    auto operator_ = previous;
+    auto rhsExpr = logicAnd();
+    return ast::BinaryExpr::make(expr, operator_, rhsExpr);
+  }
+
+  return expr;
+}
+
+/**
+ * @brief  logicAnd: equality ( "and" equality )* ;
+ *
+ * @return ast::ExpressionPtr
+ */
+ast::ExpressionPtr Parser::logicAnd() {
+  auto expr = equality();
+
+  if (match(TokenType::TOKEN_AND)) {
+    auto operator_ = previous;
+    auto rhsExpr = equality();
+    return ast::BinaryExpr::make(expr, operator_, rhsExpr);
+  }
+
   return expr;
 }
 

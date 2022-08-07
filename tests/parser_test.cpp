@@ -139,6 +139,18 @@ TEST_F(ParserTest, UnaryExprAssertions) {
 
 TEST_F(ParserTest, BinaryExprAssertions) {
   std::vector<ParserTestData> testCases = {
+      ParserTestData("And", "true and false;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::BinaryExpr::make(
+                             ast::BooleanLiteral::makeTrue(),
+                             Token(TokenType::TOKEN_AND, "and"),
+                             ast::BooleanLiteral::makeFalse()))})),
+      ParserTestData("Or", "true or false;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::BinaryExpr::make(
+                             ast::BooleanLiteral::makeTrue(),
+                             Token(TokenType::TOKEN_OR, "or"),
+                             ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("Equal", "true==false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
