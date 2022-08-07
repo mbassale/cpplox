@@ -119,6 +119,10 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
       auto binaryExpr = std::static_pointer_cast<BinaryExpr>(expr);
       return evalBinaryExpression(ctx, binaryExpr);
     }
+    case NodeType::VARIABLE_EXPRESSION: {
+      auto varExpr = std::static_pointer_cast<VariableExpr>(expr);
+      return ctx->env->get(varExpr->identifier);
+    }
     default:
       break;
   }

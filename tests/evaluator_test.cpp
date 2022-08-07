@@ -97,7 +97,9 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
   vector<TestCase> testCases = {
       TestCase{"var test;", {}}, TestCase{"var a=1;", {{"a", 1}}},
       TestCase{"var a=-1;", {{"a", -1}}},
-      TestCase{"var a=1; var b=2; var c=3;", {{"a", 1}, {"b", 2}, {"c", 3}}}};
+      TestCase{"var a=1; var b=2; var c=3;", {{"a", 1}, {"b", 2}, {"c", 3}}},
+      TestCase{"var a=1; var b=a*2; var c=b*b;",
+               {{"a", 1}, {"b", 2}, {"c", 4}}}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
