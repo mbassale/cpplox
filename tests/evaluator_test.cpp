@@ -67,24 +67,46 @@ TEST_F(EvaluatorTest, TestBinaryExpression) {
     std::optional<bool> expectedBoolValue;
   };
   vector<TestCase> testCases = {
-      TestCase{"1+1;", 2, nullopt}, TestCase{"1-1;", 0, nullopt},
-      TestCase{"2*2;", 4, nullopt}, TestCase{"10/2;", 5, nullopt},
-      TestCase{"1+2*3-4/5;", 7, nullopt}};
+      TestCase{"1+1;", 2, nullopt},
+      TestCase{"1-1;", 0, nullopt},
+      TestCase{"2*2;", 4, nullopt},
+      TestCase{"10/2;", 5, nullopt},
+      TestCase{"1+2*3-4/5;", 7, nullopt},
+      TestCase{"true and true;", nullopt, true},
+      TestCase{"true and false;", nullopt, false},
+      TestCase{"false and false;", nullopt, false},
+      TestCase{"true or true;", nullopt, true},
+      TestCase{"true or false;", nullopt, true},
+      TestCase{"false or false;", nullopt, false},
+      TestCase{"1 < 2;", nullopt, true},
+      TestCase{"1 <= 1;", nullopt, true},
+      TestCase{"2 > 1;", nullopt, true},
+      TestCase{"1 >= 1;", nullopt, true},
+      TestCase{"1 == 1;", nullopt, true},
+      TestCase{"1 != 1;", nullopt, false},
+      TestCase{"2 != 1;", nullopt, true},
+      TestCase{"1 < 2 and 3 >= 3;", nullopt, true},
+      TestCase{"1 > 2 or 2 >= 2;", nullopt, true},
+  };
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
     auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    ASSERT_FALSE(parser.hasErrors()) << "TestCase: " << testCase.source;
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedIntValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
+      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER)
+          << "TestCase: " << testCase.source;
       auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedIntValue);
+      EXPECT_EQ(intValue->Value, *testCase.expectedIntValue)
+          << "TestCase: " << testCase.source;
     } else if (testCase.expectedBoolValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN);
+      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN)
+          << "TestCase: " << testCase.source;
       auto boolValue = std::static_pointer_cast<BooleanObject>(value);
-      EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue);
+      EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue)
+          << "TestCase: " << testCase.source;
     }
   }
 }

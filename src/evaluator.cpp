@@ -168,6 +168,14 @@ ObjectPtr Evaluator::evalBinaryExpression(EvalContextPtr ctx,
     case TokenType::TOKEN_OR:
       return evalLogicOperator(ctx, leftValue, expr->operator_.type,
                                rightValue);
+    case TokenType::TOKEN_EQUAL_EQUAL:
+    case TokenType::TOKEN_BANG_EQUAL:
+    case TokenType::TOKEN_LESS:
+    case TokenType::TOKEN_LESS_EQUAL:
+    case TokenType::TOKEN_GREATER:
+    case TokenType::TOKEN_GREATER_EQUAL:
+      return evalComparisonOperator(ctx, leftValue, expr->operator_.type,
+                                    rightValue);
     default:
       // TODO: throw RuntimeError
       return NULL_OBJECT_PTR;
@@ -204,6 +212,47 @@ ObjectPtr Evaluator::evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
     case TokenType::TOKEN_OR:
       result = lhsBoolValue || rhsBoolValue;
       break;
+    default:
+      // TODO: throw RuntimeError
+      return NULL_OBJECT_PTR;
+  }
+  return BooleanObject::make(result);
+}
+
+ObjectPtr Evaluator::evalComparisonOperator(EvalContextPtr ctx,
+                                            ObjectPtr lhsValue,
+                                            TokenType operator_,
+                                            ObjectPtr rhsValue) {
+  bool result = false;
+  switch (operator_) {
+    case TokenType::TOKEN_EQUAL_EQUAL:
+      result = lhsValue->isEqual(*rhsValue);
+      break;
+    case TokenType::TOKEN_BANG_EQUAL:
+      result = !lhsValue->isEqual(*rhsValue);
+      break;
+    case TokenType::TOKEN_LESS: {
+      auto lhsIntValue = tryCastAsInteger(lhsValue);
+      auto rhsIntValue = tryCastAsInteger(rhsValue);
+      result = lhsIntValue->Value < rhsIntValue->Value;
+      break;
+    }
+    case TokenType::TOKEN_LESS_EQUAL: {
+      auto lhsIntValue = tryCastAsInteger(lhsValue);
+      auto rhsIntValue = tryCastAsInteger(rhsValue);
+      result = lhsIntValue->Value <= rhsIntValue->Value;
+    }
+    case TokenType::TOKEN_GREATER: {
+      auto lhsIntValue = tryCastAsInteger(lhsValue);
+      auto rhsIntValue = tryCastAsInteger(rhsValue);
+      result = lhsIntValue->Value > rhsIntValue->Value;
+    }
+    case TokenType::TOKEN_GREATER_EQUAL: {
+      auto lhsIntValue = tryCastAsInteger(lhsValue);
+      auto rhsIntValue = tryCastAsInteger(rhsValue);
+      result = lhsIntValue->Value >= rhsIntValue->Value;
+      break;
+    }
     default:
       // TODO: throw RuntimeError
       return NULL_OBJECT_PTR;
