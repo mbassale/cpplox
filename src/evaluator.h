@@ -8,6 +8,14 @@
 
 namespace cpplox {
 
+class RuntimeError : public std::runtime_error {
+ public:
+  RuntimeError(const std::string& message) : std::runtime_error(message) {}
+
+  static RuntimeError make(const char* file_name, int line,
+                           const std::string& msg);
+};
+
 struct EvalContext;
 using EvalContextPtr = std::shared_ptr<EvalContext>;
 

@@ -1,9 +1,20 @@
 #include "evaluator.h"
 
+#include <cstdarg>
+#include <filesystem>
+
 namespace cpplox {
 using namespace ast;
 
 static IntegerObjectPtr tryCastAsInteger(ObjectPtr obj);
+
+RuntimeError RuntimeError::make(const char* file_name, int line,
+                                const std::string& msg) {
+  std::ostringstream ss;
+  ss << "[" << std::filesystem::path(file_name).filename() << ":" << line
+     << "] " << msg;
+  return RuntimeError(ss.str());
+}
 
 Evaluator::Evaluator() { globalCtx = EvalContext::make(); }
 
@@ -88,7 +99,6 @@ ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
     }
     lastValue = evalStatement(localCtx, stmt->body);
     lastValue = evalExpression(localCtx, stmt->increment);
-    LOG(INFO) << lastValue->toString();
   }
   return lastValue;
 }
@@ -281,21 +291,20 @@ ObjectPtr Evaluator::evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
         result = lhsIntValue->Value - rhsIntValue->Value;
         break;
       default:
-        // TODO: throw RuntimeError
-        return NULL_OBJECT_PTR;
-        break;
+        std::ostringstream ss;
+        ss << "Invalid binary operator type: " << (int)operator_;
+        throw RuntimeError::make(__FILE__, __LINE__, ss.str());
     }
     return IntegerObject::make(result);
   }
-  // TODO: throw RuntimeError
-  return NULL_OBJECT_PTR;
+  std::ostringstream ss;
+  ss << "Invalid binary operands: " << lhsValue->toString() << " and "
+     << rhsValue->toString();
+  throw RuntimeError::make(__FILE__, __LINE__, ss.str());
 }
 
 ObjectPtr Evaluator::evalMinusOperator(EvalContextPtr ctx, ObjectPtr rhsValue) {
-  if (rhsValue->Type != ObjectType::OBJ_INTEGER) {
-    // TODO: throw RuntimeError
-  }
-  auto intObj = std::static_pointer_cast<IntegerObject>(rhsValue);
+  auto intObj = tryCastAsInteger(rhsValue);
   return IntegerObject::make(-intObj->Value);
 }
 
@@ -307,8 +316,9 @@ IntegerObjectPtr tryCastAsInteger(ObjectPtr obj) {
   if (obj->Type == ObjectType::OBJ_INTEGER) {
     return std::static_pointer_cast<IntegerObject>(obj);
   }
-  // TODO: throw RuntimeError
-  return IntegerObject::make(0);
+  std::ostringstream ss;
+  ss << "Cannot convert object to integer: " << obj->toString();
+  throw RuntimeError::make(__FILE__, __LINE__, ss.str());
 }
 
 }  // namespace cpplox
