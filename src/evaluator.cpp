@@ -204,8 +204,9 @@ ObjectPtr Evaluator::evalUnaryExpression(EvalContextPtr ctx,
       return evalBangOperator(ctx, rhsValue);
     }
     default:
-      // TODO: throw RuntimeError
-      return NULL_OBJECT_PTR;
+      std::ostringstream ss;
+      ss << "Invalid unary operator type: " << expr->operator_.lexeme();
+      throw RuntimeError::make(__FILE__, __LINE__, ss.str());
   }
 }
 
@@ -223,8 +224,10 @@ ObjectPtr Evaluator::evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
       result = lhsBoolValue || rhsBoolValue;
       break;
     default:
-      // TODO: throw RuntimeError
-      return NULL_OBJECT_PTR;
+      std::ostringstream ss;
+      ss << "Invalid binary operands for logic operator: "
+         << lhsValue->toString() << (int)operator_ << rhsValue->toString();
+      throw RuntimeError::make(__FILE__, __LINE__, ss.str());
   }
   return BooleanObject::make(result);
 }
@@ -264,8 +267,11 @@ ObjectPtr Evaluator::evalComparisonOperator(EvalContextPtr ctx,
       break;
     }
     default:
-      // TODO: throw RuntimeError
-      return NULL_OBJECT_PTR;
+      std::ostringstream ss;
+      ss << "Invalid operands types for comparison operator: "
+         << lhsValue->toString() << " " << (int)operator_
+         << rhsValue->toString();
+      throw RuntimeError::make(__FILE__, __LINE__, ss.str());
   }
   return BooleanObject::make(result);
 }
