@@ -90,23 +90,15 @@ ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
                                       ast::ForStatementPtr stmt) {
   auto localCtx = EvalContext::make(ctx);
   ObjectPtr lastValue = NULL_OBJECT_PTR;
-  if (stmt->initializer) {
-    lastValue = evalStatement(localCtx, stmt->initializer);
-  }
+  lastValue = evalStatement(localCtx, stmt->initializer);
   while (true) {
-    if (stmt->condition) {
-      auto conditionValue = evalExpression(localCtx, stmt->condition);
-      lastValue = conditionValue;
-      if (conditionValue->isFalsey()) {
-        break;
-      }
+    auto conditionValue = evalExpression(localCtx, stmt->condition);
+    lastValue = conditionValue;
+    if (conditionValue->isFalsey()) {
+      break;
     }
-    if (stmt->body) {
-      lastValue = evalStatement(localCtx, stmt->body);
-    }
-    if (stmt->increment) {
-      lastValue = evalExpression(localCtx, stmt->increment);
-    }
+    lastValue = evalStatement(localCtx, stmt->body);
+    lastValue = evalExpression(localCtx, stmt->increment);
   }
   return lastValue;
 }

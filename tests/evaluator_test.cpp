@@ -196,9 +196,12 @@ TEST_F(EvaluatorTest, TestIfStmts) {
 TEST_F(EvaluatorTest, TestForStmts) {
   struct TestCase {
     string source;
-    std::optional<int> expectedValue;
+    std::optional<int> expectedIntValue;
+    std::optional<bool> expectedBoolValue;
   };
-  vector<TestCase> testCases = {TestCase{"for(;false;){}", nullopt}};
+  vector<TestCase> testCases = {
+      TestCase{"for(;false;){}", nullopt, false},
+      TestCase{"var test = false; for(; test;) { false; }", nullopt, false}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
@@ -207,10 +210,14 @@ TEST_F(EvaluatorTest, TestForStmts) {
     ASSERT_FALSE(parser.hasErrors());
     Evaluator evaluator;
     auto value = evaluator.eval(program);
-    if (testCase.expectedValue.has_value()) {
+    if (testCase.expectedIntValue.has_value()) {
       ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
       auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedValue);
+      EXPECT_EQ(intValue->Value, *testCase.expectedIntValue);
+    } else if (testCase.expectedBoolValue.has_value()) {
+      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN);
+      auto boolValue = std::static_pointer_cast<BooleanObject>(value);
+      EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue);
     }
   }
 }
