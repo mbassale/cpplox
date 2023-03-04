@@ -128,7 +128,13 @@ TEST_F(ParserTest, AssignmentExprAssertions) {
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::Assignment::make(
                              "a", ast::BooleanLiteral::makeTrue()))})),
-  };
+      ParserTestData("AssignmentSimpleExpression", "a = a + 1;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::Assignment::make(
+                             "a", ast::BinaryExpr::make(
+                                      ast::VariableExpr::make("a"),
+                                      Token(TokenType::TOKEN_PLUS, "+"),
+                                      ast::IntegerLiteral::make(1))))}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);
