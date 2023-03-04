@@ -22,9 +22,32 @@ class ParserTest : public ::testing::Test {
 
 void ParserTest::compareAsts(ast::NodePtr left, ast::NodePtr right) {}
 
+TEST_F(ParserTest, LiteralExprAssertions) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData(
+          "NilLiteral", "nil;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::NilLiteral::make())})),
+      ParserTestData("TrueLiteral", "true;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(
+                             ast::BooleanLiteral::makeTrue())})),
+      ParserTestData("FalseLiteral", "false;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(
+                             ast::BooleanLiteral::makeFalse())})),
+  };
+  for (const auto &testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    const auto actualProgram = parser.parse();
+    ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
+  }
+}
+
 TEST_F(ParserTest, ParserAssertions) {
   std::vector<ParserTestData> testCases = {
-      ParserTestData("MinimalStatement", ";",
+      ParserTestData("EmptyStatement", ";",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::Statement::make()})),
       ParserTestData("ExpressionStatement", "true;",
@@ -241,18 +264,30 @@ TEST_F(ParserTest, BinaryExprAssertions) {
 
 TEST_F(ParserTest, ForStatementAssertions) {
   std::vector<ParserTestData> testCases = {
-      ParserTestData("MinimalForStatement", "for(;;);",
-                     ast::Program::make(std::vector<ast::StatementPtr>{
-                         ast::ForStatement::make(nullptr, nullptr, nullptr,
-                                                 ast::Statement::make())})),
-      ParserTestData("MinimalForStatementWithBlock", "for(;;){true;}",
-                     ast::Program::make(
-                         std::vector<ast::StatementPtr>{ast::ForStatement::make(
-                             nullptr, nullptr, nullptr,
-                             ast::Block::make(std::vector<ast::StatementPtr>{
-                                 ast::ExpressionStatement::make(
-                                     ast::BooleanLiteral::makeTrue())}))})),
-  };
+      ParserTestData(
+          "EmptyForStatement", "for(;;);",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                  ast::Statement::make(), ast::BooleanLiteral::makeTrue(),
+                  ast::EmptyExpression::make(), ast::Statement::make())})),
+      ParserTestData(
+          "MinimalForStatementWithBlock", "for(;;){true;}",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                  ast::Statement::make(), ast::BooleanLiteral::makeTrue(),
+                  ast::EmptyExpression::make(),
+                  ast::Block::make(std::vector<ast::StatementPtr>{
+                      ast::ExpressionStatement::make(
+                          ast::BooleanLiteral::makeTrue())}))})),
+      ParserTestData(
+          "ForStatmentFalseCondition", "for(;false;){false;}",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                  ast::Statement::make(), ast::BooleanLiteral::makeFalse(),
+                  ast::EmptyExpression::make(),
+                  ast::Block::make(std::vector<ast::StatementPtr>{
+                      ast::ExpressionStatement::make(
+                          ast::BooleanLiteral::makeFalse())}))}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);

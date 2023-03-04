@@ -117,7 +117,8 @@ ast::ForStatementPtr Parser::forStatement() {
   consume(TokenType::TOKEN_LEFT_PAREN, "Missing left paren");
   ast::StatementPtr initializer{nullptr};
   if (match(TokenType::TOKEN_SEMICOLON)) {
-    // no initializer.
+    // Empty initializer -> empty statement.
+    initializer = ast::Statement::make();
   } else if (match(TokenType::TOKEN_VAR)) {
     initializer = varDeclaration();
   } else {
@@ -127,11 +128,17 @@ ast::ForStatementPtr Parser::forStatement() {
   if (!match(TokenType::TOKEN_SEMICOLON)) {
     condition = expression();
     consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon after initializer");
+  } else {
+    // Empty condition expression -> true literal expression.
+    condition = ast::BooleanLiteral::makeTrue();
   }
   ast::ExpressionPtr increment{nullptr};
   if (!match(TokenType::TOKEN_RIGHT_PAREN)) {
     increment = expression();
     consume(TokenType::TOKEN_RIGHT_PAREN, "Missing right paren");
+  } else {
+    // Empty increment.
+    increment = ast::EmptyExpression::make();
   }
   auto body = statement();
   return ast::ForStatement::make(initializer, condition, increment, body);
