@@ -20,7 +20,7 @@ TEST_F(EvaluatorTest, TestLiterals) {
       TestCase{"true;", "true"},   TestCase{"false;", "false"},
       TestCase{"nil;", "nil"},     TestCase{"1;", "1"},
       TestCase{"10000;", "10000"}, TestCase{"\"test\";", "test"},
-      TestCase{"\"\";", ""}};
+      TestCase{"\"\";", ""},       TestCase{";", "nil"}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
@@ -192,14 +192,13 @@ TEST_F(EvaluatorTest, TestIfStmts) {
     }
   }
 }
-/*
+
 TEST_F(EvaluatorTest, TestForStmts) {
   struct TestCase {
     string source;
     std::optional<int> expectedValue;
   };
-  vector<TestCase> testCases = {
-      TestCase{"for(var i = 0; i < 10; i = i + 1){ 1; }", 1}};
+  vector<TestCase> testCases = {TestCase{"for(;false;){}", nullopt}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
@@ -215,4 +214,3 @@ TEST_F(EvaluatorTest, TestForStmts) {
     }
   }
 }
-*/

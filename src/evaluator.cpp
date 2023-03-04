@@ -89,16 +89,24 @@ ObjectPtr Evaluator::evalIfStatement(EvalContextPtr ctx, IfStatementPtr stmt) {
 ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
                                       ast::ForStatementPtr stmt) {
   auto localCtx = EvalContext::make(ctx);
-  auto lastValue = evalStatement(localCtx, stmt->initializer);
-  auto keepLooping = true;
-  while (keepLooping) {
-    auto conditionValue = evalExpression(localCtx, stmt->condition);
-    lastValue = conditionValue;
-    if (conditionValue->isFalsey()) {
-      break;
+  ObjectPtr lastValue = NULL_OBJECT_PTR;
+  if (stmt->initializer) {
+    lastValue = evalStatement(localCtx, stmt->initializer);
+  }
+  while (true) {
+    if (stmt->condition) {
+      auto conditionValue = evalExpression(localCtx, stmt->condition);
+      lastValue = conditionValue;
+      if (conditionValue->isFalsey()) {
+        break;
+      }
     }
-    lastValue = evalStatement(localCtx, stmt->body);
-    lastValue = evalExpression(localCtx, stmt->increment);
+    if (stmt->body) {
+      lastValue = evalStatement(localCtx, stmt->body);
+    }
+    if (stmt->increment) {
+      lastValue = evalExpression(localCtx, stmt->increment);
+    }
   }
   return lastValue;
 }
