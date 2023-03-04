@@ -158,6 +158,11 @@ struct NilLiteral : public Expression {
 };
 using NilLiteralPtr = std::shared_ptr<NilLiteral>;
 
+// NilLiteral expr also serves as a EmptyExpression.
+// When we need a placeholder for an empty expression, for example, on for loop
+// conditional and increment, we use the EmptyExpression
+using EmptyExpression = NilLiteral;
+
 struct VariableExpr : public Expression {
   std::string identifier;
 
@@ -528,16 +533,12 @@ struct ForStatement : public Statement {
       return false;
     }
     if (this->increment && other.increment) {
-      if (!this->condition->isEqual(*other.increment)) {
+      if (!this->increment->isEqual(*other.increment)) {
         return false;
       }
     }
 
     return body->isEqual(*other.body);
-  }
-
-  static std::shared_ptr<ForStatement> make() {
-    return std::make_shared<ForStatement>();
   }
 
   static std::shared_ptr<ForStatement> make(const StatementPtr& initializer,
