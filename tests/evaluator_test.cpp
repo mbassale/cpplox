@@ -279,8 +279,7 @@ TEST_F(EvaluatorTest, TestWhileStmts) {
     unordered_map<string, variant<bool, int>> expectedValues;
   };
   vector<TestCase> testCases = {
-      TestCase{"while(false);", {}}, 
-      TestCase{"while(false){}", {}},
+      TestCase{"while(false);", {}}, TestCase{"while(false){}", {}},
       TestCase{"var test = false; while(test){}", {{"test", false}}},
       TestCase{"var i = 0; while (i < 10){ i = i + 1; }", {{"i", 10}}}};
 
@@ -298,6 +297,32 @@ TEST_F(EvaluatorTest, TestWhileStmts) {
       } else if (std::holds_alternative<int>(pair.second)) {
         expectIntValue(testCase.source, value, std::get<int>(pair.second));
       }
+    }
+  }
+}
+
+TEST_F(EvaluatorTest, TestPrintStmts) {
+  struct TestCase {
+    string source;
+    variant<bool, int> expectedValue;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"print true;", true}, TestCase{"print false;", false},
+      TestCase{"print 1+2*3;", 7}, TestCase{"var a = 2; print a*2+1;", 5}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors());
+    Evaluator evaluator;
+    auto value = evaluator.eval(program);
+    if (std::holds_alternative<bool>(testCase.expectedValue)) {
+      expectBoolValue(testCase.source, value,
+                      std::get<bool>(testCase.expectedValue));
+    } else if (std::holds_alternative<int>(testCase.expectedValue)) {
+      expectIntValue(testCase.source, value,
+                     std::get<int>(testCase.expectedValue));
     }
   }
 }

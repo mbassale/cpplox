@@ -52,6 +52,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto whileStmt = std::static_pointer_cast<WhileStatement>(stmt);
       return evalWhileStatement(ctx, whileStmt);
     }
+    case NodeType::PRINT_STATEMENT: {
+      auto printStmt = std::static_pointer_cast<PrintStatement>(stmt);
+      return evalPrintStatement(ctx, printStmt);
+    }
     case NodeType::EMPTY_STATEMENT: {
       break;
     }
@@ -114,6 +118,12 @@ ObjectPtr Evaluator::evalWhileStatement(EvalContextPtr ctx,
     lastValue = evalStatement(ctx, stmt->body);
     lastValue = evalExpression(ctx, stmt->condition);
   }
+  return lastValue;
+}
+
+ObjectPtr Evaluator::evalPrintStatement(EvalContextPtr ctx, PrintStatementPtr stmt) {
+  ObjectPtr lastValue = evalExpression(ctx, stmt->expression);
+  std::cout << lastValue->toString() << std::endl;
   return lastValue;
 }
 
