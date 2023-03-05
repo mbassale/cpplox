@@ -215,7 +215,7 @@ struct Assignment : public Expression {
       return false;
     }
 
-    // compare initializers
+    // compare values
     bool hasLhs = (bool)this->value;
     bool hasRhs = (bool)other.value;
     if (hasLhs != hasRhs) {

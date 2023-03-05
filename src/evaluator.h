@@ -58,6 +58,7 @@ class Evaluator {
   ObjectPtr evalExpression(EvalContextPtr ctx, ast::ExpressionPtr expr);
   ObjectPtr evalBinaryExpression(EvalContextPtr ctx, ast::BinaryExprPtr expr);
   ObjectPtr evalUnaryExpression(EvalContextPtr ctx, ast::UnaryExprPtr expr);
+  ObjectPtr evalAssignExpression(EvalContextPtr ctx, ast::AssignmentPtr expr);
   IntegerObjectPtr evalIntegerLiteral(EvalContextPtr ctx,
                                       ast::IntegerLiteralPtr expr);
   BooleanObjectPtr evalBooleanLiteral(EvalContextPtr ctx,

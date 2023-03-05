@@ -133,10 +133,21 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
       auto varExpr = std::static_pointer_cast<VariableExpr>(expr);
       return ctx->env->get(varExpr->identifier);
     }
+    case NodeType::ASSIGNMENT_EXPRESSION: {
+      auto assignExpr = std::static_pointer_cast<Assignment>(expr);
+      return evalAssignExpression(ctx, assignExpr);
+    }
     default:
       break;
   }
   return NULL_OBJECT_PTR;
+}
+
+ObjectPtr Evaluator::evalAssignExpression(EvalContextPtr ctx, ast::AssignmentPtr expr) {
+  const auto& identifier = expr->identifier;
+  auto value = evalExpression(ctx, expr->value);
+  ctx->env->set(identifier, value);
+  return ctx->env->get(identifier);
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EvalContextPtr ctx,

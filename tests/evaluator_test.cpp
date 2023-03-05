@@ -9,7 +9,22 @@
 using namespace cpplox;
 using namespace std;
 
-class EvaluatorTest : public ::testing::Test {};
+class EvaluatorTest : public ::testing::Test {
+ protected:
+  void expectIntValue(ObjectPtr actualValue, int64_t expectedValue) {
+    ASSERT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER);
+    auto actualIntValue = dynamic_pointer_cast<IntegerObject>(actualValue);
+    ASSERT_NE(actualIntValue, nullptr);
+    EXPECT_EQ(actualIntValue->Value, expectedValue);
+  }
+
+  void expectBoolValue(ObjectPtr actualValue, bool expectedValue) {
+    ASSERT_EQ(actualValue->Type, ObjectType::OBJ_BOOLEAN);
+    auto actualBoolValue = dynamic_pointer_cast<BooleanObject>(actualValue);
+    ASSERT_NE(actualBoolValue, nullptr);
+    EXPECT_EQ(actualBoolValue->Value, expectedValue);
+  }
+};
 
 TEST_F(EvaluatorTest, TestLiterals) {
   struct TestCase {
@@ -139,6 +154,40 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
             std::static_pointer_cast<IntegerObject>(actualValue);
         EXPECT_EQ(actualIntValue->Value, it->second);
         it++;
+      }
+    } else {
+      EXPECT_EQ(value->Type, ObjectType::OBJ_NULL);
+    }
+  }
+}
+
+TEST_F(EvaluatorTest, TestAssignmentExpressions) {
+  struct TestCase {
+    string source;
+    unordered_map<string, variant<int, bool>> expectedValues;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"var a = 1; var b = 1; a = 1; b = a + 1;", {{"a", 1}, {"b", 2}}},
+      TestCase{"var a = false; var b = true; var c = nil; c = a or b;",
+               {{"a", false}, {"b", true}, {"c", true}}},
+      TestCase{"var a = 2; var b = a * 2; a = a * b;", {{"a", 8}, {"b", 4}}}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors());
+    Evaluator evaluator;
+    const auto value = evaluator.eval(program);
+    if (testCase.expectedValues.size() > 0) {
+      for (const auto& pair : testCase.expectedValues) {
+        auto actualValue = evaluator.getGlobalValue(pair.first);
+        auto& expectedValue = pair.second;
+        if (std::holds_alternative<int>(expectedValue)) {
+          expectIntValue(actualValue, std::get<int>(expectedValue));
+        } else if (std::holds_alternative<bool>(expectedValue)) {
+          expectBoolValue(actualValue, std::get<bool>(expectedValue));
+        }
       }
     } else {
       EXPECT_EQ(value->Type, ObjectType::OBJ_NULL);
