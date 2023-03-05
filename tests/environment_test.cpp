@@ -23,4 +23,7 @@ TEST_F(EnvironmentTest, TestEnclosing) {
 
   enclosingEnv->set("globalId", TRUE_OBJECT_PTR);
   EXPECT_EQ(*innerEnv->get("globalId"), *TRUE_OBJECT_PTR);
+  innerEnv->set("globalId", FALSE_OBJECT_PTR);
+  EXPECT_EQ(*enclosingEnv->get("globalId"), *FALSE_OBJECT_PTR);
+  EXPECT_EQ(*innerEnv->get("globalId"), *FALSE_OBJECT_PTR);
 }
