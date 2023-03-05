@@ -1,5 +1,13 @@
 #include "function.h"
 
+namespace cpplox {
+
+std::shared_ptr<Function> Function::make(
+    FunctionType functionType, ast::FunctionDeclarationPtr declaration,
+    const std::string &name, int arity) {
+  return std::make_shared<Function>(functionType, declaration, name, arity);
+}
+
 std::string Function::toString() const {
   std::ostringstream ss;
   ss << "<func " << name << "(#" << arity << ")>";
@@ -23,6 +31,4 @@ bool Function::isEqual(const Function &other) const {
   return arity == other.arity && name == other.name;
 }
 
-bool operator==(const Function &lhs, const Function &rhs) {
-  return lhs.isEqual(rhs);
-}
+}  // namespace cpplox

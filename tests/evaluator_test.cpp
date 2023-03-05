@@ -326,3 +326,28 @@ TEST_F(EvaluatorTest, TestPrintStmts) {
     }
   }
 }
+
+TEST_F(EvaluatorTest, TestFunctionDeclarationStmts) {
+  struct TestCase {
+    string source;
+    string expectedFunctionName;
+    int expectedFunctionArity;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"fun test(arg1, arg2) { print arg1 + arg2; }", "test", 2},
+      TestCase{"fun test() {}", "test", 0}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors());
+    Evaluator evaluator;
+    evaluator.eval(program);
+    auto value = evaluator.getGlobalValue(testCase.expectedFunctionName);
+    ASSERT_NE(value, nullptr);
+    auto funcValue = dynamic_pointer_cast<Function>(value);
+    ASSERT_NE(value, nullptr);
+    EXPECT_EQ(funcValue->getArity(), testCase.expectedFunctionArity);
+  }
+}

@@ -47,6 +47,8 @@ set(SOURCES
   src/parser.cpp
   src/object.h
   src/object.cpp
+  src/function.h
+  src/function.cpp
   src/environment.h
   src/environment.cpp
   src/evaluator.h

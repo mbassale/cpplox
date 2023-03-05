@@ -36,6 +36,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto varDeclStmt = std::static_pointer_cast<VarDeclaration>(stmt);
       return evalVarDeclarationStatement(ctx, varDeclStmt);
     }
+    case NodeType::FUNCTION_DECLARATION: {
+      auto funcDeclStmt = std::static_pointer_cast<FunctionDeclaration>(stmt);
+      return evalFuncDeclarationStatement(ctx, funcDeclStmt);
+    }
     case NodeType::BLOCK_STATEMENT: {
       auto blockStmt = std::static_pointer_cast<Block>(stmt);
       return evalBlockStatement(ctx, blockStmt);
@@ -73,6 +77,15 @@ ObjectPtr Evaluator::evalVarDeclarationStatement(EvalContextPtr ctx,
   const auto identifier = stmt->identifier.lexeme();
   ctx->env->set(identifier, value);
   return value;
+}
+
+ObjectPtr Evaluator::evalFuncDeclarationStatement(EvalContextPtr ctx,
+                                                  FunctionDeclarationPtr stmt) {
+  const auto& functionName = stmt->identifier.lexeme();
+  auto function = Function::make(FunctionType::TYPE_FUNCTION, stmt,
+                                 functionName, stmt->params.size());
+  ctx->env->set(functionName, function);
+  return function;
 }
 
 ObjectPtr Evaluator::evalBlockStatement(EvalContextPtr ctx,
@@ -121,7 +134,8 @@ ObjectPtr Evaluator::evalWhileStatement(EvalContextPtr ctx,
   return lastValue;
 }
 
-ObjectPtr Evaluator::evalPrintStatement(EvalContextPtr ctx, PrintStatementPtr stmt) {
+ObjectPtr Evaluator::evalPrintStatement(EvalContextPtr ctx,
+                                        PrintStatementPtr stmt) {
   ObjectPtr lastValue = evalExpression(ctx, stmt->expression);
   std::cout << lastValue->toString() << std::endl;
   return lastValue;
