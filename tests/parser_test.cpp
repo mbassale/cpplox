@@ -286,14 +286,31 @@ TEST_F(ParserTest, ForStatementAssertions) {
                       ast::ExpressionStatement::make(
                           ast::BooleanLiteral::makeTrue())}))})),
       ParserTestData(
-          "ForStatmentFalseCondition", "for(;false;){false;}",
+          "ForStatementFalseCondition", "for(;false;){false;}",
           ast::Program::make(
               std::vector<ast::StatementPtr>{ast::ForStatement::make(
                   ast::Statement::make(), ast::BooleanLiteral::makeFalse(),
                   ast::EmptyExpression::make(),
                   ast::Block::make(std::vector<ast::StatementPtr>{
                       ast::ExpressionStatement::make(
-                          ast::BooleanLiteral::makeFalse())}))}))};
+                          ast::BooleanLiteral::makeFalse())}))})),
+      ParserTestData(
+          "ForStatementSimple", "for(var i = 0; i < 10; i = i + 1) { i; }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                  ast::VarDeclaration::make(
+                      Token(TokenType::TOKEN_IDENTIFIER, "i"),
+                      ast::IntegerLiteral::make(0)),
+                  ast::BinaryExpr::make(ast::VariableExpr::make("i"),
+                                        Token(TokenType::TOKEN_LESS, "<"),
+                                        ast::IntegerLiteral::make(10)),
+                  ast::Assignment::make(
+                      "i", ast::BinaryExpr::make(ast::VariableExpr::make("i"),
+                                                 Token(TokenType::TOKEN_PLUS, "+"),
+                                                 ast::IntegerLiteral::make(1))),
+                  ast::Block::make(std::vector<ast::StatementPtr>{
+                      ast::ExpressionStatement::make(
+                          ast::VariableExpr::make("i"))}))}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);

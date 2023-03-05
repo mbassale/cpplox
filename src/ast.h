@@ -249,8 +249,8 @@ struct BinaryExpr : public Expression {
 
   bool isEqual(const Node& other) override {
     if (Type == other.Type) {
-      const auto& otherAssignment = dynamic_cast<const BinaryExpr&>(other);
-      return isEqual(otherAssignment);
+      const auto& otherExpr = dynamic_cast<const BinaryExpr&>(other);
+      return isEqual(otherExpr);
     }
     return false;
   }
