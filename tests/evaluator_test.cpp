@@ -11,18 +11,20 @@ using namespace std;
 
 class EvaluatorTest : public ::testing::Test {
  protected:
-  void expectIntValue(ObjectPtr actualValue, int64_t expectedValue) {
-    ASSERT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER);
+  void expectIntValue(string_view testCase, ObjectPtr actualValue,
+                      int64_t expectedValue) {
+    ASSERT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER) << testCase;
     auto actualIntValue = dynamic_pointer_cast<IntegerObject>(actualValue);
-    ASSERT_NE(actualIntValue, nullptr);
-    EXPECT_EQ(actualIntValue->Value, expectedValue);
+    ASSERT_NE(actualIntValue, nullptr) << testCase;
+    EXPECT_EQ(actualIntValue->Value, expectedValue) << testCase;
   }
 
-  void expectBoolValue(ObjectPtr actualValue, bool expectedValue) {
-    ASSERT_EQ(actualValue->Type, ObjectType::OBJ_BOOLEAN);
+  void expectBoolValue(string_view testCase, ObjectPtr actualValue,
+                       bool expectedValue) {
+    ASSERT_EQ(actualValue->Type, ObjectType::OBJ_BOOLEAN) << testCase;
     auto actualBoolValue = dynamic_pointer_cast<BooleanObject>(actualValue);
-    ASSERT_NE(actualBoolValue, nullptr);
-    EXPECT_EQ(actualBoolValue->Value, expectedValue);
+    ASSERT_NE(actualBoolValue, nullptr) << testCase;
+    EXPECT_EQ(actualBoolValue->Value, expectedValue) << testCase;
   }
 };
 
@@ -44,6 +46,7 @@ TEST_F(EvaluatorTest, TestLiterals) {
     EXPECT_FALSE(parser.hasErrors());
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
+    ASSERT_NE(value, nullptr);
     EXPECT_EQ(testCase.expectedValue, value->toString());
   }
 }
@@ -184,9 +187,11 @@ TEST_F(EvaluatorTest, TestAssignmentExpressions) {
         auto actualValue = evaluator.getGlobalValue(pair.first);
         auto& expectedValue = pair.second;
         if (std::holds_alternative<int>(expectedValue)) {
-          expectIntValue(actualValue, std::get<int>(expectedValue));
+          expectIntValue(testCase.source, actualValue,
+                         std::get<int>(expectedValue));
         } else if (std::holds_alternative<bool>(expectedValue)) {
-          expectBoolValue(actualValue, std::get<bool>(expectedValue));
+          expectBoolValue(testCase.source, actualValue,
+                          std::get<bool>(expectedValue));
         }
       }
     } else {
@@ -212,9 +217,7 @@ TEST_F(EvaluatorTest, TestBlockStmts) {
     Evaluator evaluator;
     auto value = evaluator.eval(program);
     if (testCase.expectedValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
-      auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedValue);
+      expectIntValue(testCase.source, value, *testCase.expectedValue);
     }
   }
 }
@@ -235,9 +238,7 @@ TEST_F(EvaluatorTest, TestIfStmts) {
     Evaluator evaluator;
     auto value = evaluator.eval(program);
     if (testCase.expectedValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
-      auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedValue);
+      expectIntValue(testCase.source, value, *testCase.expectedValue);
     }
   }
 }
@@ -245,12 +246,11 @@ TEST_F(EvaluatorTest, TestIfStmts) {
 TEST_F(EvaluatorTest, TestForStmts) {
   struct TestCase {
     string source;
-    std::optional<int> expectedIntValue;
-    std::optional<bool> expectedBoolValue;
+    variant<bool, int> expectedValue;
   };
   vector<TestCase> testCases = {
-      TestCase{"for(;false;){}", nullopt, false},
-      TestCase{"var test = false; for(; test;) { false; }", nullopt, false}};
+      TestCase{"for(;false;){}", false},
+      TestCase{"var test = false; for(; test;) { false; }", false}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
@@ -259,14 +259,12 @@ TEST_F(EvaluatorTest, TestForStmts) {
     ASSERT_FALSE(parser.hasErrors());
     Evaluator evaluator;
     auto value = evaluator.eval(program);
-    if (testCase.expectedIntValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
-      auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedIntValue);
-    } else if (testCase.expectedBoolValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN);
-      auto boolValue = std::static_pointer_cast<BooleanObject>(value);
-      EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue);
+    if (std::holds_alternative<bool>(testCase.expectedValue)) {
+      expectBoolValue(testCase.source, value,
+                      std::get<bool>(testCase.expectedValue));
+    } else if (std::holds_alternative<int>(testCase.expectedValue)) {
+      expectIntValue(testCase.source, value,
+                     std::get<int>(testCase.expectedValue));
     }
   }
 }
