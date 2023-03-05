@@ -48,6 +48,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto forStmt = std::static_pointer_cast<ForStatement>(stmt);
       return evalForStatement(ctx, forStmt);
     }
+    case NodeType::WHILE_STATEMENT: {
+      auto whileStmt = std::static_pointer_cast<WhileStatement>(stmt);
+      return evalWhileStatement(ctx, whileStmt);
+    }
     case NodeType::EMPTY_STATEMENT: {
       break;
     }
@@ -87,7 +91,7 @@ ObjectPtr Evaluator::evalIfStatement(EvalContextPtr ctx, IfStatementPtr stmt) {
 }
 
 ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
-                                      ast::ForStatementPtr stmt) {
+                                      ForStatementPtr stmt) {
   auto localCtx = EvalContext::make(ctx);
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   lastValue = evalStatement(localCtx, stmt->initializer);
@@ -99,6 +103,16 @@ ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
     }
     lastValue = evalStatement(localCtx, stmt->body);
     lastValue = evalExpression(localCtx, stmt->increment);
+  }
+  return lastValue;
+}
+
+ObjectPtr Evaluator::evalWhileStatement(EvalContextPtr ctx,
+                                        WhileStatementPtr stmt) {
+  ObjectPtr lastValue = evalExpression(ctx, stmt->condition);
+  while (lastValue->isTruthy()) {
+    lastValue = evalStatement(ctx, stmt->body);
+    lastValue = evalExpression(ctx, stmt->condition);
   }
   return lastValue;
 }
@@ -143,7 +157,8 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
   return NULL_OBJECT_PTR;
 }
 
-ObjectPtr Evaluator::evalAssignExpression(EvalContextPtr ctx, ast::AssignmentPtr expr) {
+ObjectPtr Evaluator::evalAssignExpression(EvalContextPtr ctx,
+                                          ast::AssignmentPtr expr) {
   const auto& identifier = expr->identifier;
   auto value = evalExpression(ctx, expr->value);
   ctx->env->set(identifier, value);

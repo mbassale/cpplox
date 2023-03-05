@@ -272,3 +272,32 @@ TEST_F(EvaluatorTest, TestForStmts) {
     }
   }
 }
+
+TEST_F(EvaluatorTest, TestWhileStmts) {
+  struct TestCase {
+    string source;
+    unordered_map<string, variant<bool, int>> expectedValues;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"while(false);", {}}, 
+      TestCase{"while(false){}", {}},
+      TestCase{"var test = false; while(test){}", {{"test", false}}},
+      TestCase{"var i = 0; while (i < 10){ i = i + 1; }", {{"i", 10}}}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors());
+    Evaluator evaluator;
+    evaluator.eval(program);
+    for (const auto& pair : testCase.expectedValues) {
+      auto value = evaluator.getGlobalValue(pair.first);
+      if (std::holds_alternative<bool>(pair.second)) {
+        expectBoolValue(testCase.source, value, std::get<bool>(pair.second));
+      } else if (std::holds_alternative<int>(pair.second)) {
+        expectIntValue(testCase.source, value, std::get<int>(pair.second));
+      }
+    }
+  }
+}
