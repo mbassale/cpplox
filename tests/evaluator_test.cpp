@@ -246,11 +246,14 @@ TEST_F(EvaluatorTest, TestIfStmts) {
 TEST_F(EvaluatorTest, TestForStmts) {
   struct TestCase {
     string source;
-    variant<bool, int> expectedValue;
+    unordered_map<string, variant<bool, int>> expectedValues;
   };
   vector<TestCase> testCases = {
-      TestCase{"for(;false;){}", false},
-      TestCase{"var test = false; for(; test;) { false; }", false}};
+      TestCase{"for(;false;){}", {}},
+      TestCase{"var test = false; for(; test;) { false; }", {{"test", false}}},
+      TestCase{"var globalVar = 0; for(var i = 0; i < 10; i = i + 1) { "
+               "globalVar = i; }",
+               {{"globalVar", 9}}}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
@@ -258,13 +261,14 @@ TEST_F(EvaluatorTest, TestForStmts) {
     auto program = parser.parse();
     ASSERT_FALSE(parser.hasErrors());
     Evaluator evaluator;
-    auto value = evaluator.eval(program);
-    if (std::holds_alternative<bool>(testCase.expectedValue)) {
-      expectBoolValue(testCase.source, value,
-                      std::get<bool>(testCase.expectedValue));
-    } else if (std::holds_alternative<int>(testCase.expectedValue)) {
-      expectIntValue(testCase.source, value,
-                     std::get<int>(testCase.expectedValue));
+    evaluator.eval(program);
+    for (const auto& pair : testCase.expectedValues) {
+      auto value = evaluator.getGlobalValue(pair.first);
+      if (std::holds_alternative<bool>(pair.second)) {
+        expectBoolValue(testCase.source, value, std::get<bool>(pair.second));
+      } else if (std::holds_alternative<int>(pair.second)) {
+        expectIntValue(testCase.source, value, std::get<int>(pair.second));
+      }
     }
   }
 }
