@@ -133,7 +133,7 @@ TEST_F(ParserTest, AssignmentExprAssertions) {
                          ast::ExpressionStatement::make(ast::Assignment::make(
                              "a", ast::BinaryExpr::make(
                                       ast::VariableExpr::make("a"),
-                                      Token(TokenType::TOKEN_PLUS, "+"),
+                                      Token::make(TokenType::TOKEN_PLUS),
                                       ast::IntegerLiteral::make(1))))}))};
 
   for (const auto &testCase : testCases) {
@@ -149,12 +149,12 @@ TEST_F(ParserTest, UnaryExprAssertions) {
       ParserTestData("Negation", "!true;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::UnaryExpr::make(
-                             Token(TokenType::TOKEN_BANG, "!"),
+                             Token::make(TokenType::TOKEN_BANG),
                              ast::BooleanLiteral::makeTrue()))})),
       ParserTestData("Negative", "-1;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::UnaryExpr::make(
-                             Token(TokenType::TOKEN_MINUS, "-"),
+                             Token::make(TokenType::TOKEN_MINUS),
                              ast::IntegerLiteral::make(1)))})),
   };
 
@@ -172,91 +172,91 @@ TEST_F(ParserTest, BinaryExprAssertions) {
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_AND, "and"),
+                             Token::make(TokenType::TOKEN_AND),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("Or", "true or false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_OR, "or"),
+                             Token::make(TokenType::TOKEN_OR),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("Equal", "true==false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_EQUAL_EQUAL, "=="),
+                             Token::make(TokenType::TOKEN_EQUAL_EQUAL),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("EqualRecursive", "true==false==true;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BinaryExpr::make(
                                  ast::BooleanLiteral::makeTrue(),
-                                 Token(TokenType::TOKEN_EQUAL_EQUAL, "=="),
+                                 Token::make(TokenType::TOKEN_EQUAL_EQUAL),
                                  ast::BooleanLiteral::makeFalse()),
-                             Token(TokenType::TOKEN_EQUAL_EQUAL, "=="),
+                             Token::make(TokenType::TOKEN_EQUAL_EQUAL),
                              ast::BooleanLiteral::makeTrue()))})),
       ParserTestData("NotEqual", "true!=false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_BANG_EQUAL, "!="),
+                             Token::make(TokenType::TOKEN_BANG_EQUAL),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("Less", "true<false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_LESS, "<"),
+                             Token::make(TokenType::TOKEN_LESS),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("LessEqual", "true<=false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_LESS_EQUAL, "<="),
+                             Token::make(TokenType::TOKEN_LESS_EQUAL),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("LessEqualRecursive", "true<=false<=true;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BinaryExpr::make(
                                  ast::BooleanLiteral::makeTrue(),
-                                 Token(TokenType::TOKEN_LESS_EQUAL, "<="),
+                                 Token::make(TokenType::TOKEN_LESS_EQUAL),
                                  ast::BooleanLiteral::makeFalse()),
-                             Token(TokenType::TOKEN_LESS_EQUAL, "<="),
+                             Token::make(TokenType::TOKEN_LESS_EQUAL),
                              ast::BooleanLiteral::makeTrue()))})),
       ParserTestData("Greater", "true>false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_GREATER, ">"),
+                             Token::make(TokenType::TOKEN_GREATER),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("GreaterEqual", "true>=false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::BooleanLiteral::makeTrue(),
-                             Token(TokenType::TOKEN_GREATER_EQUAL, ">="),
+                             Token::make(TokenType::TOKEN_GREATER_EQUAL),
                              ast::BooleanLiteral::makeFalse()))})),
       ParserTestData("Plus", "1+2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::IntegerLiteral::make(1),
-                             Token(TokenType::TOKEN_PLUS, "+"),
+                             Token::make(TokenType::TOKEN_PLUS),
                              ast::IntegerLiteral::make(2)))})),
       ParserTestData("Minus", "1-2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::IntegerLiteral::make(1),
-                             Token(TokenType::TOKEN_MINUS, "-"),
+                             Token::make(TokenType::TOKEN_MINUS),
                              ast::IntegerLiteral::make(2)))})),
       ParserTestData("Multiply", "1*2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::IntegerLiteral::make(1),
-                             Token(TokenType::TOKEN_STAR, "*"),
+                             Token::make(TokenType::TOKEN_STAR),
                              ast::IntegerLiteral::make(2)))})),
       ParserTestData("Division", "1/2;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(
                              ast::IntegerLiteral::make(1),
-                             Token(TokenType::TOKEN_SLASH, "/"),
+                             Token::make(TokenType::TOKEN_SLASH),
                              ast::IntegerLiteral::make(2)))})),
   };
 
@@ -296,21 +296,20 @@ TEST_F(ParserTest, ForStatementAssertions) {
                           ast::BooleanLiteral::makeFalse())}))})),
       ParserTestData(
           "ForStatementSimple", "for(var i = 0; i < 10; i = i + 1) { i; }",
-          ast::Program::make(
-              std::vector<ast::StatementPtr>{ast::ForStatement::make(
-                  ast::VarDeclaration::make(
-                      Token(TokenType::TOKEN_IDENTIFIER, "i"),
-                      ast::IntegerLiteral::make(0)),
-                  ast::BinaryExpr::make(ast::VariableExpr::make("i"),
-                                        Token(TokenType::TOKEN_LESS, "<"),
-                                        ast::IntegerLiteral::make(10)),
-                  ast::Assignment::make(
-                      "i", ast::BinaryExpr::make(ast::VariableExpr::make("i"),
-                                                 Token(TokenType::TOKEN_PLUS, "+"),
-                                                 ast::IntegerLiteral::make(1))),
-                  ast::Block::make(std::vector<ast::StatementPtr>{
-                      ast::ExpressionStatement::make(
-                          ast::VariableExpr::make("i"))}))}))};
+          ast::Program::make(std::vector<
+                             ast::StatementPtr>{ast::ForStatement::make(
+              ast::VarDeclaration::make(Token(TokenType::TOKEN_IDENTIFIER, "i"),
+                                        ast::IntegerLiteral::make(0)),
+              ast::BinaryExpr::make(ast::VariableExpr::make("i"),
+                                    Token::make(TokenType::TOKEN_LESS),
+                                    ast::IntegerLiteral::make(10)),
+              ast::Assignment::make(
+                  "i", ast::BinaryExpr::make(ast::VariableExpr::make("i"),
+                                             Token::make(TokenType::TOKEN_PLUS),
+                                             ast::IntegerLiteral::make(1))),
+              ast::Block::make(
+                  std::vector<ast::StatementPtr>{ast::ExpressionStatement::make(
+                      ast::VariableExpr::make("i"))}))}))};
 
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);

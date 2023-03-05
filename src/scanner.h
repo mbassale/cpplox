@@ -89,6 +89,7 @@ struct Token {
     return this->type == token.type && this->lexeme() == token.lexeme();
   }
 
+  static Token make(TokenType type);
   static Token make(const Scanner &scanner, TokenType type);
   static Token makeError(const Scanner &scanner, const std::string &error);
 };
