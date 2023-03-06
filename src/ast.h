@@ -28,6 +28,7 @@ enum class NodeType {
   ASSIGNMENT_EXPRESSION,
   BINARY_EXPRESSION,
   UNARY_EXPRESSION,
+  CALL_EXPRESSION,
   INTEGER_LITERAL,
   BOOLEAN_LITERAL,
   STRING_LITERAL,
@@ -303,6 +304,46 @@ struct UnaryExpr : public Expression {
   }
 };
 using UnaryExprPtr = std::shared_ptr<UnaryExpr>;
+
+struct CallExpr : public Expression {
+  ExpressionPtr left;
+  std::vector<ExpressionPtr> arguments;
+
+  CallExpr(const ExpressionPtr& left,
+           const std::vector<ExpressionPtr>& arguments)
+      : Expression(NodeType::CALL_EXPRESSION),
+        left(left),
+        arguments(arguments) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherCallExpr = dynamic_cast<const CallExpr&>(other);
+      return isEqual(otherCallExpr);
+    }
+    return false;
+  }
+
+  bool isEqual(const CallExpr& other) {
+    if (!left->isEqual(*other.left)) {
+      return false;
+    }
+    if (arguments.size() != other.arguments.size()) {
+      return false;
+    }
+    for (size_t i = 0; i < arguments.size(); i++) {
+      if (!arguments[i]->isEqual(*other.arguments[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static std::shared_ptr<CallExpr> make(
+      const ExpressionPtr& left, const std::vector<ExpressionPtr>& arguments) {
+    return std::make_shared<CallExpr>(left, arguments);
+  }
+};
+using CallExprPtr = std::shared_ptr<CallExpr>;
 
 struct Program : public Node {
   std::vector<StatementPtr> statements;

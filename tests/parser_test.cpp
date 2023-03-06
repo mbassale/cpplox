@@ -166,6 +166,58 @@ TEST_F(ParserTest, UnaryExprAssertions) {
   }
 }
 
+TEST_F(ParserTest, CallExprAssertions) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData("MinimalCall", "test();",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::CallExpr::make(
+                             ast::VariableExpr::make("test"),
+                             std::vector<ast::ExpressionPtr>{}))})),
+      ParserTestData("CallWithSimpleArgument", "test(arg1);",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::CallExpr::make(
+                             ast::VariableExpr::make("test"),
+                             std::vector<ast::ExpressionPtr>{
+                                 ast::VariableExpr::make("arg1")}))})),
+      ParserTestData(
+          "CallWithExpressionArgument", "test(2*arg1);",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::CallExpr::make(
+                  ast::VariableExpr::make("test"),
+                  std::vector<ast::ExpressionPtr>{ast::BinaryExpr::make(
+                      ast::IntegerLiteral::make(2),
+                      Token::make(TokenType::TOKEN_STAR),
+                      ast::VariableExpr::make("arg1"))}))})),
+      ParserTestData("CallWithTwoExpressionArguments", "test(arg1,2*arg2);",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::CallExpr::make(
+                             ast::VariableExpr::make("test"),
+                             std::vector<ast::ExpressionPtr>{
+                                 ast::VariableExpr::make("arg1"),
+                                 ast::BinaryExpr::make(
+                                     ast::IntegerLiteral::make(2),
+                                     Token::make(TokenType::TOKEN_STAR),
+                                     ast::VariableExpr::make("arg2"))}))})),
+      ParserTestData(
+          "CallWithInnerCallArguments", "test(arg1,test2(arg2));",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::CallExpr::make(
+                  ast::VariableExpr::make("test"),
+                  std::vector<ast::ExpressionPtr>{
+                      ast::VariableExpr::make("arg1"),
+                      ast::CallExpr::make(
+                          ast::VariableExpr::make("test2"),
+                          std::vector<ast::ExpressionPtr>{
+                              ast::VariableExpr::make("arg2")})}))}))};
+
+  for (const auto &testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    const auto actualProgram = parser.parse();
+    ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
+  }
+}
+
 TEST_F(ParserTest, BinaryExprAssertions) {
   std::vector<ParserTestData> testCases = {
       ParserTestData("And", "true and false;",

@@ -338,7 +338,7 @@ ast::ExpressionPtr Parser::factor() {
 }
 
 /**
- * @brief unary: ( "!" | "-" ) unary | primary ;
+ * @brief unary: ( "!" | "-" ) unary | call ;
  *
  * @return ast::ExpressionPtr
  */
@@ -349,7 +349,30 @@ ast::ExpressionPtr Parser::unary() {
     return ast::UnaryExpr::make(operator_, right);
   }
 
-  return primary();
+  return call();
+}
+
+/**
+ * @brief call: primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+ *
+ * @return ast::ExpressionPtr
+ */
+ast::ExpressionPtr Parser::call() {
+  auto expr = primary();
+  
+  // call
+  std::vector<ast::ExpressionPtr> arguments;
+  if (match(TokenType::TOKEN_LEFT_PAREN)) {
+    // parse arguments
+    while (!match(TokenType::TOKEN_RIGHT_PAREN)) {
+      auto argExpr = expression();
+      arguments.push_back(argExpr);
+      match(TokenType::TOKEN_COMMA);
+    }
+    return ast::CallExpr::make(expr, arguments);
+  }
+
+  return expr;
 }
 
 /**
