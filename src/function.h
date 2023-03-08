@@ -29,6 +29,7 @@ class Function : public Object {
   inline const std::string &getName() const { return name; }
   inline int getArity() const { return arity; }
   inline int incrArity() { return ++arity; }
+  inline ast::FunctionDeclarationPtr getDeclaration() { return declaration; }
 
   std::string toString() const override;
   bool isFalsey() const override;

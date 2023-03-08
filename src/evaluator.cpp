@@ -175,6 +175,10 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
       auto assignExpr = std::static_pointer_cast<Assignment>(expr);
       return evalAssignExpression(ctx, assignExpr);
     }
+    case NodeType::CALL_EXPRESSION: {
+      auto callExpr = std::static_pointer_cast<CallExpr>(expr);
+      return evalCallExpression(ctx, callExpr);
+    }
     default:
       break;
   }
@@ -187,6 +191,28 @@ ObjectPtr Evaluator::evalAssignExpression(EvalContextPtr ctx,
   auto value = evalExpression(ctx, expr->value);
   ctx->env->set(identifier, value);
   return ctx->env->get(identifier);
+}
+
+ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx, ast::CallExprPtr expr) {
+  auto value = evalExpression(ctx, expr->left);
+  if (value->Type != ObjectType::OBJ_FUNCTION) {
+    std::ostringstream ss;
+    ss << "Invalid callable: " << value->toString();
+    throw RuntimeError::make(__FILE__, __LINE__, ss.str());
+  }
+  auto funcValue = std::dynamic_pointer_cast<Function>(value);
+  assert(funcValue != nullptr);
+  auto funcDeclStmt = funcValue->getDeclaration();
+  auto funcCtx = EvalContext::make(ctx);
+  // bind arguments
+  for (size_t i = 0; i < funcDeclStmt->params.size(); i++) {
+    const auto paramName = funcDeclStmt->params[i].lexeme();
+    auto argExpr = expr->arguments[i];
+    auto argValue = evalExpression(ctx, argExpr);
+    funcCtx->env->set(paramName, argValue);
+  }
+  // execute function body
+  return evalStatement(funcCtx, funcDeclStmt->body);
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EvalContextPtr ctx,

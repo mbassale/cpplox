@@ -347,7 +347,38 @@ TEST_F(EvaluatorTest, TestFunctionDeclarationStmts) {
     auto value = evaluator.getGlobalValue(testCase.expectedFunctionName);
     ASSERT_NE(value, nullptr);
     auto funcValue = dynamic_pointer_cast<Function>(value);
-    ASSERT_NE(value, nullptr);
+    ASSERT_NE(funcValue, nullptr);
     EXPECT_EQ(funcValue->getArity(), testCase.expectedFunctionArity);
+  }
+}
+
+TEST_F(EvaluatorTest, TestFunctionCallExpression) {
+  struct TestCase {
+    string source;
+    unordered_map<string, variant<int, bool>> expectedValues;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"fun test(arg1) { arg1 + 1; } var a = test(1);", {{"a", 2}}},
+      TestCase{"fun test1(arg1, arg2) { arg1 + arg2; } fun test2(arg1) { 2 * "
+               "arg1; } var a = test2(test1(1, 1));",
+               {{"a", 4}}},
+      TestCase{"fun test1(arg1, arg2) { arg1+arg2; } var a = test1(2*2, 2+2);",
+               {{"a", 8}}}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors()) << testCase.source;
+    Evaluator evaluator;
+    evaluator.eval(program);
+    for (const auto& pair : testCase.expectedValues) {
+      auto value = evaluator.getGlobalValue(pair.first);
+      if (std::holds_alternative<int>(pair.second)) {
+        expectIntValue(testCase.source, value, std::get<int>(pair.second));
+      } else if (std::holds_alternative<bool>(pair.second)) {
+        expectBoolValue(testCase.source, value, std::get<bool>(pair.second));
+      }
+    }
   }
 }
