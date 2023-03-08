@@ -54,11 +54,8 @@ Token Token::make(TokenType type) {
 }
 
 Token Token::make(const Scanner &scanner, TokenType type) {
-  Token token(type);
-  token.start = scanner.start;
-  token.length = scanner.current - scanner.start;
-  token.line = scanner.line;
-  return token;
+  const auto length = scanner.current - scanner.start;
+  return Token(type, scanner.start, length, scanner.line);
 }
 
 Token Token::makeError(const Scanner &scanner, const std::string &error) {

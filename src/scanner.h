@@ -62,21 +62,22 @@ struct Token {
   size_t length;
   size_t line;
   std::string error;
-  std::string _lexeme;
+  std::string lexeme_;
 
   explicit Token() : type(TokenType::TOKEN_EMPTY) {}
   explicit Token(TokenType type) : type(type), start(), length(), line() {}
   explicit Token(TokenType type, const std::string &lexeme)
-      : type(type), _lexeme(lexeme), line(1) {
-    start = _lexeme.cbegin();
-    length = _lexeme.size();
+      : type(type), lexeme_(lexeme), line(1) {
+    start = lexeme_.cbegin();
+    length = lexeme_.size();
   }
   explicit Token(TokenType type, std::string::const_iterator start,
                  size_t length, size_t line)
-      : type(type), start(start), length(length), line(line) {}
+      : type(type), start(start), length(length), line(line) {
+    lexeme_ = std::string(start, start + length);
+  }
   const std::string lexeme() const {
-    if (_lexeme.size() > 0) return _lexeme;
-    return std::string(start, start + length);
+    return lexeme_;
   }
   const std::string str() const {
     std::ostringstream ss;
