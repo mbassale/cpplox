@@ -4,12 +4,12 @@
 #include <filesystem>
 
 namespace {
-  using namespace cpplox;
+using namespace cpplox;
 
-  bool isReturnValue(ObjectPtr value) {
-    return value->Type == ObjectType::OBJ_RETURN_VALUE;
-  }
+bool isReturnValue(ObjectPtr value) {
+  return value->Type == ObjectType::OBJ_RETURN_VALUE;
 }
+}  // namespace
 
 namespace cpplox {
 using namespace ast;
@@ -120,8 +120,10 @@ ObjectPtr Evaluator::evalIfStatement(EvalContextPtr ctx, IfStatementPtr stmt) {
   auto conditionValue = evalExpression(ctx, stmt->condition);
   if (conditionValue->isTruthy()) {
     return evalStatement(ctx, stmt->thenBranch);
-  } else {
+  } else if (stmt->elseBranch != nullptr) {
     return evalStatement(ctx, stmt->elseBranch);
+  } else {
+    return FALSE_OBJECT_PTR;
   }
 }
 

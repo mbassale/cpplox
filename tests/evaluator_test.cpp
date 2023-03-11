@@ -371,7 +371,13 @@ TEST_F(EvaluatorTest, TestFunctionCallExpression) {
                {{"a", false}}},
       TestCase{"fun test(a){ return a + 1; }"
                "var a = test(1); var b = test(2);",
-               {{"a", 2}, {"b", 3}}}};
+               {{"a", 2}, {"b", 3}}},
+      TestCase{"fun max(a, b) { if (a >= b) { return a; } else { return b; }} "
+               "var a = max(1,2); var b = max(2,3);",
+               {{"a", 2}, {"b", 3}}},
+      TestCase{"fun test(a,b) { while (a < b) { a = "
+               "a + 1; if (a > 5) { return 90; }}} var a = test(1,10);",
+               {{"a", 90}}}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
