@@ -364,9 +364,12 @@ TEST_F(EvaluatorTest, TestFunctionCallExpression) {
                {{"a", 4}}},
       TestCase{"fun test1(arg1, arg2) { arg1+arg2; } var a = test1(2*2, 2+2);",
                {{"a", 8}}},
-      TestCase{
-          "fun test1(arg1, arg2) { arg1 and arg2; } var a = test1(test1(true, true),test1(false,true));",
-          {{"a", false}}}};
+      TestCase{"fun test1(arg1, arg2) { arg1 and arg2; } var a = "
+               "test1(test1(true, true),test1(false,true));",
+               {{"a", false}}},
+      TestCase{"fun test(a){ return a + 1; }"
+               "var a = test(1); var b = test(2);",
+               {{"a", 2}, {"b", 3}}}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);

@@ -136,6 +136,34 @@ struct StringObject : public Object {
 
 using StringObjectPtr = std::shared_ptr<StringObject>;
 
+struct ReturnObject : public Object {
+  ObjectPtr Value;
+
+  ReturnObject(const ObjectPtr &value)
+      : Object(ObjectType::OBJ_RETURN_VALUE), Value(value) {}
+
+  std::string toString() const override {
+    return "return " + Value->toString();
+  }
+
+  bool isFalsey() const override { return Value->isFalsey(); }
+  bool isTruthy() const override { return Value->isTruthy(); }
+
+  bool isEqual(const Object &obj) const override {
+    if (obj.Type == Type) {
+      const auto &rhs = static_cast<const ReturnObject &>(obj);
+      return Value == rhs.Value;
+    }
+    return false;
+  }
+
+  static std::shared_ptr<ReturnObject> make(const ObjectPtr& value) {
+    return std::make_shared<ReturnObject>(value);
+  }
+};
+
+using ReturnObjectPtr = std::shared_ptr<ReturnObject>;
+
 static auto NULL_OBJECT_PTR = std::make_shared<NullObject>();
 static auto TRUE_OBJECT_PTR = std::make_shared<BooleanObject>(true);
 static auto FALSE_OBJECT_PTR = std::make_shared<BooleanObject>(false);

@@ -58,6 +58,8 @@ class Evaluator {
   ObjectPtr evalForStatement(EvalContextPtr ctx, ast::ForStatementPtr stmt);
   ObjectPtr evalWhileStatement(EvalContextPtr ctx, ast::WhileStatementPtr stmt);
   ObjectPtr evalPrintStatement(EvalContextPtr ctx, ast::PrintStatementPtr stmt);
+  ObjectPtr evalReturnStatement(EvalContextPtr ctx,
+                                ast::ReturnStatementPtr stmt);
   ObjectPtr evalBlockStatement(EvalContextPtr ctx, ast::BlockPtr stmt);
 
   ObjectPtr evalExpression(EvalContextPtr ctx, ast::ExpressionPtr expr);

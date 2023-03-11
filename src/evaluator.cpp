@@ -3,6 +3,14 @@
 #include <cstdarg>
 #include <filesystem>
 
+namespace {
+  using namespace cpplox;
+
+  bool isReturnValue(ObjectPtr value) {
+    return value->Type == ObjectType::OBJ_RETURN_VALUE;
+  }
+}
+
 namespace cpplox {
 using namespace ast;
 
@@ -22,6 +30,9 @@ ObjectPtr Evaluator::eval(ProgramPtr program) {
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : program->statements) {
     lastValue = evalStatement(globalCtx, stmt);
+    if (isReturnValue(lastValue)) {
+      return lastValue;
+    }
   }
   return lastValue;
 }
@@ -60,6 +71,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto printStmt = std::static_pointer_cast<PrintStatement>(stmt);
       return evalPrintStatement(ctx, printStmt);
     }
+    case NodeType::RETURN_STATEMENT: {
+      auto returnStmt = std::static_pointer_cast<ReturnStatement>(stmt);
+      return evalReturnStatement(ctx, returnStmt);
+    }
     case NodeType::EMPTY_STATEMENT: {
       break;
     }
@@ -94,6 +109,9 @@ ObjectPtr Evaluator::evalBlockStatement(EvalContextPtr ctx,
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : stmt->statements) {
     lastValue = evalStatement(localCtx, stmt);
+    if (isReturnValue(lastValue)) {
+      return lastValue;
+    }
   }
   return lastValue;
 }
@@ -119,6 +137,9 @@ ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
       break;
     }
     lastValue = evalStatement(localCtx, stmt->body);
+    if (isReturnValue(lastValue)) {
+      return lastValue;
+    }
     lastValue = evalExpression(localCtx, stmt->increment);
   }
   return lastValue;
@@ -129,6 +150,9 @@ ObjectPtr Evaluator::evalWhileStatement(EvalContextPtr ctx,
   ObjectPtr lastValue = evalExpression(ctx, stmt->condition);
   while (lastValue->isTruthy()) {
     lastValue = evalStatement(ctx, stmt->body);
+    if (isReturnValue(lastValue)) {
+      return lastValue;
+    }
     lastValue = evalExpression(ctx, stmt->condition);
   }
   return lastValue;
@@ -139,6 +163,12 @@ ObjectPtr Evaluator::evalPrintStatement(EvalContextPtr ctx,
   ObjectPtr lastValue = evalExpression(ctx, stmt->expression);
   std::cout << lastValue->toString() << std::endl;
   return lastValue;
+}
+
+ObjectPtr Evaluator::evalReturnStatement(EvalContextPtr ctx,
+                                         ReturnStatementPtr stmt) {
+  ObjectPtr lastValue = evalExpression(ctx, stmt->expression);
+  return ReturnObject::make(lastValue);
 }
 
 ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
@@ -193,8 +223,13 @@ ObjectPtr Evaluator::evalAssignExpression(EvalContextPtr ctx,
   return ctx->env->get(identifier);
 }
 
-ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx, ast::CallExprPtr expr) {
+ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx,
+                                        ast::CallExprPtr expr) {
   auto value = evalExpression(ctx, expr->left);
+  if (isReturnValue(value)) {
+    auto returnValue = std::dynamic_pointer_cast<ReturnObject>(value);
+    value = returnValue->Value;
+  }
   if (value->Type != ObjectType::OBJ_FUNCTION) {
     std::ostringstream ss;
     ss << "Invalid callable: " << value->toString();
@@ -212,7 +247,13 @@ ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx, ast::CallExprPtr exp
     funcCtx->env->set(paramName, argValue);
   }
   // execute function body
-  return evalStatement(funcCtx, funcDeclStmt->body);
+  auto lastValue = evalStatement(funcCtx, funcDeclStmt->body);
+  if (isReturnValue(lastValue)) {
+    auto returnValue = std::dynamic_pointer_cast<ReturnObject>(lastValue);
+    assert(returnValue != nullptr);
+    return returnValue->Value;
+  }
+  return lastValue;
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EvalContextPtr ctx,
