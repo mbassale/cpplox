@@ -250,6 +250,18 @@ TEST_F(ParserTest, BinaryExprAssertions) {
                                         ast::BooleanLiteral::makeFalse()),
                   Token::make(TokenType::TOKEN_OR),
                   ast::BooleanLiteral::makeTrue()))})),
+      ParserTestData(
+          "MultipleAndOr", "true or false and true or true;",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ExpressionStatement::make(ast::BinaryExpr::make(
+                  ast::BinaryExpr::make(
+                      ast::BinaryExpr::make(ast::BooleanLiteral::makeTrue(),
+                                            Token::make(TokenType::TOKEN_OR),
+                                            ast::BooleanLiteral::makeFalse()),
+                      Token::make(TokenType::TOKEN_AND),
+                      ast::BooleanLiteral::makeTrue()),
+                  Token::make(TokenType::TOKEN_OR),
+                  ast::BooleanLiteral::makeTrue()))})),
       ParserTestData("Equal", "true==false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(ast::BinaryExpr::make(

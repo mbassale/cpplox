@@ -215,12 +215,12 @@ ast::ExpressionStatementPtr Parser::expressionStatement() {
 ast::ExpressionPtr Parser::expression() { return assignment(); }
 
 /**
- * @brief assignment: ( call "." )? IDENTIFIER "=" assignment | logicOr ;
+ * @brief assignment: ( call "." )? IDENTIFIER "=" assignment | logicOperator ;
  *
  * @return ast::ExpressionPtr
  */
 ast::ExpressionPtr Parser::assignment() {
-  auto expr = logicOr();
+  auto expr = logicOperator();
   if (match(TokenType::TOKEN_EQUAL)) {
     auto value = assignment();
     if (expr->Type == ast::NodeType::VARIABLE_EXPRESSION) {
@@ -233,31 +233,14 @@ ast::ExpressionPtr Parser::assignment() {
 }
 
 /**
- * @brief logicOr: logicAnd ( "or" logicAnd )* ;
+ * @brief logicOperator: equality ( ("or" | "and" ) equality )* ;
  *
  * @return ast::ExpressionPtr
  */
-ast::ExpressionPtr Parser::logicOr() {
-  auto expr = logicAnd();
-
-  while (match(TokenType::TOKEN_OR)) {
-    auto operator_ = previous;
-    auto rhsExpr = logicAnd();
-    expr = ast::BinaryExpr::make(expr, operator_, rhsExpr);
-  }
-
-  return expr;
-}
-
-/**
- * @brief  logicAnd: equality ( "and" equality )* ;
- *
- * @return ast::ExpressionPtr
- */
-ast::ExpressionPtr Parser::logicAnd() {
+ast::ExpressionPtr Parser::logicOperator() {
   auto expr = equality();
 
-  while (match(TokenType::TOKEN_AND)) {
+  while (match(TokenType::TOKEN_OR) || match(TokenType::TOKEN_AND)) {
     auto operator_ = previous;
     auto rhsExpr = equality();
     expr = ast::BinaryExpr::make(expr, operator_, rhsExpr);
@@ -359,7 +342,7 @@ ast::ExpressionPtr Parser::unary() {
  */
 ast::ExpressionPtr Parser::call() {
   auto expr = primary();
-  
+
   // call
   std::vector<ast::ExpressionPtr> arguments;
   if (match(TokenType::TOKEN_LEFT_PAREN)) {
