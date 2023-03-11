@@ -47,7 +47,8 @@ Token Token::make(TokenType type) {
     case TokenType::TOKEN_OR:
       return Token(type, "or");
     default: {
-      std::string error = std::string("Invalid TokenType: ") + std::to_string((int)type);
+      std::string error =
+          std::string("Invalid TokenType: ") + std::to_string((int)type);
       throw std::invalid_argument(error);
     }
   }
@@ -178,6 +179,8 @@ TokenType Scanner::identifierType() {
   switch (*start) {
     case 'a':
       return checkKeyword(1, "nd", TokenType::TOKEN_AND);
+    case 'b':
+      return checkKeyword(1, "reak", TokenType::TOKEN_BREAK);
     case 'c':
       return checkKeyword(1, "lass", TokenType::TOKEN_CLASS);
     case 'e':
@@ -226,9 +229,12 @@ TokenType Scanner::identifierType() {
 
 TokenType Scanner::checkKeyword(size_t offset, const std::string &rest,
                                 TokenType type) {
-  std::string lexeme(start + offset, start + offset + rest.length());
-  if (lexeme == rest) {
-    return type;
+  const auto end = start + offset + rest.length();
+  if (end < source.end()) {
+    std::string lexeme(start + offset, end);
+    if (lexeme == rest) {
+      return type;
+    }
   }
   return TokenType::TOKEN_IDENTIFIER;
 }

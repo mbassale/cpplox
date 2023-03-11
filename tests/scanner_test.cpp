@@ -73,12 +73,12 @@ TEST_F(ScannerTest, PunctuationTokenAssertions) {
 }
 
 TEST_F(ScannerTest, KeywordTokenAssertions) {
-  std::array<ScanTestData<16>, 1> testCases = {
-      ScanTestData<16>("Punctuation",
+  std::array<ScanTestData<17>, 1> testCases = {
+      ScanTestData<17>("Punctuation",
                        "and class  else  false \tfor\t fun\tif\nnil\t\nor\n\t "
                        "print\n \t return \t super \n this  \t\t  true \n\t\n "
-                       "var \t\n while \n\n\n \t\n\t \t \n  ",
-                       std::array<TokenType, 16>{
+                       "var \t\n while \n\t break \n\n\n \t\n\t \t \n  ",
+                       std::array<TokenType, 17>{
                            // One character tokens.
                            TokenType::TOKEN_AND,
                            TokenType::TOKEN_CLASS,
@@ -96,10 +96,11 @@ TEST_F(ScannerTest, KeywordTokenAssertions) {
                            TokenType::TOKEN_TRUE,
                            TokenType::TOKEN_VAR,
                            TokenType::TOKEN_WHILE,
+                           TokenType::TOKEN_BREAK,
                        }),
   };
   for (const auto testData : testCases) {
     Scanner scanner(testData.source);
-    assertTokenTypes<16>(scanner, testData.tokenTypes);
+    assertTokenTypes<17>(scanner, testData.tokenTypes);
   }
 }
