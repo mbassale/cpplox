@@ -240,10 +240,10 @@ ast::ExpressionPtr Parser::assignment() {
 ast::ExpressionPtr Parser::logicOr() {
   auto expr = logicAnd();
 
-  if (match(TokenType::TOKEN_OR)) {
+  while (match(TokenType::TOKEN_OR)) {
     auto operator_ = previous;
     auto rhsExpr = logicAnd();
-    return ast::BinaryExpr::make(expr, operator_, rhsExpr);
+    expr = ast::BinaryExpr::make(expr, operator_, rhsExpr);
   }
 
   return expr;
@@ -257,10 +257,10 @@ ast::ExpressionPtr Parser::logicOr() {
 ast::ExpressionPtr Parser::logicAnd() {
   auto expr = equality();
 
-  if (match(TokenType::TOKEN_AND)) {
+  while (match(TokenType::TOKEN_AND)) {
     auto operator_ = previous;
     auto rhsExpr = equality();
-    return ast::BinaryExpr::make(expr, operator_, rhsExpr);
+    expr = ast::BinaryExpr::make(expr, operator_, rhsExpr);
   }
 
   return expr;
