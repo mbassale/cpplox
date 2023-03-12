@@ -4,8 +4,8 @@
 #include "ast.h"
 #include "common.h"
 #include "environment.h"
-#include "object.h"
 #include "function.h"
+#include "object.h"
 
 namespace cpplox {
 
@@ -60,6 +60,7 @@ class Evaluator {
   ObjectPtr evalPrintStatement(EvalContextPtr ctx, ast::PrintStatementPtr stmt);
   ObjectPtr evalReturnStatement(EvalContextPtr ctx,
                                 ast::ReturnStatementPtr stmt);
+  ObjectPtr evalBreakStatement(EvalContextPtr ctx, ast::BreakStatementPtr stmt);
   ObjectPtr evalBlockStatement(EvalContextPtr ctx, ast::BlockPtr stmt);
 
   ObjectPtr evalExpression(EvalContextPtr ctx, ast::ExpressionPtr expr);

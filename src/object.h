@@ -10,6 +10,7 @@ enum class ObjectType {
   OBJ_STRING,
   OBJ_NULL,
   OBJ_RETURN_VALUE,
+  OBJ_BREAK,
   OBJ_ERROR,
   OBJ_FUNCTION,
   OBJ_ARRAY,
@@ -157,12 +158,32 @@ struct ReturnObject : public Object {
     return false;
   }
 
-  static std::shared_ptr<ReturnObject> make(const ObjectPtr& value) {
+  static std::shared_ptr<ReturnObject> make(const ObjectPtr &value) {
     return std::make_shared<ReturnObject>(value);
   }
 };
 
 using ReturnObjectPtr = std::shared_ptr<ReturnObject>;
+
+struct BreakObject : public Object {
+  BreakObject() : Object(ObjectType::OBJ_BREAK) {}
+
+  std::string toString() const override { return "break"; }
+
+  bool isFalsey() const override { return false; }
+  bool isTruthy() const override { return true; }
+
+  bool isEqual(const Object &obj) const override {
+    if (obj.Type == Type) {
+      return true;
+    }
+    return false;
+  }
+
+  static std::shared_ptr<BreakObject> make() {
+    return std::make_shared<BreakObject>();
+  }
+};
 
 static auto NULL_OBJECT_PTR = std::make_shared<NullObject>();
 static auto TRUE_OBJECT_PTR = std::make_shared<BooleanObject>(true);

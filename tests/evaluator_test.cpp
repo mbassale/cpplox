@@ -396,3 +396,33 @@ TEST_F(EvaluatorTest, TestFunctionCallExpression) {
     }
   }
 }
+
+TEST_F(EvaluatorTest, TestBreakStatement) {
+  struct TestCase {
+    string source;
+    unordered_map<string, variant<int, bool>> expectedValues;
+  };
+  vector<TestCase> testCases = {
+      TestCase{
+          "var a; for (a = 1; a < 10; a = a + 1) { if (a == 5) { break; }}",
+          {{"a", 5}}},
+      TestCase{"var a = 1; while (a < 10) { if (a == 5) { break; } a = a + 1; }",
+               {{"a", 5}}}};
+
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors()) << testCase.source;
+    Evaluator evaluator;
+    evaluator.eval(program);
+    for (const auto& pair : testCase.expectedValues) {
+      auto value = evaluator.getGlobalValue(pair.first);
+      if (std::holds_alternative<int>(pair.second)) {
+        expectIntValue(testCase.source, value, std::get<int>(pair.second));
+      } else if (std::holds_alternative<bool>(pair.second)) {
+        expectBoolValue(testCase.source, value, std::get<bool>(pair.second));
+      }
+    }
+  }
+}

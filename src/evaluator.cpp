@@ -6,9 +6,14 @@
 namespace {
 using namespace cpplox;
 
-bool isReturnValue(ObjectPtr value) {
+static bool isReturnObject(ObjectPtr value) {
   return value->Type == ObjectType::OBJ_RETURN_VALUE;
 }
+
+static bool isBreakObject(ObjectPtr value) {
+  return value->Type == ObjectType::OBJ_BREAK;
+}
+
 }  // namespace
 
 namespace cpplox {
@@ -30,8 +35,12 @@ ObjectPtr Evaluator::eval(ProgramPtr program) {
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : program->statements) {
     lastValue = evalStatement(globalCtx, stmt);
-    if (isReturnValue(lastValue)) {
+    if (isReturnObject(lastValue)) {
       return lastValue;
+    } else if (isBreakObject(lastValue)) {
+      std::ostringstream ss;
+      ss << "Invalid statement: " << lastValue->toString();
+      throw RuntimeError::make(__FILE__, __LINE__, ss.str());
     }
   }
   return lastValue;
@@ -75,6 +84,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto returnStmt = std::static_pointer_cast<ReturnStatement>(stmt);
       return evalReturnStatement(ctx, returnStmt);
     }
+    case NodeType::BREAK_STATEMENT: {
+      auto breakStmt = std::static_pointer_cast<BreakStatement>(stmt);
+      return evalBreakStatement(ctx, breakStmt);
+    }
     case NodeType::EMPTY_STATEMENT: {
       break;
     }
@@ -109,7 +122,7 @@ ObjectPtr Evaluator::evalBlockStatement(EvalContextPtr ctx,
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : stmt->statements) {
     lastValue = evalStatement(localCtx, stmt);
-    if (isReturnValue(lastValue)) {
+    if (isReturnObject(lastValue) || isBreakObject(lastValue)) {
       return lastValue;
     }
   }
@@ -139,8 +152,10 @@ ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
       break;
     }
     lastValue = evalStatement(localCtx, stmt->body);
-    if (isReturnValue(lastValue)) {
+    if (isReturnObject(lastValue)) {
       return lastValue;
+    } else if (isBreakObject(lastValue)) {
+      return NULL_OBJECT_PTR;
     }
     lastValue = evalExpression(localCtx, stmt->increment);
   }
@@ -152,8 +167,10 @@ ObjectPtr Evaluator::evalWhileStatement(EvalContextPtr ctx,
   ObjectPtr lastValue = evalExpression(ctx, stmt->condition);
   while (lastValue->isTruthy()) {
     lastValue = evalStatement(ctx, stmt->body);
-    if (isReturnValue(lastValue)) {
+    if (isReturnObject(lastValue)) {
       return lastValue;
+    } else if (isBreakObject(lastValue)) {
+      return NULL_OBJECT_PTR;
     }
     lastValue = evalExpression(ctx, stmt->condition);
   }
@@ -171,6 +188,11 @@ ObjectPtr Evaluator::evalReturnStatement(EvalContextPtr ctx,
                                          ReturnStatementPtr stmt) {
   ObjectPtr lastValue = evalExpression(ctx, stmt->expression);
   return ReturnObject::make(lastValue);
+}
+
+ObjectPtr Evaluator::evalBreakStatement(EvalContextPtr ctx,
+                                        BreakStatementPtr stmt) {
+  return BreakObject::make();
 }
 
 ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
@@ -228,7 +250,7 @@ ObjectPtr Evaluator::evalAssignExpression(EvalContextPtr ctx,
 ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx,
                                         ast::CallExprPtr expr) {
   auto value = evalExpression(ctx, expr->left);
-  if (isReturnValue(value)) {
+  if (isReturnObject(value)) {
     auto returnValue = std::dynamic_pointer_cast<ReturnObject>(value);
     value = returnValue->Value;
   }
@@ -250,10 +272,14 @@ ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx,
   }
   // execute function body
   auto lastValue = evalStatement(funcCtx, funcDeclStmt->body);
-  if (isReturnValue(lastValue)) {
+  if (isReturnObject(lastValue)) {
     auto returnValue = std::dynamic_pointer_cast<ReturnObject>(lastValue);
     assert(returnValue != nullptr);
     return returnValue->Value;
+  } else if (isBreakObject(lastValue)) {
+    std::ostringstream ss;
+    ss << "Invalid statement: " << value->toString();
+    throw RuntimeError::make(__FILE__, __LINE__, ss.str());
   }
   return lastValue;
 }
