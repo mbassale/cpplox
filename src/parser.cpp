@@ -80,7 +80,7 @@ ast::FunctionDeclarationPtr Parser::functionDeclaration() {
 
 /**
  * @brief statement: exprStmt | forStmt | ifStmt | printStmt | returnStmt |
- * whileStmt | block ;
+ * breakStmt | whileStmt | block ;
  *
  * @return ast::StatementPtr
  */
@@ -97,6 +97,8 @@ ast::StatementPtr Parser::statement() {
     return printStatement();
   } else if (match(TokenType::TOKEN_RETURN)) {
     return returnStatement();
+  } else if (match(TokenType::TOKEN_BREAK)) {
+    return breakStatement();
   } else if (match(TokenType::TOKEN_SEMICOLON)) {
     return ast::Statement::make();
   } else {
@@ -192,6 +194,16 @@ ast::ReturnStatementPtr Parser::returnStatement() {
     consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon");
   }
   return ast::ReturnStatement::make(expr);
+}
+
+/**
+ * @brief breakStatement: "break" ";" ;
+ *
+ * @return ast::BreakStatementPtr
+ */
+ast::BreakStatementPtr Parser::breakStatement() {
+  consume(TokenType::TOKEN_SEMICOLON, "Missing semicolon");
+  return ast::BreakStatement::make();
 }
 
 /**

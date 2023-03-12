@@ -400,3 +400,28 @@ TEST_F(ParserTest, ForStatementAssertions) {
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
+
+TEST_F(ParserTest, BreakStatementAssertions) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData(
+          "DirectBreakInFor", "for(;;) { break; }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                  ast::Statement::make(), ast::BooleanLiteral::makeTrue(),
+                  ast::EmptyExpression::make(),
+                  ast::Block::make(std::vector<ast::StatementPtr>{
+                      ast::BreakStatement::make()}))})),
+      ParserTestData("DirectBreakInWhile", "while(true) { break; }",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::WhileStatement::make(
+                             ast::BooleanLiteral::makeTrue(),
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::BreakStatement::make()}))}))};
+
+  for (const auto &testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    const auto actualProgram = parser.parse();
+    ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
+  }
+}

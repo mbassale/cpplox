@@ -47,6 +47,7 @@ class Parser {
   ast::WhileStatementPtr whileStatement();
   ast::PrintStatementPtr printStatement();
   ast::ReturnStatementPtr returnStatement();
+  ast::BreakStatementPtr breakStatement();
   ast::ExpressionStatementPtr expressionStatement();
   ast::ExpressionPtr expression();
   ast::ExpressionPtr assignment();

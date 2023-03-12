@@ -46,6 +46,7 @@ enum class NodeType {
   WHILE_STATEMENT,
   PRINT_STATEMENT,
   RETURN_STATEMENT,
+  BREAK_STATEMENT,
 };
 
 struct Node {
@@ -768,6 +769,25 @@ struct ReturnStatement : public Statement {
   }
 };
 using ReturnStatementPtr = std::shared_ptr<ReturnStatement>;
+
+struct BreakStatement : public Statement {
+  BreakStatement() : Statement(NodeType::BREAK_STATEMENT) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherReturnStmt = dynamic_cast<const BreakStatement&>(other);
+      return isEqual(otherReturnStmt);
+    }
+    return false;
+  }
+
+  bool isEqual(const BreakStatement& other) { return true; }
+
+  static std::shared_ptr<BreakStatement> make() {
+    return std::make_shared<BreakStatement>();
+  }
+};
+using BreakStatementPtr = std::shared_ptr<BreakStatement>;
 
 struct ExpressionStatement : public Statement {
   ExpressionPtr expression;
