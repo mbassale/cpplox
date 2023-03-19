@@ -87,9 +87,9 @@ add_executable(
 target_link_libraries(
   cpplox_test
   libcpplox
-  gtest
-  gtest_main
   glog::glog
+  GTest::gtest
+  GTest::gtest_main
   ${ADDITIONAL_LIBRARIES}
 )
 
