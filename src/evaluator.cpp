@@ -88,11 +88,10 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
       auto breakStmt = std::static_pointer_cast<BreakStatement>(stmt);
       return evalBreakStatement(ctx, breakStmt);
     }
-    case NodeType::EMPTY_STATEMENT: {
-      break;
-    }
+    case NodeType::EMPTY_STATEMENT:
+    default:
+      return NULL_OBJECT_PTR;
   }
-  return NULL_OBJECT_PTR;
 }
 
 ObjectPtr Evaluator::evalVarDeclarationStatement(EvalContextPtr ctx,

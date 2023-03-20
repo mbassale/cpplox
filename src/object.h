@@ -29,13 +29,7 @@ struct Object {
   virtual bool isTruthy() const { return false; }
   virtual bool isEqual(const Object &obj) const { return true; }
 
-  inline bool isNumeric() {
-    switch (Type) {
-      case ObjectType::OBJ_INTEGER:
-        return true;
-    }
-    return false;
-  }
+  inline bool isNumeric() { return Type == ObjectType::OBJ_INTEGER; }
 
   inline bool isString() { return Type == ObjectType::OBJ_STRING; }
 
