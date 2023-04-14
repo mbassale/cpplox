@@ -12,6 +12,10 @@ Token Token::make(TokenType type) {
       return Token(type, "{");
     case TokenType::TOKEN_RIGHT_BRACE:
       return Token(type, "}");
+    case TokenType::TOKEN_LEFT_BRACKET:
+      return Token(type, "[");
+    case TokenType::TOKEN_RIGHT_BRACKET:
+      return Token(type, "]");
     case TokenType::TOKEN_COMMA:
       return Token(type, ",");
     case TokenType::TOKEN_DOT:
@@ -85,6 +89,10 @@ Token Scanner::next() {
       return Token::make(*this, TokenType::TOKEN_LEFT_BRACE);
     case '}':
       return Token::make(*this, TokenType::TOKEN_RIGHT_BRACE);
+    case '[':
+      return Token::make(*this, TokenType::TOKEN_LEFT_BRACKET);
+    case ']':
+      return Token::make(*this, TokenType::TOKEN_RIGHT_BRACKET);
     case ';':
       return Token::make(*this, TokenType::TOKEN_SEMICOLON);
     case ',':

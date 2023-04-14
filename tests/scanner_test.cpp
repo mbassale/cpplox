@@ -4,27 +4,26 @@
 
 #include "common.h"
 
-template <size_t N>
+using namespace std;
+
 struct ScanTestData {
   const char *name;
   const char *source;
-  std::array<TokenType, N> tokenTypes;
+  vector<TokenType> tokenTypes;
 
   ScanTestData(const char *name, const char *source,
-               const std::array<TokenType, N> &tokenTypes)
+               const vector<TokenType> &tokenTypes)
       : name(name), source(source), tokenTypes(tokenTypes) {}
 };
 
 class ScannerTest : public ::testing::Test {
  protected:
-  template <size_t N>
   void assertTokenTypes(Scanner &scanner,
-                        const std::array<TokenType, N> &expectedTokens);
+                        const vector<TokenType> &expectedTokens);
 };
 
-template <size_t N>
 void ScannerTest::assertTokenTypes(
-    Scanner &scanner, const std::array<TokenType, N> &expectedTokenTypes) {
+    Scanner &scanner, const vector<TokenType> &expectedTokenTypes) {
   size_t tokenCount = 0;
   std::for_each(expectedTokenTypes.begin(), expectedTokenTypes.end(),
                 [&](const TokenType &expected) {
@@ -40,67 +39,69 @@ void ScannerTest::assertTokenTypes(
 }
 
 TEST_F(ScannerTest, PunctuationTokenAssertions) {
-  std::array<ScanTestData<19>, 1> testCases = {
-      ScanTestData<19>("Punctuation", "(){},.-+;/*!!====>>=<<=",
-                       std::array<TokenType, 19>{
-                           // One character tokens.
-                           TokenType::TOKEN_LEFT_PAREN,
-                           TokenType::TOKEN_RIGHT_PAREN,
-                           TokenType::TOKEN_LEFT_BRACE,
-                           TokenType::TOKEN_RIGHT_BRACE,
-                           TokenType::TOKEN_COMMA,
-                           TokenType::TOKEN_DOT,
-                           TokenType::TOKEN_MINUS,
-                           TokenType::TOKEN_PLUS,
-                           TokenType::TOKEN_SEMICOLON,
-                           TokenType::TOKEN_SLASH,
-                           TokenType::TOKEN_STAR,
-                           // One or two character tokens.
-                           TokenType::TOKEN_BANG,
-                           TokenType::TOKEN_BANG_EQUAL,
-                           TokenType::TOKEN_EQUAL_EQUAL,
-                           TokenType::TOKEN_EQUAL,
-                           TokenType::TOKEN_GREATER,
-                           TokenType::TOKEN_GREATER_EQUAL,
-                           TokenType::TOKEN_LESS,
-                           TokenType::TOKEN_LESS_EQUAL,
-                       }),
+  vector<ScanTestData> testCases = {
+      ScanTestData("Punctuation", "(){}[],.-+;/*!!====>>=<<=",
+                   vector<TokenType>{
+                       // One character tokens.
+                       TokenType::TOKEN_LEFT_PAREN,
+                       TokenType::TOKEN_RIGHT_PAREN,
+                       TokenType::TOKEN_LEFT_BRACE,
+                       TokenType::TOKEN_RIGHT_BRACE,
+                       TokenType::TOKEN_LEFT_BRACKET,
+                       TokenType::TOKEN_RIGHT_BRACKET,
+                       TokenType::TOKEN_COMMA,
+                       TokenType::TOKEN_DOT,
+                       TokenType::TOKEN_MINUS,
+                       TokenType::TOKEN_PLUS,
+                       TokenType::TOKEN_SEMICOLON,
+                       TokenType::TOKEN_SLASH,
+                       TokenType::TOKEN_STAR,
+                       // One or two character tokens.
+                       TokenType::TOKEN_BANG,
+                       TokenType::TOKEN_BANG_EQUAL,
+                       TokenType::TOKEN_EQUAL_EQUAL,
+                       TokenType::TOKEN_EQUAL,
+                       TokenType::TOKEN_GREATER,
+                       TokenType::TOKEN_GREATER_EQUAL,
+                       TokenType::TOKEN_LESS,
+                       TokenType::TOKEN_LESS_EQUAL,
+                   }),
   };
   for (const auto testData : testCases) {
     Scanner scanner(testData.source);
-    assertTokenTypes<19>(scanner, testData.tokenTypes);
+    assertTokenTypes(scanner, testData.tokenTypes);
   }
 }
 
 TEST_F(ScannerTest, KeywordTokenAssertions) {
-  std::array<ScanTestData<17>, 1> testCases = {
-      ScanTestData<17>("Punctuation",
-                       "and class  else  false \tfor\t fun\tif\nnil\t\nor\n\t "
-                       "print\n \t return \t super \n this  \t\t  true \n\t\n "
-                       "var \t\n while \n\t break \n\n\n \t\n\t \t \n  ",
-                       std::array<TokenType, 17>{
-                           // One character tokens.
-                           TokenType::TOKEN_AND,
-                           TokenType::TOKEN_CLASS,
-                           TokenType::TOKEN_ELSE,
-                           TokenType::TOKEN_FALSE,
-                           TokenType::TOKEN_FOR,
-                           TokenType::TOKEN_FUN,
-                           TokenType::TOKEN_IF,
-                           TokenType::TOKEN_NIL,
-                           TokenType::TOKEN_OR,
-                           TokenType::TOKEN_PRINT,
-                           TokenType::TOKEN_RETURN,
-                           TokenType::TOKEN_SUPER,
-                           TokenType::TOKEN_THIS,
-                           TokenType::TOKEN_TRUE,
-                           TokenType::TOKEN_VAR,
-                           TokenType::TOKEN_WHILE,
-                           TokenType::TOKEN_BREAK,
-                       }),
+  vector<ScanTestData> testCases = {
+      ScanTestData("Punctuation",
+                   "and class  else  false \tfor\t fun\tif\nnil\t\nor\n\t "
+                   "print\n \t return \t super \n this  \t\t  true \n\t\n "
+                   "var \t\n while \n\t break \n\n\n \t\n\t \t \n  ",
+                   vector<TokenType>{
+                       // One character tokens.
+                       TokenType::TOKEN_AND,
+                       TokenType::TOKEN_CLASS,
+                       TokenType::TOKEN_ELSE,
+                       TokenType::TOKEN_FALSE,
+                       TokenType::TOKEN_FOR,
+                       TokenType::TOKEN_FUN,
+                       TokenType::TOKEN_IF,
+                       TokenType::TOKEN_NIL,
+                       TokenType::TOKEN_OR,
+                       TokenType::TOKEN_PRINT,
+                       TokenType::TOKEN_RETURN,
+                       TokenType::TOKEN_SUPER,
+                       TokenType::TOKEN_THIS,
+                       TokenType::TOKEN_TRUE,
+                       TokenType::TOKEN_VAR,
+                       TokenType::TOKEN_WHILE,
+                       TokenType::TOKEN_BREAK,
+                   }),
   };
   for (const auto testData : testCases) {
     Scanner scanner(testData.source);
-    assertTokenTypes<17>(scanner, testData.tokenTypes);
+    assertTokenTypes(scanner, testData.tokenTypes);
   }
 }
