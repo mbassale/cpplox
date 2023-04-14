@@ -380,7 +380,8 @@ ast::ExpressionPtr Parser::call() {
  *  | STRING
  *  | IDENTIFIER
  *  | "(" expression ")"
- *  | "super" "." IDENTIFIER ;
+ *  | "super" "." IDENTIFIER
+ *  | "[" ARRAY_ELEMENTS "]" ;
  *
  * @return ast::ExpressionPtr
  */
@@ -412,6 +413,15 @@ ast::ExpressionPtr Parser::primary() {
       const auto expr = expression();
       consume(TokenType::TOKEN_RIGHT_PAREN, "Unbalanced parenthesis");
       return expr;
+    }
+    case TokenType::TOKEN_LEFT_BRACKET: {
+      advance();
+      std::vector<ast::ExpressionPtr> elements;
+      while (!match(TokenType::TOKEN_RIGHT_BRACKET)) {
+        elements.push_back(expression());
+        match(TokenType::TOKEN_COMMA);
+      }
+      return ast::ArrayLiteral::make(elements);
     }
     default:
       throw ParserException("Unknown primary", current);

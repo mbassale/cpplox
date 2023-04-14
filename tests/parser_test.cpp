@@ -425,3 +425,44 @@ TEST_F(ParserTest, BreakStatementAssertions) {
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
+
+TEST_F(ParserTest, ArrayLiteralAssertions) {
+  std::vector testCases = {
+      ParserTestData("EmptyArray", "[];",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::ArrayLiteral::make(
+                             std::vector<ast::ExpressionPtr>{}))})),
+      ParserTestData("ArrayWithOneElement", "[1];",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::ArrayLiteral::make(
+                             std::vector<ast::ExpressionPtr>{
+                                 ast::IntegerLiteral::make(1)}))})),
+      ParserTestData("ArrayWithTwoElements", "[1, 2];",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::ArrayLiteral::make(
+                             std::vector<ast::ExpressionPtr>{
+                                 ast::IntegerLiteral::make(1),
+                                 ast::IntegerLiteral::make(2)}))})),
+      ParserTestData(
+          "ArrayWithSubArray", "[1, [2, 3]];",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ExpressionStatement::make(
+                  ast::ArrayLiteral::make(std::vector<ast::ExpressionPtr>{
+                      ast::IntegerLiteral::make(1),
+                      ast::ArrayLiteral::make(std::vector<ast::ExpressionPtr>{
+                          ast::IntegerLiteral::make(2),
+                          ast::IntegerLiteral::make(3)})}))})),
+      ParserTestData("ArrayWithString", "[\"hello\", \"world\"];",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::ArrayLiteral::make(
+                             std::vector<ast::ExpressionPtr>{
+                                 ast::StringLiteral::make("hello"),
+                                 ast::StringLiteral::make("world")}))})),
+  };
+  for (const auto &testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    const auto actualProgram = parser.parse();
+    ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
+  }
+}

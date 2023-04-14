@@ -32,6 +32,7 @@ enum class NodeType {
   INTEGER_LITERAL,
   BOOLEAN_LITERAL,
   STRING_LITERAL,
+  ARRAY_LITERAL,
   NIL_LITERAL,
 
   /*
@@ -816,6 +817,41 @@ struct ExpressionStatement : public Statement {
   }
 };
 using ExpressionStatementPtr = std::shared_ptr<ExpressionStatement>;
+
+struct ArrayLiteral : public Expression {
+  std::vector<ExpressionPtr> elements;
+
+  ArrayLiteral() : Expression(NodeType::ARRAY_LITERAL), elements() {}
+  ArrayLiteral(const std::vector<ExpressionPtr>& elements)
+      : Expression(NodeType::ARRAY_LITERAL), elements(elements) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherExprStmt =
+          dynamic_cast<const ArrayLiteral&>(other);
+      return isEqual(otherExprStmt);
+    }
+    return false;
+  }
+
+  bool isEqual(const ArrayLiteral& other) {
+    if (elements.size() != other.elements.size()) {
+      return false;
+    }
+    for (size_t i = 0; i < elements.size(); ++i) {
+      if (!elements[i]->isEqual(*other.elements[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static std::shared_ptr<ArrayLiteral> make(
+      const std::vector<ExpressionPtr>& elements = {}) {
+    return std::make_shared<ArrayLiteral>(elements);
+  }
+};
+using ArrayLiteralPtr = std::shared_ptr<ArrayLiteral>;
 
 template <typename T>
 class NodeVisitor {
