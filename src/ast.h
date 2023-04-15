@@ -33,6 +33,7 @@ enum class NodeType {
   BOOLEAN_LITERAL,
   STRING_LITERAL,
   ARRAY_LITERAL,
+  ARRAY_SUBSCRIPT_EXPRESSION,
   NIL_LITERAL,
 
   /*
@@ -852,6 +853,36 @@ struct ArrayLiteral : public Expression {
   }
 };
 using ArrayLiteralPtr = std::shared_ptr<ArrayLiteral>;
+
+struct ArraySubscriptExpr : public Expression {
+  ExpressionPtr array;
+  ExpressionPtr index;
+
+  ArraySubscriptExpr()
+      : Expression(NodeType::ARRAY_SUBSCRIPT_EXPRESSION), array(nullptr), index(nullptr) {}
+  ArraySubscriptExpr(const ExpressionPtr& array, const ExpressionPtr& index)
+      : Expression(NodeType::ARRAY_SUBSCRIPT_EXPRESSION), array(array), index(index) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherExprStmt =
+          dynamic_cast<const ArraySubscriptExpr&>(other);
+      return isEqual(otherExprStmt);
+    }
+    return false;
+  }
+
+  bool isEqual(const ArraySubscriptExpr& other) {
+    return array->isEqual(*other.array) && index->isEqual(*other.index);
+  }
+
+  static std::shared_ptr<ArraySubscriptExpr> make(
+      const ExpressionPtr& array, const ExpressionPtr& index) {
+    return std::make_shared<ArraySubscriptExpr>(array, index);
+  }
+};
+
+using ArraySubscriptExprPtr = std::shared_ptr<ArraySubscriptExpr>;
 
 template <typename T>
 class NodeVisitor {

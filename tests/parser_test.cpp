@@ -466,7 +466,18 @@ TEST_F(ParserTest, ArrayLiteralAssertions) {
                   ast::ArrayLiteral::make(std::vector<ast::ExpressionPtr>{
                       ast::IntegerLiteral::make(1),
                       ast::IntegerLiteral::make(2)}))})),
-  };
+      ParserTestData(
+          "ArraySubscript", "var a = [1, 2]; var b = a[1];",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::VarDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                  ast::ArrayLiteral::make(std::vector<ast::ExpressionPtr>{
+                      ast::IntegerLiteral::make(1),
+                      ast::IntegerLiteral::make(2)})),
+              ast::VarDeclaration::make(Token(TokenType::TOKEN_IDENTIFIER, "b"),
+                                        ast::ArraySubscriptExpr::make(
+                                            ast::VariableExpr::make("a"),
+                                            ast::IntegerLiteral::make(1)))}))};
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);

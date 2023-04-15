@@ -406,9 +406,17 @@ ast::ExpressionPtr Parser::primary() {
       const auto strLiteral = lexeme.substr(1, lexeme.size() - 2);
       return ast::StringLiteral::make(strLiteral);
     }
-    case TokenType::TOKEN_IDENTIFIER:
+    case TokenType::TOKEN_IDENTIFIER: {
       advance();
-      return ast::VariableExpr::make(previous.lexeme());
+      auto variableExpr = ast::VariableExpr::make(previous.lexeme());
+      if (match(TokenType::TOKEN_LEFT_BRACKET)) {
+        auto indexExpr = expression();
+        consume(TokenType::TOKEN_RIGHT_BRACKET, "Unbalanced bracket");
+        return ast::ArraySubscriptExpr::make(variableExpr, indexExpr);
+      } else {
+        return variableExpr;
+      }
+    }
     case TokenType::TOKEN_LEFT_PAREN: {
       const auto expr = expression();
       consume(TokenType::TOKEN_RIGHT_PAREN, "Unbalanced parenthesis");
