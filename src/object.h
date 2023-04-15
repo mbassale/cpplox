@@ -179,6 +179,55 @@ struct BreakObject : public Object {
   }
 };
 
+using BreakObjectPtr = std::shared_ptr<BreakObject>;
+
+struct ArrayObject : public Object {
+  std::vector<ObjectPtr> Values;
+
+  ArrayObject() : Object(ObjectType::OBJ_ARRAY) {}
+
+  std::string toString() const override {
+    std::ostringstream ss;
+    ss << "[";
+    for (size_t i = 0; i < Values.size(); i++) {
+      ss << Values[i]->toString();
+      if (i < Values.size() - 1) {
+        ss << ", ";
+      }
+    }
+    ss << "]";
+    return ss.str();
+  }
+
+  bool isFalsey() const override { return Values.size() == 0; }
+  bool isTruthy() const override { return Values.size() > 0; }
+
+  bool isEqual(const Object &obj) const override {
+    if (obj.Type == Type) {
+      const auto &rhs = static_cast<const ArrayObject &>(obj);
+      if (Values.size() != rhs.Values.size()) {
+        return false;
+      }
+      for (size_t i = 0; i < Values.size(); i++) {
+        if (!Values[i]->isEqual(*rhs.Values[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  static std::shared_ptr<ArrayObject> make(
+      const std::vector<ObjectPtr> &values) {
+    auto array = std::make_shared<ArrayObject>();
+    array->Values = values;
+    return array;
+  }
+};
+
+using ArrayObjectPtr = std::shared_ptr<ArrayObject>;
+
 static auto NULL_OBJECT_PTR = std::make_shared<NullObject>();
 static auto TRUE_OBJECT_PTR = std::make_shared<BooleanObject>(true);
 static auto FALSE_OBJECT_PTR = std::make_shared<BooleanObject>(false);

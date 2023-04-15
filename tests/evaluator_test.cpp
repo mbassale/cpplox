@@ -406,8 +406,9 @@ TEST_F(EvaluatorTest, TestBreakStatement) {
       TestCase{
           "var a; for (a = 1; a < 10; a = a + 1) { if (a == 5) { break; }}",
           {{"a", 5}}},
-      TestCase{"var a = 1; while (a < 10) { if (a == 5) { break; } a = a + 1; }",
-               {{"a", 5}}}};
+      TestCase{
+          "var a = 1; while (a < 10) { if (a == 5) { break; } a = a + 1; }",
+          {{"a", 5}}}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
@@ -422,6 +423,36 @@ TEST_F(EvaluatorTest, TestBreakStatement) {
         expectIntValue(testCase.source, value, std::get<int>(pair.second));
       } else if (std::holds_alternative<bool>(pair.second)) {
         expectBoolValue(testCase.source, value, std::get<bool>(pair.second));
+      }
+    }
+  }
+}
+
+TEST_F(EvaluatorTest, TestArrayExpressions) {
+  struct TestCase {
+    string source;
+    unordered_map<string, vector<int>> expectedValues;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"var a = [1,2,3];", {{"a", {1, 2, 3}}}},
+      TestCase{"var a = [1,2,3]; var b = [1];",
+               {{"a", {1, 2, 3}}, {"b", {1}}}},
+  };
+  for (const auto& testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    auto program = parser.parse();
+    ASSERT_FALSE(parser.hasErrors()) << testCase.source;
+    Evaluator evaluator;
+    evaluator.eval(program);
+    for (const auto& pair : testCase.expectedValues) {
+      auto value = evaluator.getGlobalValue(pair.first);
+      ASSERT_NE(value, nullptr);
+      auto arrayValue = dynamic_pointer_cast<ArrayObject>(value);
+      ASSERT_NE(arrayValue, nullptr);
+      EXPECT_EQ(arrayValue->Values.size(), pair.second.size());
+      for (size_t i = 0; i < pair.second.size(); ++i) {
+        expectIntValue(testCase.source, arrayValue->Values[i], pair.second[i]);
       }
     }
   }

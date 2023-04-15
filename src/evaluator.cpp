@@ -208,6 +208,10 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
       auto stringExpr = std::static_pointer_cast<StringLiteral>(expr);
       return evalStringLiteral(ctx, stringExpr);
     }
+    case NodeType::ARRAY_LITERAL: {
+      auto arrayExpr = std::static_pointer_cast<ArrayLiteral>(expr);
+      return evalArrayLiteral(ctx, arrayExpr);
+    }
     case NodeType::NIL_LITERAL: {
       auto nilExpr = std::static_pointer_cast<NilLiteral>(expr);
       return evalNilLiteral(ctx, nilExpr);
@@ -305,6 +309,16 @@ NullObjectPtr Evaluator::evalNilLiteral(EvalContextPtr ctx,
 StringObjectPtr Evaluator::evalStringLiteral(EvalContextPtr ctx,
                                              ast::StringLiteralPtr expr) {
   return std::make_shared<StringObject>(expr->Value);
+}
+
+ArrayObjectPtr Evaluator::evalArrayLiteral(EvalContextPtr ctx,
+                                           ast::ArrayLiteralPtr expr) {
+  std::vector<ObjectPtr> elements;
+  for (auto elementExpr : expr->elements) {
+    auto elementValue = evalExpression(ctx, elementExpr);
+    elements.push_back(elementValue);
+  }
+  return ArrayObject::make(elements);
 }
 
 ObjectPtr Evaluator::evalBinaryExpression(EvalContextPtr ctx,
