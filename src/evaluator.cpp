@@ -29,7 +29,7 @@ RuntimeError RuntimeError::make(const char* file_name, int line,
   return RuntimeError(ss.str());
 }
 
-Evaluator::Evaluator() { globalCtx = EvalContext::make(); }
+Evaluator::Evaluator() { globalCtx = Environment::make(); }
 
 ObjectPtr Evaluator::eval(ProgramPtr program) {
   ObjectPtr lastValue = NULL_OBJECT_PTR;
@@ -49,7 +49,7 @@ ObjectPtr Evaluator::eval(ProgramPtr program) {
   return lastValue;
 }
 
-ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
+ObjectPtr Evaluator::evalStatement(EnvironmentPtr ctx, StatementPtr stmt) {
   switch (stmt->Type) {
     case NodeType::EXPRESSION_STATEMENT: {
       auto exprStmt = std::static_pointer_cast<ExpressionStatement>(stmt);
@@ -97,7 +97,7 @@ ObjectPtr Evaluator::evalStatement(EvalContextPtr ctx, StatementPtr stmt) {
   }
 }
 
-ObjectPtr Evaluator::evalVarDeclarationStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalVarDeclarationStatement(EnvironmentPtr ctx,
                                                  VarDeclarationPtr stmt) {
   ObjectPtr value = NULL_OBJECT_PTR;
   if (stmt->initializer) {
@@ -105,22 +105,22 @@ ObjectPtr Evaluator::evalVarDeclarationStatement(EvalContextPtr ctx,
   }
   // TODO: we shouldn't access the lexeme here.
   const auto identifier = stmt->identifier.lexeme();
-  ctx->env->set(identifier, value);
+  ctx->set(identifier, value);
   return value;
 }
 
-ObjectPtr Evaluator::evalFuncDeclarationStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalFuncDeclarationStatement(EnvironmentPtr ctx,
                                                   FunctionDeclarationPtr stmt) {
   const auto& functionName = stmt->identifier.lexeme();
   auto function = Function::make(FunctionType::TYPE_FUNCTION, stmt,
                                  functionName, stmt->params.size());
-  ctx->env->set(functionName, function);
+  ctx->set(functionName, function);
   return function;
 }
 
-ObjectPtr Evaluator::evalBlockStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalBlockStatement(EnvironmentPtr ctx,
                                         ast::BlockPtr stmt) {
-  auto localCtx = EvalContext::make(ctx);
+  auto localCtx = Environment::make(ctx);
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : stmt->statements) {
     lastValue = evalStatement(localCtx, stmt);
@@ -131,7 +131,7 @@ ObjectPtr Evaluator::evalBlockStatement(EvalContextPtr ctx,
   return lastValue;
 }
 
-ObjectPtr Evaluator::evalIfStatement(EvalContextPtr ctx, IfStatementPtr stmt) {
+ObjectPtr Evaluator::evalIfStatement(EnvironmentPtr ctx, IfStatementPtr stmt) {
   auto conditionValue = evalExpression(ctx, stmt->condition);
   if (conditionValue->isTruthy()) {
     return evalStatement(ctx, stmt->thenBranch);
@@ -142,9 +142,9 @@ ObjectPtr Evaluator::evalIfStatement(EvalContextPtr ctx, IfStatementPtr stmt) {
   }
 }
 
-ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalForStatement(EnvironmentPtr ctx,
                                       ForStatementPtr stmt) {
-  auto localCtx = EvalContext::make(ctx);
+  auto localCtx = Environment::make(ctx);
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   lastValue = evalStatement(localCtx, stmt->initializer);
   while (true) {
@@ -164,7 +164,7 @@ ObjectPtr Evaluator::evalForStatement(EvalContextPtr ctx,
   return lastValue;
 }
 
-ObjectPtr Evaluator::evalWhileStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalWhileStatement(EnvironmentPtr ctx,
                                         WhileStatementPtr stmt) {
   ObjectPtr lastValue = evalExpression(ctx, stmt->condition);
   while (lastValue->isTruthy()) {
@@ -179,25 +179,25 @@ ObjectPtr Evaluator::evalWhileStatement(EvalContextPtr ctx,
   return lastValue;
 }
 
-ObjectPtr Evaluator::evalPrintStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalPrintStatement(EnvironmentPtr ctx,
                                         PrintStatementPtr stmt) {
   ObjectPtr lastValue = evalExpression(ctx, stmt->expression);
   std::cout << lastValue->toString() << std::endl;
   return lastValue;
 }
 
-ObjectPtr Evaluator::evalReturnStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalReturnStatement(EnvironmentPtr ctx,
                                          ReturnStatementPtr stmt) {
   ObjectPtr lastValue = evalExpression(ctx, stmt->expression);
   return ReturnObject::make(lastValue);
 }
 
-ObjectPtr Evaluator::evalBreakStatement(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalBreakStatement(EnvironmentPtr ctx,
                                         BreakStatementPtr stmt) {
   return BreakObject::make();
 }
 
-ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
+ObjectPtr Evaluator::evalExpression(EnvironmentPtr ctx, ExpressionPtr expr) {
   switch (expr->Type) {
     case NodeType::INTEGER_LITERAL: {
       auto intExpr = std::static_pointer_cast<IntegerLiteral>(expr);
@@ -234,7 +234,7 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
     }
     case NodeType::VARIABLE_EXPRESSION: {
       auto varExpr = std::static_pointer_cast<VariableExpr>(expr);
-      return ctx->env->get(varExpr->identifier);
+      return ctx->get(varExpr->identifier);
     }
     case NodeType::ASSIGNMENT_EXPRESSION: {
       auto assignExpr = std::static_pointer_cast<Assignment>(expr);
@@ -250,15 +250,15 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
   return NULL_OBJECT_PTR;
 }
 
-ObjectPtr Evaluator::evalAssignExpression(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalAssignExpression(EnvironmentPtr ctx,
                                           ast::AssignmentPtr expr) {
   const auto& identifier = expr->identifier;
   auto value = evalExpression(ctx, expr->value);
-  ctx->env->set(identifier, value);
-  return ctx->env->get(identifier);
+  ctx->set(identifier, value);
+  return ctx->get(identifier);
 }
 
-ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx,
                                         ast::CallExprPtr expr) {
   auto value = evalExpression(ctx, expr->left);
   if (isReturnObject(value)) {
@@ -273,13 +273,13 @@ ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx,
   auto funcValue = std::dynamic_pointer_cast<Function>(value);
   assert(funcValue != nullptr);
   auto funcDeclStmt = funcValue->getDeclaration();
-  auto funcCtx = EvalContext::make(ctx);
+  auto funcCtx = Environment::make(ctx);
   // bind arguments
   for (size_t i = 0; i < funcDeclStmt->params.size(); i++) {
     const auto paramName = funcDeclStmt->params[i].lexeme();
     auto argExpr = expr->arguments[i];
     auto argValue = evalExpression(ctx, argExpr);
-    funcCtx->env->set(paramName, argValue);
+    funcCtx->set(paramName, argValue);
   }
   // execute function body
   auto lastValue = evalStatement(funcCtx, funcDeclStmt->body);
@@ -295,12 +295,12 @@ ObjectPtr Evaluator::evalCallExpression(EvalContextPtr ctx,
   return lastValue;
 }
 
-IntegerObjectPtr Evaluator::evalIntegerLiteral(EvalContextPtr ctx,
+IntegerObjectPtr Evaluator::evalIntegerLiteral(EnvironmentPtr ctx,
                                                ast::IntegerLiteralPtr expr) {
   return std::make_shared<IntegerObject>(expr->Value);
 }
 
-BooleanObjectPtr Evaluator::evalBooleanLiteral(EvalContextPtr ctx,
+BooleanObjectPtr Evaluator::evalBooleanLiteral(EnvironmentPtr ctx,
                                                ast::BooleanLiteralPtr expr) {
   if (expr->Value) {
     return TRUE_OBJECT_PTR;
@@ -309,17 +309,17 @@ BooleanObjectPtr Evaluator::evalBooleanLiteral(EvalContextPtr ctx,
   }
 }
 
-NullObjectPtr Evaluator::evalNilLiteral(EvalContextPtr ctx,
+NullObjectPtr Evaluator::evalNilLiteral(EnvironmentPtr ctx,
                                         ast::NilLiteralPtr expr) {
   return NULL_OBJECT_PTR;
 }
 
-StringObjectPtr Evaluator::evalStringLiteral(EvalContextPtr ctx,
+StringObjectPtr Evaluator::evalStringLiteral(EnvironmentPtr ctx,
                                              ast::StringLiteralPtr expr) {
   return std::make_shared<StringObject>(expr->Value);
 }
 
-ArrayObjectPtr Evaluator::evalArrayLiteral(EvalContextPtr ctx,
+ArrayObjectPtr Evaluator::evalArrayLiteral(EnvironmentPtr ctx,
                                            ast::ArrayLiteralPtr expr) {
   std::vector<ObjectPtr> elements;
   for (auto elementExpr : expr->elements) {
@@ -330,7 +330,7 @@ ArrayObjectPtr Evaluator::evalArrayLiteral(EvalContextPtr ctx,
 }
 
 ObjectPtr Evaluator::evalArraySubscriptExpression(
-    EvalContextPtr ctx, ast::ArraySubscriptExprPtr expr) {
+    EnvironmentPtr ctx, ast::ArraySubscriptExprPtr expr) {
   auto arrayValue = evalExpression(ctx, expr->array);
   auto indexValue = evalExpression(ctx, expr->index);
   if (arrayValue->Type != ObjectType::OBJ_ARRAY) {
@@ -356,7 +356,7 @@ ObjectPtr Evaluator::evalArraySubscriptExpression(
   return arrayObject->Values[indexObject->Value];
 }
 
-ObjectPtr Evaluator::evalBinaryExpression(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalBinaryExpression(EnvironmentPtr ctx,
                                           ast::BinaryExprPtr expr) {
   auto leftValue = evalExpression(ctx, expr->left);
   auto rightValue = evalExpression(ctx, expr->right);
@@ -385,7 +385,7 @@ ObjectPtr Evaluator::evalBinaryExpression(EvalContextPtr ctx,
   }
 }
 
-ObjectPtr Evaluator::evalUnaryExpression(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalUnaryExpression(EnvironmentPtr ctx,
                                          ast::UnaryExprPtr expr) {
   auto rhsValue = evalExpression(ctx, expr->right);
 
@@ -403,7 +403,7 @@ ObjectPtr Evaluator::evalUnaryExpression(EvalContextPtr ctx,
   }
 }
 
-ObjectPtr Evaluator::evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+ObjectPtr Evaluator::evalLogicOperator(EnvironmentPtr ctx, ObjectPtr lhsValue,
                                        TokenType operator_,
                                        ObjectPtr rhsValue) {
   auto lhsBoolValue = lhsValue->isTruthy();
@@ -425,7 +425,7 @@ ObjectPtr Evaluator::evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
   return BooleanObject::make(result);
 }
 
-ObjectPtr Evaluator::evalComparisonOperator(EvalContextPtr ctx,
+ObjectPtr Evaluator::evalComparisonOperator(EnvironmentPtr ctx,
                                             ObjectPtr lhsValue,
                                             TokenType operator_,
                                             ObjectPtr rhsValue) {
@@ -469,7 +469,7 @@ ObjectPtr Evaluator::evalComparisonOperator(EvalContextPtr ctx,
   return BooleanObject::make(result);
 }
 
-ObjectPtr Evaluator::evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+ObjectPtr Evaluator::evalBinaryOperator(EnvironmentPtr ctx, ObjectPtr lhsValue,
                                         TokenType operator_,
                                         ObjectPtr rhsValue) {
   if (lhsValue->isNumeric() && rhsValue->isNumeric()) {
@@ -502,12 +502,12 @@ ObjectPtr Evaluator::evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
   throw RuntimeError::make(__FILE__, __LINE__, ss.str());
 }
 
-ObjectPtr Evaluator::evalMinusOperator(EvalContextPtr ctx, ObjectPtr rhsValue) {
+ObjectPtr Evaluator::evalMinusOperator(EnvironmentPtr ctx, ObjectPtr rhsValue) {
   auto intObj = tryCastAsInteger(rhsValue);
   return IntegerObject::make(-intObj->Value);
 }
 
-ObjectPtr Evaluator::evalBangOperator(EvalContextPtr ctx, ObjectPtr rhsValue) {
+ObjectPtr Evaluator::evalBangOperator(EnvironmentPtr ctx, ObjectPtr rhsValue) {
   return BooleanObject::make(!rhsValue->isTruthy());
 }
 

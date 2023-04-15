@@ -18,76 +18,57 @@ class RuntimeError : public std::runtime_error {
                            const std::string& msg);
 };
 
-struct EvalContext;
-using EvalContextPtr = std::shared_ptr<EvalContext>;
-
-struct EvalContext {
-  EnvironmentPtr env;
-
-  EvalContext() { env = std::make_shared<Environment>(); }
-  EvalContext(EvalContextPtr enclosing) {
-    env = std::make_shared<Environment>(enclosing->env);
-  }
-
-  inline static EvalContextPtr make() {
-    return std::make_shared<EvalContext>();
-  }
-  inline static EvalContextPtr make(EvalContextPtr enclosing) {
-    return std::make_shared<EvalContext>(enclosing);
-  }
-};
-
 class Evaluator {
  private:
-  EvalContextPtr globalCtx;
+  EnvironmentPtr globalCtx;
 
  public:
   Evaluator();
 
   ObjectPtr eval(ast::ProgramPtr program);
   ObjectPtr getGlobalValue(const std::string& identifier) const {
-    return globalCtx->env->get(identifier);
+    return globalCtx->get(identifier);
   }
 
  private:
-  ObjectPtr evalStatement(EvalContextPtr ctx, ast::StatementPtr stmt);
-  ObjectPtr evalVarDeclarationStatement(EvalContextPtr ctx,
+  ObjectPtr evalStatement(EnvironmentPtr ctx, ast::StatementPtr stmt);
+  ObjectPtr evalVarDeclarationStatement(EnvironmentPtr ctx,
                                         ast::VarDeclarationPtr stmt);
-  ObjectPtr evalFuncDeclarationStatement(EvalContextPtr ctx,
+  ObjectPtr evalFuncDeclarationStatement(EnvironmentPtr ctx,
                                          ast::FunctionDeclarationPtr stmt);
-  ObjectPtr evalIfStatement(EvalContextPtr ctx, ast::IfStatementPtr stmt);
-  ObjectPtr evalForStatement(EvalContextPtr ctx, ast::ForStatementPtr stmt);
-  ObjectPtr evalWhileStatement(EvalContextPtr ctx, ast::WhileStatementPtr stmt);
-  ObjectPtr evalPrintStatement(EvalContextPtr ctx, ast::PrintStatementPtr stmt);
-  ObjectPtr evalReturnStatement(EvalContextPtr ctx,
+  ObjectPtr evalIfStatement(EnvironmentPtr ctx, ast::IfStatementPtr stmt);
+  ObjectPtr evalForStatement(EnvironmentPtr ctx, ast::ForStatementPtr stmt);
+  ObjectPtr evalWhileStatement(EnvironmentPtr ctx, ast::WhileStatementPtr stmt);
+  ObjectPtr evalPrintStatement(EnvironmentPtr ctx, ast::PrintStatementPtr stmt);
+  ObjectPtr evalReturnStatement(EnvironmentPtr ctx,
                                 ast::ReturnStatementPtr stmt);
-  ObjectPtr evalBreakStatement(EvalContextPtr ctx, ast::BreakStatementPtr stmt);
-  ObjectPtr evalBlockStatement(EvalContextPtr ctx, ast::BlockPtr stmt);
+  ObjectPtr evalBreakStatement(EnvironmentPtr ctx, ast::BreakStatementPtr stmt);
+  ObjectPtr evalBlockStatement(EnvironmentPtr ctx, ast::BlockPtr stmt);
 
-  ObjectPtr evalExpression(EvalContextPtr ctx, ast::ExpressionPtr expr);
-  ObjectPtr evalBinaryExpression(EvalContextPtr ctx, ast::BinaryExprPtr expr);
-  ObjectPtr evalUnaryExpression(EvalContextPtr ctx, ast::UnaryExprPtr expr);
-  ObjectPtr evalAssignExpression(EvalContextPtr ctx, ast::AssignmentPtr expr);
-  ObjectPtr evalCallExpression(EvalContextPtr ctx, ast::CallExprPtr expr);
-  IntegerObjectPtr evalIntegerLiteral(EvalContextPtr ctx,
+  ObjectPtr evalExpression(EnvironmentPtr ctx, ast::ExpressionPtr expr);
+  ObjectPtr evalBinaryExpression(EnvironmentPtr ctx, ast::BinaryExprPtr expr);
+  ObjectPtr evalUnaryExpression(EnvironmentPtr ctx, ast::UnaryExprPtr expr);
+  ObjectPtr evalAssignExpression(EnvironmentPtr ctx, ast::AssignmentPtr expr);
+  ObjectPtr evalCallExpression(EnvironmentPtr ctx, ast::CallExprPtr expr);
+  IntegerObjectPtr evalIntegerLiteral(EnvironmentPtr ctx,
                                       ast::IntegerLiteralPtr expr);
-  BooleanObjectPtr evalBooleanLiteral(EvalContextPtr ctx,
+  BooleanObjectPtr evalBooleanLiteral(EnvironmentPtr ctx,
                                       ast::BooleanLiteralPtr expr);
-  NullObjectPtr evalNilLiteral(EvalContextPtr ctx, ast::NilLiteralPtr expr);
-  StringObjectPtr evalStringLiteral(EvalContextPtr ctx,
+  NullObjectPtr evalNilLiteral(EnvironmentPtr ctx, ast::NilLiteralPtr expr);
+  StringObjectPtr evalStringLiteral(EnvironmentPtr ctx,
                                     ast::StringLiteralPtr expr);
-  ArrayObjectPtr evalArrayLiteral(EvalContextPtr ctx,
+  ArrayObjectPtr evalArrayLiteral(EnvironmentPtr ctx,
                                   ast::ArrayLiteralPtr expr);
-  ObjectPtr evalArraySubscriptExpression(EvalContextPtr ctx,
+  ObjectPtr evalArraySubscriptExpression(EnvironmentPtr ctx,
                                          ast::ArraySubscriptExprPtr expr);
-  ObjectPtr evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+  ObjectPtr evalBinaryOperator(EnvironmentPtr ctx, ObjectPtr lhsValue,
                                TokenType operator_, ObjectPtr rhsValue);
-  ObjectPtr evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+  ObjectPtr evalLogicOperator(EnvironmentPtr ctx, ObjectPtr lhsValue,
                               TokenType operator_, ObjectPtr rhsValue);
-  ObjectPtr evalComparisonOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
+  ObjectPtr evalComparisonOperator(EnvironmentPtr ctx, ObjectPtr lhsValue,
                                    TokenType operator_, ObjectPtr rhsValue);
-  ObjectPtr evalMinusOperator(EvalContextPtr ctx, ObjectPtr rhsValue);
-  ObjectPtr evalBangOperator(EvalContextPtr ctx, ObjectPtr rhsValue);
+  ObjectPtr evalMinusOperator(EnvironmentPtr ctx, ObjectPtr rhsValue);
+  ObjectPtr evalBangOperator(EnvironmentPtr ctx, ObjectPtr rhsValue);
 };
 
 }  // namespace cpplox
