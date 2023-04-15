@@ -458,6 +458,14 @@ TEST_F(ParserTest, ArrayLiteralAssertions) {
                              std::vector<ast::ExpressionPtr>{
                                  ast::StringLiteral::make("hello"),
                                  ast::StringLiteral::make("world")}))})),
+      ParserTestData(
+          "ArrayAssignment", "var a = [1, 2];",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::VarDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                  ast::ArrayLiteral::make(std::vector<ast::ExpressionPtr>{
+                      ast::IntegerLiteral::make(1),
+                      ast::IntegerLiteral::make(2)}))})),
   };
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);
