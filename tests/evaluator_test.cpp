@@ -431,13 +431,14 @@ TEST_F(EvaluatorTest, TestBreakStatement) {
 TEST_F(EvaluatorTest, TestArrayExpressions) {
   struct TestCase {
     string source;
-    unordered_map<string, vector<int>> expectedValues;
+    unordered_map<string, variant<vector<int>, int>> expectedValues;
   };
   vector<TestCase> testCases = {
-      TestCase{"var a = [1,2,3];", {{"a", {1, 2, 3}}}},
+      TestCase{"var a = [1,2,3];", {{"a", vector<int>{1, 2, 3}}}},
       TestCase{"var a = [1,2,3]; var b = [1];",
-               {{"a", {1, 2, 3}}, {"b", {1}}}},
-  };
+               {{"a", vector<int>{1, 2, 3}}, {"b", vector<int>{1}}}},
+      TestCase{"var a = [1,2,3]; var b = a[0]; var c = a[1]; var d = a[2];",
+               {{"a", vector<int>{1, 2, 3}}, {"b", 1}, {"c", 2}, {"d", 3}}}};
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);
@@ -448,11 +449,17 @@ TEST_F(EvaluatorTest, TestArrayExpressions) {
     for (const auto& pair : testCase.expectedValues) {
       auto value = evaluator.getGlobalValue(pair.first);
       ASSERT_NE(value, nullptr);
-      auto arrayValue = dynamic_pointer_cast<ArrayObject>(value);
-      ASSERT_NE(arrayValue, nullptr);
-      EXPECT_EQ(arrayValue->Values.size(), pair.second.size());
-      for (size_t i = 0; i < pair.second.size(); ++i) {
-        expectIntValue(testCase.source, arrayValue->Values[i], pair.second[i]);
+      if (std::holds_alternative<int>(pair.second)) {
+        expectIntValue(testCase.source, value, std::get<int>(pair.second));
+      } else if (std::holds_alternative<vector<int>>(pair.second)) {
+        auto arrayValue = dynamic_pointer_cast<ArrayObject>(value);
+        auto expectedArray = std::get<vector<int>>(pair.second);
+        ASSERT_NE(arrayValue, nullptr);
+        EXPECT_EQ(arrayValue->Values.size(), expectedArray.size());
+        for (size_t i = 0; i < expectedArray.size(); ++i) {
+          expectIntValue(testCase.source, arrayValue->Values[i],
+                         expectedArray[i]);
+        }
       }
     }
   }

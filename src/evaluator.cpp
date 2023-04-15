@@ -212,6 +212,11 @@ ObjectPtr Evaluator::evalExpression(EvalContextPtr ctx, ExpressionPtr expr) {
       auto arrayExpr = std::static_pointer_cast<ArrayLiteral>(expr);
       return evalArrayLiteral(ctx, arrayExpr);
     }
+    case NodeType::ARRAY_SUBSCRIPT_EXPRESSION: {
+      auto arraySubscriptExpr =
+          std::static_pointer_cast<ArraySubscriptExpr>(expr);
+      return evalArraySubscriptExpression(ctx, arraySubscriptExpr);
+    }
     case NodeType::NIL_LITERAL: {
       auto nilExpr = std::static_pointer_cast<NilLiteral>(expr);
       return evalNilLiteral(ctx, nilExpr);
@@ -319,6 +324,33 @@ ArrayObjectPtr Evaluator::evalArrayLiteral(EvalContextPtr ctx,
     elements.push_back(elementValue);
   }
   return ArrayObject::make(elements);
+}
+
+ObjectPtr Evaluator::evalArraySubscriptExpression(
+    EvalContextPtr ctx, ast::ArraySubscriptExprPtr expr) {
+  auto arrayValue = evalExpression(ctx, expr->array);
+  auto indexValue = evalExpression(ctx, expr->index);
+  if (arrayValue->Type != ObjectType::OBJ_ARRAY) {
+    std::ostringstream ss;
+    ss << "Invalid array: " << arrayValue->toString();
+    throw RuntimeError::make(__FILE__, __LINE__, ss.str());
+  }
+  if (indexValue->Type != ObjectType::OBJ_INTEGER) {
+    std::ostringstream ss;
+    ss << "Invalid index: " << indexValue->toString();
+    throw RuntimeError::make(__FILE__, __LINE__, ss.str());
+  }
+  auto arrayObject = std::dynamic_pointer_cast<ArrayObject>(arrayValue);
+  auto indexObject = std::dynamic_pointer_cast<IntegerObject>(indexValue);
+  assert(arrayObject != nullptr);
+  assert(indexObject != nullptr);
+  if (indexObject->Value < 0 ||
+      indexObject->Value >= arrayObject->Values.size()) {
+    std::ostringstream ss;
+    ss << "Index out of range: " << indexObject->Value;
+    throw RuntimeError::make(__FILE__, __LINE__, ss.str());
+  }
+  return arrayObject->Values[indexObject->Value];
 }
 
 ObjectPtr Evaluator::evalBinaryExpression(EvalContextPtr ctx,

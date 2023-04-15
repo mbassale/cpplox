@@ -75,7 +75,10 @@ class Evaluator {
   NullObjectPtr evalNilLiteral(EvalContextPtr ctx, ast::NilLiteralPtr expr);
   StringObjectPtr evalStringLiteral(EvalContextPtr ctx,
                                     ast::StringLiteralPtr expr);
-  ArrayObjectPtr evalArrayLiteral(EvalContextPtr ctx, ast::ArrayLiteralPtr expr);
+  ArrayObjectPtr evalArrayLiteral(EvalContextPtr ctx,
+                                  ast::ArrayLiteralPtr expr);
+  ObjectPtr evalArraySubscriptExpression(EvalContextPtr ctx,
+                                         ast::ArraySubscriptExprPtr expr);
   ObjectPtr evalBinaryOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
                                TokenType operator_, ObjectPtr rhsValue);
   ObjectPtr evalLogicOperator(EvalContextPtr ctx, ObjectPtr lhsValue,
