@@ -61,6 +61,7 @@ class Driver {
         return false;
       }
       LOG(INFO) << "======== PARSING END ========";
+      LOG(INFO) << program->toString();
       LOG(INFO) << "======== EVALUATOR START ====";
 
       const auto value = evaluator.eval(program);
