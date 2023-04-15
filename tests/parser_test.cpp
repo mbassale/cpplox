@@ -59,25 +59,6 @@ TEST_F(ParserTest, ParserAssertions) {
                          ast::VarDeclaration::make(
                              Token(TokenType::TOKEN_IDENTIFIER, "test"),
                              ast::BooleanLiteral::makeTrue())})),
-      ParserTestData("FunctionDeclaration No Args", "fun test() { true; }",
-                     ast::Program::make(std::vector<ast::StatementPtr>{
-                         ast::FunctionDeclaration::make(
-                             Token(TokenType::TOKEN_IDENTIFIER, "test"),
-                             std::vector<Token>{},
-                             ast::Block::make(std::vector<ast::StatementPtr>{
-                                 ast::ExpressionStatement::make(
-                                     ast::BooleanLiteral::makeTrue())}))})),
-      ParserTestData(
-          "FunctionDeclaration Multiple Args", "fun test(arg1, arg2) { true; }",
-          ast::Program::make(
-              std::vector<ast::StatementPtr>{ast::FunctionDeclaration::make(
-                  Token(TokenType::TOKEN_IDENTIFIER, "test"),
-                  std::vector<Token>{
-                      Token(TokenType::TOKEN_IDENTIFIER, "arg1"),
-                      Token(TokenType::TOKEN_IDENTIFIER, "arg2")},
-                  ast::Block::make(std::vector<ast::StatementPtr>{
-                      ast::ExpressionStatement::make(
-                          ast::BooleanLiteral::makeTrue())}))})),
       ParserTestData("IfStatement", "if(true){true;}",
                      ast::Program::make(
                          std::vector<ast::StatementPtr>{ast::IfStatement::make(
@@ -114,6 +95,50 @@ TEST_F(ParserTest, ParserAssertions) {
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ReturnStatement::make()}))};
 
+  for (const auto &testCase : testCases) {
+    Scanner scanner(testCase.source);
+    Parser parser(scanner);
+    const auto actualProgram = parser.parse();
+    ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
+  }
+}
+
+TEST_F(ParserTest, ParseFunctionDeclaration) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData("FunctionDeclarationNoArgs", "fun test() { return true; }",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::FunctionDeclaration::make(
+                             Token(TokenType::TOKEN_IDENTIFIER, "test"),
+                             std::vector<Token>{},
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ReturnStatement::make(
+                                     ast::BooleanLiteral::makeTrue())}))})),
+      ParserTestData("FunctionDeclarationMultipleArgs",
+                     "fun test(arg1, arg2) { return true; }",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::FunctionDeclaration::make(
+                             Token(TokenType::TOKEN_IDENTIFIER, "test"),
+                             std::vector<Token>{
+                                 Token(TokenType::TOKEN_IDENTIFIER, "arg1"),
+                                 Token(TokenType::TOKEN_IDENTIFIER, "arg2")},
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ReturnStatement::make(
+                                     ast::BooleanLiteral::makeTrue())}))})),
+      ParserTestData("FunctionDeclarationLocalVars",
+                     "fun test(arg1) { var a = arg1; return a; }",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::FunctionDeclaration::make(
+                             Token(TokenType::TOKEN_IDENTIFIER, "test"),
+                             std::vector<Token>{
+                                 Token(TokenType::TOKEN_IDENTIFIER, "arg1"),
+                             },
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::VarDeclaration::make(
+                                     Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                                     ast::VariableExpr::make("arg1")),
+                                 ast::ReturnStatement::make(
+                                     ast::VariableExpr::make("a"))}))})),
+  };
   for (const auto &testCase : testCases) {
     Scanner scanner(testCase.source);
     Parser parser(scanner);

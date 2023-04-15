@@ -109,7 +109,7 @@ ast::StatementPtr Parser::statement() {
 ast::BlockPtr Parser::block() {
   auto blockStmt = std::make_shared<ast::Block>();
   while (!match(TokenType::TOKEN_RIGHT_BRACE) && !isAtEnd()) {
-    auto stmt = statement();
+    auto stmt = declaration();
     blockStmt->statements.push_back(stmt);
   }
   return blockStmt;
