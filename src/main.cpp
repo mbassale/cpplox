@@ -4,17 +4,22 @@
 #include "evaluator.h"
 #include "parser.h"
 #include "scanner.h"
+#include "settings.h"
 
 #define EXIT_CMDLINE_HELP 64
 
-DEFINE_bool(trace, false, "Enable all tracing");
+DEFINE_bool(debug, false, "Enable debugging");
 
 class Driver {
  private:
   cpplox::Evaluator evaluator;
 
  public:
-  Driver() {}
+  Driver() {
+    if (FLAGS_debug) {
+      cpplox::Settings::getInstance()->debugMode = true;
+    }
+  }
 
   void repl() {
     std::cout << "CppLox v" << CPPLOX_VERSION_MAJOR << "."
@@ -44,7 +49,7 @@ class Driver {
 
   bool interpret(const std::string &source) {
     try {
-      VLOG(0) << "======== PARSING START ========";
+      LOG(INFO) << "======== PARSING START ========";
       Scanner scanner(source);
       cpplox::Parser parser(scanner);
       const auto program = parser.parse();
@@ -55,12 +60,12 @@ class Driver {
         }
         return false;
       }
-      VLOG(0) << "======== PARSING END ========";
-      VLOG(0) << "======== EVALUATOR START ====";
+      LOG(INFO) << "======== PARSING END ========";
+      LOG(INFO) << "======== EVALUATOR START ====";
 
       const auto value = evaluator.eval(program);
-      VLOG(0) << "ret: " << value->toString();
-      VLOG(0) << "======== EVALUATOR END ======";
+      LOG(INFO) << "ret: " << value->toString();
+      LOG(INFO) << "======== EVALUATOR END ======";
       return true;
     } catch (std::exception &ex) {
       LOG(ERROR) << "RuntimeError: " << ex.what();
