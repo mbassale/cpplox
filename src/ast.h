@@ -57,6 +57,8 @@ struct Node {
   Node(const NodeType type) : Type(type) {}
 
   virtual bool isEqual(const Node& other) { return true; }
+
+  virtual std::string toString() const { return "(Node)"; }
 };
 using NodePtr = std::shared_ptr<Node>;
 
@@ -67,11 +69,15 @@ struct Statement : public Node {
   static std::shared_ptr<Statement> make() {
     return std::make_shared<Statement>();
   }
+
+  virtual std::string toString() const override { return "(Statement)"; }
 };
 using StatementPtr = std::shared_ptr<Statement>;
 
 struct Expression : public Node {
   Expression(NodeType type) : Node(type) {}
+
+  virtual std::string toString() const override { return "(Expression)"; }
 };
 using ExpressionPtr = std::shared_ptr<Expression>;
 
@@ -90,6 +96,10 @@ struct IntegerLiteral : public Expression {
   }
 
   bool isEqual(const IntegerLiteral& other) { return Value == other.Value; }
+
+  virtual std::string toString() const override {
+    return "(IntegerLiteral " + std::to_string(Value) + ")";
+  }
 
   static std::shared_ptr<IntegerLiteral> make(const int64_t value) {
     return std::make_shared<IntegerLiteral>(value);
@@ -112,6 +122,10 @@ struct BooleanLiteral : public Expression {
   }
 
   bool isEqual(const BooleanLiteral& other) { return Value == other.Value; }
+
+  std::string toString() const override {
+    return "(BooleanLiteral " + std::to_string(Value) + ")";
+  }
 
   static std::shared_ptr<BooleanLiteral> makeTrue() {
     return std::make_shared<BooleanLiteral>(true);
@@ -143,6 +157,10 @@ struct StringLiteral : public Expression {
 
   bool isEqual(const StringLiteral& other) { return Value == other.Value; }
 
+  std::string toString() const override {
+    return "(StringLiteral " + Value + ")";
+  }
+
   static std::shared_ptr<StringLiteral> make(const std::string& value) {
     return std::make_shared<StringLiteral>(value);
   }
@@ -155,6 +173,8 @@ struct NilLiteral : public Expression {
   bool isEqual(const Node& other) override { return Type == other.Type; }
 
   bool isEqual(const NilLiteral& other) { return true; }
+
+  std::string toString() const override { return "(NilLiteral)"; }
 
   static std::shared_ptr<NilLiteral> make() {
     return std::make_shared<NilLiteral>();
@@ -185,6 +205,10 @@ struct VariableExpr : public Expression {
 
   bool isEqual(const VariableExpr& other) {
     return this->identifier == other.identifier;
+  }
+
+  std::string toString() const override {
+    return "(VariableExpr " + identifier + ")";
   }
 
   static std::shared_ptr<VariableExpr> make(const std::string& variableName) {
@@ -229,6 +253,10 @@ struct Assignment : public Expression {
     return value->isEqual(*other.value);
   }
 
+  std::string toString() const override {
+    return "(Assignment " + identifier + " " + value->toString() + ")";
+  }
+
   static std::shared_ptr<Assignment> make(const std::string& identifier) {
     return std::make_shared<Assignment>(identifier);
   }
@@ -269,6 +297,11 @@ struct BinaryExpr : public Expression {
     return right->isEqual(*other.right);
   }
 
+  std::string toString() const override {
+    return "(BinaryExpr " + left->toString() + " " + operator_.lexeme() + " " +
+           right->toString() + ")";
+  }
+
   static std::shared_ptr<BinaryExpr> make(const ExpressionPtr& left,
                                           const Token& operator_,
                                           const ExpressionPtr& right) {
@@ -299,6 +332,10 @@ struct UnaryExpr : public Expression {
       return false;
     }
     return right->isEqual(*other.right);
+  }
+
+  std::string toString() const override {
+    return "(UnaryExpr " + operator_.lexeme() + " " + right->toString() + ")";
   }
 
   static std::shared_ptr<UnaryExpr> make(const Token& operator_,
@@ -341,6 +378,15 @@ struct CallExpr : public Expression {
     return true;
   }
 
+  std::string toString() const override {
+    std::string result = "(CallExpr " + left->toString();
+    for (const auto& arg : arguments) {
+      result += " " + arg->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   static std::shared_ptr<CallExpr> make(
       const ExpressionPtr& left, const std::vector<ExpressionPtr>& arguments) {
     return std::make_shared<CallExpr>(left, arguments);
@@ -370,6 +416,15 @@ struct Program : public Node {
                       [](const auto& stmt1, const auto& stmt2) {
                         return stmt1->isEqual(*stmt2);
                       });
+  }
+
+  std::string toString() const override {
+    std::string result = "(Program";
+    for (const auto& stmt : statements) {
+      result += " " + stmt->toString();
+    }
+    result += ")";
+    return result;
   }
 
   static std::shared_ptr<Program> make(
@@ -418,6 +473,15 @@ struct VarDeclaration : public Statement {
     }
 
     return true;
+  }
+
+  std::string toString() const override {
+    std::string result = "(VarDeclaration " + identifier.lexeme();
+    if (initializer) {
+      result += " " + initializer->toString();
+    }
+    result += ")";
+    return result;
   }
 
   static std::shared_ptr<VarDeclaration> make(
@@ -478,6 +542,18 @@ struct FunctionDeclaration : public Statement {
     return true;
   }
 
+  std::string toString() const override {
+    std::string result = "(FunctionDeclaration " + identifier.lexeme();
+    for (const auto& param : params) {
+      result += " " + param.lexeme();
+    }
+    if (body) {
+      result += " " + body->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   static std::shared_ptr<FunctionDeclaration> make(
       const Token& identifier, const std::vector<Token>& params,
       const StatementPtr& body) {
@@ -508,6 +584,15 @@ struct Block : public Statement {
                       [](const auto& stmt1, const auto& stmt2) {
                         return stmt1->isEqual(*stmt2);
                       });
+  }
+
+  std::string toString() const override {
+    std::string result = "(Block";
+    for (const auto& stmt : statements) {
+      result += " " + stmt->toString();
+    }
+    result += ")";
+    return result;
   }
 
   static std::shared_ptr<Block> make(
@@ -585,6 +670,24 @@ struct ForStatement : public Statement {
     return body->isEqual(*other.body);
   }
 
+  std::string toString() const override {
+    std::string result = "(ForStatement";
+    if (initializer) {
+      result += " " + initializer->toString();
+    }
+    if (condition) {
+      result += " " + condition->toString();
+    }
+    if (increment) {
+      result += " " + increment->toString();
+    }
+    if (body) {
+      result += " " + body->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   static std::shared_ptr<ForStatement> make(const StatementPtr& initializer,
                                             const ExpressionPtr& condition,
                                             const ExpressionPtr& increment,
@@ -632,6 +735,18 @@ struct WhileStatement : public Statement {
     return body->isEqual(*other.body);
   }
 
+  std::string toString() const override {
+    std::string result = "(WhileStatement";
+    if (condition) {
+      result += " " + condition->toString();
+    }
+    if (body) {
+      result += " " + body->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   static std::shared_ptr<WhileStatement> make() {
     return std::make_shared<WhileStatement>();
   }
@@ -661,6 +776,15 @@ struct PrintStatement : public Statement {
 
   bool isEqual(const PrintStatement& other) {
     return expression->isEqual(*other.expression);
+  }
+
+  std::string toString() const override {
+    std::string result = "(PrintStatement";
+    if (expression) {
+      result += " " + expression->toString();
+    }
+    result += ")";
+    return result;
   }
 
   static std::shared_ptr<PrintStatement> make() {
@@ -731,6 +855,21 @@ struct IfStatement : public Statement {
     }
     return thenBranchEqual;
   }
+
+  std::string toString() const override {
+    std::string result = "(IfStatement";
+    if (condition) {
+      result += " " + condition->toString();
+    }
+    if (thenBranch) {
+      result += " " + thenBranch->toString();
+    }
+    if (elseBranch) {
+      result += " " + elseBranch->toString();
+    }
+    result += ")";
+    return result;
+  }
 };
 using IfStatementPtr = std::shared_ptr<IfStatement>;
 
@@ -762,6 +901,15 @@ struct ReturnStatement : public Statement {
     return true;
   }
 
+  std::string toString() const override {
+    std::string result = "(ReturnStatement";
+    if (expression) {
+      result += " " + expression->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   static std::shared_ptr<ReturnStatement> make() {
     return std::make_shared<ReturnStatement>();
   }
@@ -784,6 +932,10 @@ struct BreakStatement : public Statement {
   }
 
   bool isEqual(const BreakStatement& other) { return true; }
+
+  std::string toString() const override {
+    return "(BreakStatement)";
+  }
 
   static std::shared_ptr<BreakStatement> make() {
     return std::make_shared<BreakStatement>();
@@ -812,6 +964,15 @@ struct ExpressionStatement : public Statement {
     return this->expression->isEqual(*other.expression);
   }
 
+  std::string toString() const override {
+    std::string result = "(ExpressionStatement";
+    if (expression) {
+      result += " " + expression->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   static std::shared_ptr<ExpressionStatement> make(
       const ExpressionPtr& expression) {
     return std::make_shared<ExpressionStatement>(expression);
@@ -828,8 +989,7 @@ struct ArrayLiteral : public Expression {
 
   bool isEqual(const Node& other) override {
     if (Type == other.Type) {
-      const auto& otherExprStmt =
-          dynamic_cast<const ArrayLiteral&>(other);
+      const auto& otherExprStmt = dynamic_cast<const ArrayLiteral&>(other);
       return isEqual(otherExprStmt);
     }
     return false;
@@ -847,6 +1007,15 @@ struct ArrayLiteral : public Expression {
     return true;
   }
 
+  std::string toString() const override {
+    std::string result = "(ArrayLiteral";
+    for (const auto& element : elements) {
+      result += " " + element->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   static std::shared_ptr<ArrayLiteral> make(
       const std::vector<ExpressionPtr>& elements = {}) {
     return std::make_shared<ArrayLiteral>(elements);
@@ -859,9 +1028,13 @@ struct ArraySubscriptExpr : public Expression {
   ExpressionPtr index;
 
   ArraySubscriptExpr()
-      : Expression(NodeType::ARRAY_SUBSCRIPT_EXPRESSION), array(nullptr), index(nullptr) {}
+      : Expression(NodeType::ARRAY_SUBSCRIPT_EXPRESSION),
+        array(nullptr),
+        index(nullptr) {}
   ArraySubscriptExpr(const ExpressionPtr& array, const ExpressionPtr& index)
-      : Expression(NodeType::ARRAY_SUBSCRIPT_EXPRESSION), array(array), index(index) {}
+      : Expression(NodeType::ARRAY_SUBSCRIPT_EXPRESSION),
+        array(array),
+        index(index) {}
 
   bool isEqual(const Node& other) override {
     if (Type == other.Type) {
@@ -872,12 +1045,24 @@ struct ArraySubscriptExpr : public Expression {
     return false;
   }
 
+  std::string toString() const override {
+    std::string result = "(ArraySubscriptExpr";
+    if (array) {
+      result += " " + array->toString();
+    }
+    if (index) {
+      result += " " + index->toString();
+    }
+    result += ")";
+    return result;
+  }
+
   bool isEqual(const ArraySubscriptExpr& other) {
     return array->isEqual(*other.array) && index->isEqual(*other.index);
   }
 
-  static std::shared_ptr<ArraySubscriptExpr> make(
-      const ExpressionPtr& array, const ExpressionPtr& index) {
+  static std::shared_ptr<ArraySubscriptExpr> make(const ExpressionPtr& array,
+                                                  const ExpressionPtr& index) {
     return std::make_shared<ArraySubscriptExpr>(array, index);
   }
 };
