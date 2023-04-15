@@ -15,8 +15,8 @@ if(UNIX AND NOT APPLE)
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libstdc++ -static-libgcc -static-libasan -lrt")
   set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libstdc++ -static-libgcc -static-libasan -lrt")
 elseif(APPLE)
-  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -fsanitize=address -fno-omit-frame-pointer")
-  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -g -fsanitize=address -fno-omit-frame-pointer")
+  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -fsanitize=address -fno-omit-frame-pointer")
+  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -g3 -fsanitize=address -fno-omit-frame-pointer")
 endif()
 
 # GTest
@@ -53,6 +53,8 @@ set(SOURCES
   src/environment.cpp
   src/evaluator.h
   src/evaluator.cpp
+  src/settings.h
+  src/settings.cpp
 )
 add_library(libcpplox STATIC ${SOURCES})
 

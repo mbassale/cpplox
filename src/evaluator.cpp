@@ -34,6 +34,9 @@ Evaluator::Evaluator() { globalCtx = EvalContext::make(); }
 ObjectPtr Evaluator::eval(ProgramPtr program) {
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : program->statements) {
+    if (Settings::getInstance()->isDebugMode()) {
+      LOG(INFO) << "Executing: " << stmt->toString();
+    }
     lastValue = evalStatement(globalCtx, stmt);
     if (isReturnObject(lastValue)) {
       return lastValue;

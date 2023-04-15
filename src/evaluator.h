@@ -6,6 +6,7 @@
 #include "environment.h"
 #include "function.h"
 #include "object.h"
+#include "settings.h"
 
 namespace cpplox {
 

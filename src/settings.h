@@ -13,12 +13,7 @@ class Settings {
   Settings() {}
 
  public:
-  static Settings* getInstance() {
-    if (instance == nullptr) {
-      instance = new Settings();
-    }
-    return instance;
-  }
+  static Settings* getInstance();
 
   bool isDebugMode() { return debugMode; }
 
@@ -32,6 +27,6 @@ class Settings {
   friend class ::Driver;
 };
 
-Settings* Settings::instance = nullptr;
+
 
 }  // namespace cpplox
