@@ -1,8 +1,16 @@
 
 fun fib(n) {
-    if (n == 0) return 0;
-    if (n == 1) return 1;
-    return fib(n - 1) + fib(n - 2);
+    var n1 = 0;
+    var n2 = 1;
+    var sum = 0;
+    for (var i = 3; i <= n; i = i + 1) {
+        sum = n1 + n2;
+        n1 = n2;
+        n2 = sum;
+    }
+    return sum;
 }
 
-print fib(10);
+print fib(10); // prints 34
+print fib(11); // prints 55
+print fib(12); // prints 89
