@@ -28,16 +28,23 @@ find_package(gflags REQUIRED)
 # GLog
 find_package (glog REQUIRED)
 
+# Bison
+find_package(BISON REQUIRED)
+
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
 #------------------------------------------------#
 configure_file(config.h.in ${PROJECT_SOURCE_DIR}/src/config.h)
+
+BISON_TARGET(PythonLikeParser ${PROJECT_SOURCE_DIR}/src/parser.yy ${PROJECT_SOURCE_DIR}/src/python_parser.cpp)
 
 include_directories(src ${gflags_INCLUDE_DIR})
 set(SOURCES
   src/common.h
   src/ast.h
   src/ast.cpp
+  src/astbuilder.h
+  src/astbuilder.cpp
   src/config.h
   src/lineinfo.h
   src/lineinfo.cpp
@@ -55,6 +62,9 @@ set(SOURCES
   src/evaluator.cpp
   src/settings.h
   src/settings.cpp
+  src/lexer.h
+  src/lexer.cpp
+  ${BISON_PythonLikeParser_OUTPUTS}
 )
 add_library(libcpplox STATIC ${SOURCES})
 

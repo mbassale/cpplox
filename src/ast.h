@@ -54,6 +54,7 @@ enum class NodeType {
 struct Node {
   const NodeType Type;
 
+  Node() : Type(NodeType::EMPTY_STATEMENT) {}
   Node(const NodeType type) : Type(type) {}
 
   virtual bool isEqual(const Node& other) { return true; }
@@ -933,9 +934,7 @@ struct BreakStatement : public Statement {
 
   bool isEqual(const BreakStatement& other) { return true; }
 
-  std::string toString() const override {
-    return "(BreakStatement)";
-  }
+  std::string toString() const override { return "(BreakStatement)"; }
 
   static std::shared_ptr<BreakStatement> make() {
     return std::make_shared<BreakStatement>();

@@ -2,9 +2,10 @@
 
 #include "common.h"
 #include "evaluator.h"
-#include "parser.h"
 #include "scanner.h"
 #include "settings.h"
+#include "astbuilder.h"
+#include "python_parser.hpp"
 
 #define EXIT_CMDLINE_HELP 64
 
@@ -51,22 +52,12 @@ class Driver {
     try {
       LOG(INFO) << "======== PARSING START ========";
       Scanner scanner(source);
-      cpplox::Parser parser(scanner);
-      const auto program = parser.parse();
-      if (parser.hasErrors()) {
-        for (const cpplox::ParserException &error : parser.getErrors()) {
-          LOG(ERROR) << "Parse error at line " << error.getLocation().line
-                     << ": " << error.what();
-        }
-        return false;
-      }
+      ASTBuilderImpl builder;
+      PythonParser::PythonParser parser(builder, scanner);
+      parser.parse();
+      auto program = builder.getProgram();
+      LOG(INFO) << "Program: " << program->toString();
       LOG(INFO) << "======== PARSING END ========";
-      LOG(INFO) << program->toString();
-      LOG(INFO) << "======== EVALUATOR START ====";
-
-      const auto value = evaluator.eval(program);
-      LOG(INFO) << "ret: " << value->toString();
-      LOG(INFO) << "======== EVALUATOR END ======";
       return true;
     } catch (std::exception &ex) {
       LOG(ERROR) << "RuntimeError: " << ex.what();
