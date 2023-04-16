@@ -23,6 +23,8 @@ class Environment : public std::enable_shared_from_this<Environment> {
 
   EnvironmentPtr findEnvironment(const std::string& identifier);
 
+  std::string toString();
+
   static EnvironmentPtr make() { return std::make_shared<Environment>(); }
   static EnvironmentPtr make(EnvironmentPtr enclosing) {
     return std::make_shared<Environment>(enclosing);

@@ -14,6 +14,19 @@ EnvironmentPtr Environment::findEnvironment(const std::string& identifier) {
   return nullptr;
 }
 
+std::string Environment::toString() {
+  std::string result = "";
+  if (enclosing) {
+    result += enclosing->toString() + "\n";
+  }
+  result += "{";
+  for (auto& [key, value] : values) {
+    result += key + ": " + value->toString() + ", ";
+  }
+  result += "}";
+  return result;
+}
+
 void Environment::set(const std::string& identifier, ObjectPtr value) {
   if (existsInLocalScope(identifier)) {
     values[identifier] = value;
@@ -24,7 +37,7 @@ void Environment::set(const std::string& identifier, ObjectPtr value) {
       parentEnv->set(identifier, value);
       return;
     }
-  } 
+  }
   values[identifier] = value;
 }
 
