@@ -35,6 +35,7 @@ ObjectPtr Evaluator::eval(ProgramPtr program) {
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : program->statements) {
     if (Settings::getInstance()->isDebugMode()) {
+      LOG(INFO) << "Env: " << globalCtx->toString();
       LOG(INFO) << "Executing: " << stmt->toString();
     }
     lastValue = evalStatement(globalCtx, stmt);
@@ -376,9 +377,11 @@ ObjectPtr Evaluator::evalBinaryExpression(EnvironmentPtr ctx,
     case TokenType::TOKEN_LESS:
     case TokenType::TOKEN_LESS_EQUAL:
     case TokenType::TOKEN_GREATER:
-    case TokenType::TOKEN_GREATER_EQUAL:
-      return evalComparisonOperator(ctx, leftValue, expr->operator_.type,
+    case TokenType::TOKEN_GREATER_EQUAL: {
+      auto result = evalComparisonOperator(ctx, leftValue, expr->operator_.type,
                                     rightValue);
+      return result;
+    }
     default:
       // TODO: throw RuntimeError
       return NULL_OBJECT_PTR;
@@ -447,11 +450,13 @@ ObjectPtr Evaluator::evalComparisonOperator(EnvironmentPtr ctx,
       auto lhsIntValue = tryCastAsInteger(lhsValue);
       auto rhsIntValue = tryCastAsInteger(rhsValue);
       result = lhsIntValue->Value <= rhsIntValue->Value;
+      break;
     }
     case TokenType::TOKEN_GREATER: {
       auto lhsIntValue = tryCastAsInteger(lhsValue);
       auto rhsIntValue = tryCastAsInteger(rhsValue);
       result = lhsIntValue->Value > rhsIntValue->Value;
+      break;
     }
     case TokenType::TOKEN_GREATER_EQUAL: {
       auto lhsIntValue = tryCastAsInteger(lhsValue);

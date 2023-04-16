@@ -255,7 +255,10 @@ TEST_F(EvaluatorTest, TestForStmts) {
       TestCase{"var test = false; for(; test;) { false; }", {{"test", false}}},
       TestCase{"var globalVar = 0; for(var i = 0; i < 10; i = i + 1) { "
                "globalVar = i; }",
-               {{"globalVar", 9}}}};
+               {{"globalVar", 9}}},
+      TestCase{"var n = 10; var res = 0; for(var i = 0; i < n; i = i + 1) { "
+               "res = i; }",
+               {{"res", 9}}}};
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
