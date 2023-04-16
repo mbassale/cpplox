@@ -88,13 +88,13 @@ using IntegerObjectPtr = std::shared_ptr<IntegerObject>;
 struct BooleanObject : public Object {
   bool Value;
 
-  BooleanObject(const bool value)
+  BooleanObject(bool value)
       : Object(ObjectType::OBJ_BOOLEAN), Value(value) {}
 
   std::string toString() const override { return Value ? "true" : "false"; }
 
-  bool isFalsey() const override { return !Value; }
-  bool isTruthy() const override { return Value; }
+  bool isFalsey() const override { return Value == false; }
+  bool isTruthy() const override { return Value == true; }
   bool isEqual(const Object &obj) const override {
     if (obj.Type == Type) {
       const auto &rhs = static_cast<const BooleanObject &>(obj);

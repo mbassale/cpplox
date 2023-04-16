@@ -229,8 +229,15 @@ TEST_F(EvaluatorTest, TestIfStmts) {
     string source;
     std::optional<int> expectedValue;
   };
-  vector<TestCase> testCases = {TestCase{"if(true){ 1; } else { 2; }", 1},
-                                TestCase{"if(false){ 1; } else { 2; }", 2}};
+  vector<TestCase> testCases = {
+      TestCase{"if(true){ 1; } else { 2; }", 1},
+      TestCase{"if(false){ 1; } else { 2; }", 2},
+      TestCase{"var i = 0; var n = 10; if(i <= n) { 1; } else { 2; }", 1},
+      TestCase{"var i = 0; var n = 10; if(i > n) { 1; } else { 2; }", 2},
+      TestCase{"var n = 10; if (n > 0) { n; } else { 0; }", 10},
+      TestCase{"var n = 10; if (n == 10) { n; } else { 0; }", 10},
+      TestCase{"var n = 10; if (n == 0) { n; } else { 0; }", 0},
+  };
 
   for (const auto& testCase : testCases) {
     Scanner scanner(testCase.source);
