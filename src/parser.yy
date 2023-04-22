@@ -57,6 +57,21 @@ using namespace cpplox::ast;
 %token SLASH "/"
 %token LPAREN "("
 %token RPAREN ")"
+%token LBRACE "{"
+%token RBRACE "}"
+%token LBRACKET "["
+%token RBRACKET "]"
+%token COMMA ","
+%token DOT "."
+%token BANG "!"
+%token BANG_EQUAL "!="
+%token EQUAL "="
+%token EQUAL_EQUAL "=="
+%token GREATER ">"
+%token GREATER_EQUAL ">="
+%token LESS "<"
+%token LESS_EQUAL "<="
+%token SEMICOLON ";"
 %token COLON ":"
 
 %type<cpplox::ast::ProgramPtr> program
@@ -66,6 +81,8 @@ using namespace cpplox::ast;
 %type<cpplox::ast::ExpressionStatementPtr> simple_statement
 %type<std::vector<cpplox::ast::StatementPtr>> statements
 
+%left PLUS MINUS
+%left STAR SLASH
 
 %start program
 

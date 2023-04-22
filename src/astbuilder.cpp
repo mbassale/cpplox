@@ -11,11 +11,6 @@ ProgramPtr ASTBuilderImpl::emitProgram(
 
 ExpressionStatementPtr ASTBuilderImpl::emitExpressionStatement(
     cpplox::ast::ExpressionPtr expr) {
-  if (expr) {
-    LOG(INFO) << "ExpressionStmt: " << expr->toString();
-  } else {
-    LOG(INFO) << "ExpressionStmt: nullptr";
-  }
   return ExpressionStatement::make(expr);
 }
 
@@ -39,17 +34,17 @@ BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
 
 IfStatementPtr ASTBuilderImpl::emitIfStatement(
     cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) {
-  return nullptr;
+  return IfStatement::make(condition, body);
 }
 
 WhileStatementPtr ASTBuilderImpl::emitWhileStatement(
     cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) {
-  return nullptr;
+  return WhileStatement::make(condition, body);
 }
 
 FunctionDeclarationPtr ASTBuilderImpl::emitDefStatement(
     const Token &name, cpplox::ast::BlockPtr body) {
-  return nullptr;
+  return FunctionDeclaration::make(name, {}, body);
 }
 
 BlockPtr ASTBuilderImpl::emitBlock(

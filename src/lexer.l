@@ -53,6 +53,23 @@ std::stack<int> indentStack;
 <*>\- { return PythonParser::PythonParser::token::MINUS; }
 <*>\* { return PythonParser::PythonParser::token::STAR; }
 <*>\/ { return PythonParser::PythonParser::token::SLASH; }
+<*>\( { return PythonParser::PythonParser::token::LPAREN; }
+<*>\) { return PythonParser::PythonParser::token::RPAREN; }
+<*>\{ { return PythonParser::PythonParser::token::LBRACE; }
+<*>\} { return PythonParser::PythonParser::token::RBRACE; }
+<*>\[ { return PythonParser::PythonParser::token::LBRACKET; }
+<*>\] { return PythonParser::PythonParser::token::RBRACKET; }
+<*>\= { return PythonParser::PythonParser::token::EQUAL; }
+<*>\, { return PythonParser::PythonParser::token::COMMA; }
+<*>\. { return PythonParser::PythonParser::token::DOT; }
+<*>\! { return PythonParser::PythonParser::token::BANG; }
+<*>\!\= { return PythonParser::PythonParser::token::BANG_EQUAL; }
+<*>\=\= { return PythonParser::PythonParser::token::EQUAL_EQUAL; }
+<*>\> { return PythonParser::PythonParser::token::GREATER; }
+<*>\>\= { return PythonParser::PythonParser::token::GREATER_EQUAL; }
+<*>\< { return PythonParser::PythonParser::token::LESS; }
+<*>\<\= { return PythonParser::PythonParser::token::LESS_EQUAL; }
+<*>\; { return PythonParser::PythonParser::token::SEMICOLON; }
 <*>\: { return PythonParser::PythonParser::token::COLON; }
 
   /* Identation and Blocks */
