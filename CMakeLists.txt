@@ -31,12 +31,23 @@ find_package (glog REQUIRED)
 # Bison
 find_package(BISON REQUIRED)
 
+# Flex
+find_package(FLEX REQUIRED)
+
 #------------------------------------------------#
 # CPPLOX SOURCES                                 #
 #------------------------------------------------#
 configure_file(config.h.in ${PROJECT_SOURCE_DIR}/src/config.h)
 
+# Bison
 BISON_TARGET(PythonLikeParser ${PROJECT_SOURCE_DIR}/src/parser.yy ${PROJECT_SOURCE_DIR}/src/python_parser.cpp)
+
+# Flex
+set(LEXER_INPUT_FILE ${PROJECT_SOURCE_DIR}/src/lexer.l)
+FLEX_TARGET(
+  PythonLikeLexer 
+  ${LEXER_INPUT_FILE} 
+  ${PROJECT_SOURCE_DIR}/src/lexer.cpp)
 
 include_directories(src ${gflags_INCLUDE_DIR})
 set(SOURCES
@@ -63,8 +74,9 @@ set(SOURCES
   src/settings.h
   src/settings.cpp
   src/lexer.h
-  src/lexer.cpp
+  src/lexer_impl.cpp
   ${BISON_PythonLikeParser_OUTPUTS}
+  ${FLEX_PythonLikeLexer_OUTPUTS}
 )
 add_library(libcpplox STATIC ${SOURCES})
 

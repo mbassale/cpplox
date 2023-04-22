@@ -5,6 +5,7 @@
 #include "scanner.h"
 #include "settings.h"
 #include "astbuilder.h"
+#include "lexer.h"
 #include "python_parser.hpp"
 
 #define EXIT_CMDLINE_HELP 64
@@ -51,9 +52,10 @@ class Driver {
   bool interpret(const std::string &source) {
     try {
       LOG(INFO) << "======== PARSING START ========";
-      Scanner scanner(source);
       ASTBuilderImpl builder;
-      PythonParser::PythonParser parser(builder, scanner);
+      std::stringstream ss(source + '\n');
+      PythonLexer lexer(&ss);
+      PythonParser::PythonParser parser(builder, lexer);
       parser.parse();
       auto program = builder.getProgram();
       LOG(INFO) << "Program: " << program->toString();

@@ -21,6 +21,7 @@ using namespace cpplox::ast;
 %define api.value.type variant
 
 %code requires {
+    class PythonLexer;
     class ASTBuilder {
     public:
         virtual ~ASTBuilder() = default;
@@ -30,7 +31,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
         virtual cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) = 0;
         virtual cpplox::ast::VariableExprPtr emitIdentifier(const Token &value) = 0;
-        virtual cpplox::ast::BinaryExprPtr emitBinaryOp(char op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
+        virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::WhileStatementPtr emitWhileStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(const Token &name, cpplox::ast::BlockPtr body) = 0;
@@ -38,7 +39,7 @@ using namespace cpplox::ast;
     };
 }
 
-%param {ASTBuilder& builder} {Scanner& scanner}
+%param {ASTBuilder& builder} {PythonLexer& lexer}
 
 %token<Token> INDENT "INDENT"
 %token<Token> DEDENT "DEDENT"
@@ -50,6 +51,13 @@ using namespace cpplox::ast;
 %token IF "if"
 %token WHILE "while"
 %token DEF "def"
+%token PLUS "+"
+%token MINUS "-"
+%token STAR "*"
+%token SLASH "/"
+%token LPAREN "("
+%token RPAREN ")"
+%token COLON ":"
 
 %type<cpplox::ast::ProgramPtr> program
 %type<cpplox::ast::ExpressionPtr> expr
@@ -79,7 +87,7 @@ statement
     ;
 
 simple_statement
-    : expr { $$ = builder.emitExpressionStatement($1);}
+    : expr { $$ = builder.emitExpressionStatement($1); }
     ;
 
 compound_statement
@@ -89,13 +97,13 @@ compound_statement
     ;
 
 if_statement
-    : IF expr ':' suite
+    : IF expr COLON suite
       %prec INDENT
       { builder.emitIfStatement($2, $4); }
     ;
 
 while_statement
-    : WHILE expr ':' suite
+    : WHILE expr COLON suite
       %prec INDENT
       { builder.emitWhileStatement($2, $4); }
     ;
@@ -108,13 +116,13 @@ def_statement
 
 expr
     : INTEGER { $$ = builder.emitIntegerLiteral($1); }
-    | IDENTIFIER { $$ = builder.emitIdentifier($1); }
     | STRING_LITERAL { $$ = builder.emitStringLiteral($1); }
-    | '(' expr ')' { $$ = $2; }
-    | expr '+' expr { $$ = builder.emitBinaryOp('+', $1, $3); }
-    | expr '-' expr { $$ = builder.emitBinaryOp('-', $1, $3); }
-    | expr '*' expr { $$ = builder.emitBinaryOp('*', $1, $3); }
-    | expr '/' expr { $$ = builder.emitBinaryOp('/', $1, $3); }
+    | IDENTIFIER { $$ = builder.emitIdentifier($1); }
+    | LPAREN expr RPAREN { $$ = $2; }
+    | expr PLUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_PLUS, $1, $3); }
+    | expr MINUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_MINUS, $1, $3); }
+    | expr STAR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_STAR, $1, $3); }
+    | expr SLASH expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_SLASH, $1, $3); }
     ;
 
 suite
