@@ -4,7 +4,6 @@ cpplox
 cpplox_test*
 .vscode
 /src/config.h
-/src/lexer.h
 /src/lexer.cpp
 /src/python_parser.cpp
 /src/python_parser.hpp

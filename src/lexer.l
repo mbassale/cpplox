@@ -23,7 +23,7 @@ std::stack<int> indentStack;
 
 %%
 
-/* String Literal */
+  /* String Literal */
 <STRING>\" { BEGIN(INITIAL); 
   yylval.emplace<Token>(Token(TokenType::TOKEN_STRING, currentString));
   return PythonParser::PythonParser::token::STRING_LITERAL; 
@@ -31,31 +31,31 @@ std::stack<int> indentStack;
 <STRING>[^\"]* { currentString = yytext; }
 <*>\" { BEGIN(STRING); }
 
-/* Keywords */
+  /* Keywords */
 <*>while    { return PythonParser::PythonParser::token::WHILE; }
 <*>if       { return PythonParser::PythonParser::token::IF; }
 <*>def      { return PythonParser::PythonParser::token::DEF; }
 
-/* Integer */
+  /* Integer */
 <*>[0-9]+ { 
   yylval.emplace<Token>(Token(TokenType::TOKEN_NUMBER, yytext));
   return PythonParser::PythonParser::token::INTEGER; 
 }
 
-/* Identifier */
+  /* Identifier */
 <*>[a-zA-Z_][a-zA-Z0-9_]* { 
   yylval.emplace<Token>(Token(TokenType::TOKEN_IDENTIFIER, yytext));
   return PythonParser::PythonParser::token::IDENTIFIER; 
 }
 
-/* Operators */
+  /* Operators */
 <*>\+ { return PythonParser::PythonParser::token::PLUS; }
 <*>\- { return PythonParser::PythonParser::token::MINUS; }
 <*>\* { return PythonParser::PythonParser::token::STAR; }
 <*>\/ { return PythonParser::PythonParser::token::SLASH; }
 <*>\: { return PythonParser::PythonParser::token::COLON; }
 
-/* Identation and Blocks */
+  /* Identation and Blocks */
 <*>[ \t]*\n { 
   BEGIN(INDENT_MODE); 
   return PythonParser::PythonParser::token::NEWLINE; 
