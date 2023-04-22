@@ -10,6 +10,8 @@
 
 #define EXIT_CMDLINE_HELP 64
 
+using Parser::PythonParser;
+
 DEFINE_bool(debug, false, "Enable debugging");
 
 class Driver {
@@ -55,7 +57,7 @@ class Driver {
       ASTBuilderImpl builder;
       std::stringstream ss(source + '\n');
       PythonLexer lexer(&ss);
-      PythonParser::PythonParser parser(builder, lexer);
+      PythonParser parser(builder, lexer);
       parser.parse();
       auto program = builder.getProgram();
       LOG(INFO) << "Program: " << program->toString();

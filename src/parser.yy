@@ -15,7 +15,7 @@ using namespace cpplox::ast;
 
 %language "c++"
 %require "3.8"
-%define api.namespace {PythonParser}
+%define api.namespace {Parser}
 %define parse.error verbose
 %define api.parser.class {PythonParser}
 %define api.value.type variant
@@ -149,7 +149,7 @@ suite
 
 %%
 
-namespace PythonParser
+namespace Parser
 {
   // Report an error to the user.
   auto PythonParser::error (const std::string& msg) -> void

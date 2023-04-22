@@ -15,5 +15,5 @@ class PythonLexer : public yyFlexLexer {
   PythonLexer(std::istream *in) : yyFlexLexer(in) {}
 };
 
-int yylex(PythonParser::PythonParser::value_type* value, ASTBuilder& builder,
+int yylex(Parser::PythonParser::value_type* value, ASTBuilder& builder,
           PythonLexer& lexer);

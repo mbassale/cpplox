@@ -6,15 +6,15 @@
 #include "python_parser.hpp"
 
 using namespace std;
+using Parser::PythonParser;
 
 struct LexerTestData {
   const char *name;
   const char *source;
-  vector<PythonParser::PythonParser::token_kind_type> tokenTypes;
+  vector<PythonParser::token_kind_type> tokenTypes;
 
-  LexerTestData(
-      const char *name, const char *source,
-      const vector<PythonParser::PythonParser::token_kind_type> &tokenTypes)
+  LexerTestData(const char *name, const char *source,
+                const vector<PythonParser::token_kind_type> &tokenTypes)
       : name(name), source(source), tokenTypes(tokenTypes) {}
 };
 
@@ -22,52 +22,49 @@ class LexerTest : public ::testing::Test {
  protected:
   void assertTokenTypes(
       PythonLexer &lexer,
-      const vector<PythonParser::PythonParser::token_kind_type>
-          &expectedTokens);
+      const vector<PythonParser::token_kind_type> &expectedTokens);
 };
 
 void LexerTest::assertTokenTypes(
     PythonLexer &lexer,
-    const vector<PythonParser::PythonParser::token_kind_type>
-        &expectedTokenTypes) {
+    const vector<PythonParser::token_kind_type> &expectedTokenTypes) {
   size_t tokenCount = 0;
-  std::for_each(
-      expectedTokenTypes.begin(), expectedTokenTypes.end(),
-      [&](const PythonParser::PythonParser::token_kind_type &expected) {
-        auto actual = lexer.yylex();
-        ASSERT_EQ(actual, expected);
-        tokenCount++;
-      });
+  std::for_each(expectedTokenTypes.begin(), expectedTokenTypes.end(),
+                [&](const PythonParser::token_kind_type &expected) {
+                  auto actual = lexer.yylex();
+                  ASSERT_EQ(actual, expected);
+                  tokenCount++;
+                });
   ASSERT_EQ(tokenCount, expectedTokenTypes.size());
 }
 
 TEST_F(LexerTest, PunctuationTokenAssertions) {
   vector<LexerTestData> testCases = {
       LexerTestData("Punctuation", "(){}[],.-+;/*!!====>>=<<=",
-                    vector<PythonParser::PythonParser::token_kind_type>{
+                    vector<PythonParser::token_kind_type>{
                         // One character tokens.
-                        PythonParser::PythonParser::token::LPAREN,
-                        PythonParser::PythonParser::token::RPAREN,
-                        PythonParser::PythonParser::token::LBRACE,
-                        PythonParser::PythonParser::token::RBRACE,
-                        PythonParser::PythonParser::token::LBRACKET,
-                        PythonParser::PythonParser::token::RBRACKET,
-                        PythonParser::PythonParser::token::COMMA,
-                        PythonParser::PythonParser::token::DOT,
-                        PythonParser::PythonParser::token::MINUS,
-                        PythonParser::PythonParser::token::PLUS,
-                        PythonParser::PythonParser::token::SEMICOLON,
-                        PythonParser::PythonParser::token::SLASH,
-                        PythonParser::PythonParser::token::STAR,
+                        PythonParser::token::LPAREN,
+                        PythonParser::token::RPAREN,
+                        PythonParser::token::LBRACE,
+                        PythonParser::token::RBRACE,
+                        PythonParser::token::LBRACKET,
+                        PythonParser::token::RBRACKET,
+                        PythonParser::token::COMMA,
+                        PythonParser::token::DOT,
+                        PythonParser::token::MINUS,
+                        PythonParser::token::PLUS,
+                        PythonParser::token::SEMICOLON,
+                        PythonParser::token::SLASH,
+                        PythonParser::token::STAR,
                         // One or two character tokens.
-                        PythonParser::PythonParser::token::BANG,
-                        PythonParser::PythonParser::token::BANG_EQUAL,
-                        PythonParser::PythonParser::token::EQUAL_EQUAL,
-                        PythonParser::PythonParser::token::EQUAL,
-                        PythonParser::PythonParser::token::GREATER,
-                        PythonParser::PythonParser::token::GREATER_EQUAL,
-                        PythonParser::PythonParser::token::LESS,
-                        PythonParser::PythonParser::token::LESS_EQUAL,
+                        PythonParser::token::BANG,
+                        PythonParser::token::BANG_EQUAL,
+                        PythonParser::token::EQUAL_EQUAL,
+                        PythonParser::token::EQUAL,
+                        PythonParser::token::GREATER,
+                        PythonParser::token::GREATER_EQUAL,
+                        PythonParser::token::LESS,
+                        PythonParser::token::LESS_EQUAL,
                     }),
   };
   for (const auto testData : testCases) {
@@ -80,10 +77,10 @@ TEST_F(LexerTest, PunctuationTokenAssertions) {
 TEST_F(LexerTest, KeywordTokenAssertions) {
   vector<LexerTestData> testCases = {
       LexerTestData("Keywords", " if   while  def ",
-                    vector<PythonParser::PythonParser::token_kind_type>{
-                        PythonParser::PythonParser::token::IF,
-                        PythonParser::PythonParser::token::WHILE,
-                        PythonParser::PythonParser::token::DEF,
+                    vector<PythonParser::token_kind_type>{
+                        PythonParser::token::IF,
+                        PythonParser::token::WHILE,
+                        PythonParser::token::DEF,
                     }),
   };
   for (const auto testData : testCases) {
