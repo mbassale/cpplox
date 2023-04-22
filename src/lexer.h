@@ -8,7 +8,7 @@
 #include <string>
 #include "ast.h"
 #include "astbuilder.h"
-#include "python_parser.hpp"  // Include Bison-generated header file for token definitions
+#include "parser.h"
 
 class PythonLexer : public yyFlexLexer {
  public:

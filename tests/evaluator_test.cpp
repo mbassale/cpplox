@@ -2,9 +2,14 @@
 
 #include <gtest/gtest.h>
 
+#include "ast.h"
+#include "astbuilder.h"
 #include "common.h"
+#include "lexer.h"
 #include "parser.h"
 #include "scanner.h"
+
+using Parser::PythonParser;
 
 using namespace cpplox;
 using namespace std;
@@ -40,10 +45,13 @@ TEST_F(EvaluatorTest, TestLiterals) {
       TestCase{"\"\";", ""},       TestCase{";", "nil"}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    EXPECT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     ASSERT_NE(value, nullptr);
@@ -60,10 +68,13 @@ TEST_F(EvaluatorTest, TestUnaryExpression) {
   vector<TestCase> testCases = {TestCase{"-1;", -1, nullopt},
                                 TestCase{"!true;", nullopt, false}};
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedIntValue.has_value()) {
@@ -109,10 +120,13 @@ TEST_F(EvaluatorTest, TestBinaryExpression) {
       TestCase{"1 > 2 or 2 >= 2;", nullopt, true},
   };
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors()) << "TestCase: " << testCase.source;
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedIntValue.has_value()) {
@@ -144,10 +158,13 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
                {{"a", 1}, {"b", 2}, {"c", 4}}}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedValues.size() > 0) {
@@ -178,10 +195,13 @@ TEST_F(EvaluatorTest, TestAssignmentExpressions) {
       TestCase{"var a = 2; var b = a * 2; a = a * b;", {{"a", 8}, {"b", 4}}}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedValues.size() > 0) {
@@ -212,10 +232,13 @@ TEST_F(EvaluatorTest, TestBlockStmts) {
                                 TestCase{"{ true; 1; }", 1}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     auto value = evaluator.eval(program);
     if (testCase.expectedValue.has_value()) {
@@ -240,10 +263,13 @@ TEST_F(EvaluatorTest, TestIfStmts) {
   };
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     auto value = evaluator.eval(program);
     if (testCase.expectedValue.has_value()) {
@@ -268,10 +294,13 @@ TEST_F(EvaluatorTest, TestForStmts) {
                {{"res", 9}}}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     evaluator.eval(program);
     for (const auto& pair : testCase.expectedValues) {
@@ -296,10 +325,13 @@ TEST_F(EvaluatorTest, TestWhileStmts) {
       TestCase{"var i = 0; while (i < 10){ i = i + 1; }", {{"i", 10}}}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     evaluator.eval(program);
     for (const auto& pair : testCase.expectedValues) {
@@ -323,10 +355,13 @@ TEST_F(EvaluatorTest, TestPrintStmts) {
       TestCase{"print 1+2*3;", 7}, TestCase{"var a = 2; print a*2+1;", 5}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     auto value = evaluator.eval(program);
     if (std::holds_alternative<bool>(testCase.expectedValue)) {
@@ -350,10 +385,13 @@ TEST_F(EvaluatorTest, TestFunctionDeclarationStmts) {
       TestCase{"fun test() {}", "test", 0}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors());
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     evaluator.eval(program);
     auto value = evaluator.getGlobalValue(testCase.expectedFunctionName);
@@ -390,10 +428,13 @@ TEST_F(EvaluatorTest, TestFunctionCallExpression) {
                {{"a", 90}}}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors()) << testCase.source;
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     evaluator.eval(program);
     for (const auto& pair : testCase.expectedValues) {
@@ -421,10 +462,13 @@ TEST_F(EvaluatorTest, TestBreakStatement) {
           {{"a", 5}}}};
 
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors()) << testCase.source;
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     evaluator.eval(program);
     for (const auto& pair : testCase.expectedValues) {
@@ -450,10 +494,13 @@ TEST_F(EvaluatorTest, TestArrayExpressions) {
       TestCase{"var a = [1,2,3]; var b = a[0]; var c = a[1]; var d = a[2];",
                {{"a", vector<int>{1, 2, 3}}, {"b", 1}, {"c", 2}, {"d", 3}}}};
   for (const auto& testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    auto program = parser.parse();
-    ASSERT_FALSE(parser.hasErrors()) << testCase.source;
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     evaluator.eval(program);
     for (const auto& pair : testCase.expectedValues) {

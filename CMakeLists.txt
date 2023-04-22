@@ -40,7 +40,11 @@ find_package(FLEX REQUIRED)
 configure_file(config.h.in ${PROJECT_SOURCE_DIR}/src/config.h)
 
 # Bison
-BISON_TARGET(PythonLikeParser ${PROJECT_SOURCE_DIR}/src/parser.yy ${PROJECT_SOURCE_DIR}/src/python_parser.cpp)
+BISON_TARGET(
+  PythonLikeParser 
+  ${PROJECT_SOURCE_DIR}/src/parser.yy 
+  ${PROJECT_SOURCE_DIR}/src/parser.cpp
+  DEFINES_FILE ${PROJECT_SOURCE_DIR}/src/parser.h)
 
 # Flex
 set(LEXER_INPUT_FILE ${PROJECT_SOURCE_DIR}/src/lexer.l)

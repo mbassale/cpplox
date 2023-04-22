@@ -2,7 +2,7 @@
 
 #include "ast.h"
 #include "common.h"
-#include "python_parser.hpp"
+#include "parser.h"
 
 class ASTBuilderImpl : public ASTBuilder {
  public:

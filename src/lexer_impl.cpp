@@ -1,7 +1,7 @@
 #include "astbuilder.h"
 #include "common.h"
 #include "lexer.h"
-#include "python_parser.hpp"
+#include "parser.h"
 #include "scanner.h"
 
 using Parser::PythonParser;

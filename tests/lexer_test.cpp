@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "common.h"
-#include "python_parser.hpp"
+#include "parser.h"
 
 using namespace std;
 using Parser::PythonParser;

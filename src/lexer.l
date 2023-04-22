@@ -11,7 +11,7 @@
 #include "ast.h"
 
 class PythonLexer;
-#include "python_parser.hpp" // Include Bison-generated header file for token definitions
+#include "parser.h" // Include Bison-generated header file for token definitions
 
 using Parser::PythonParser;
 PythonParser::value_type yylval;

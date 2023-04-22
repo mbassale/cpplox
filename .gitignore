@@ -5,8 +5,8 @@ cpplox_test*
 .vscode
 /src/config.h
 /src/lexer.cpp
-/src/python_parser.cpp
-/src/python_parser.hpp
+/src/parser.cpp
+/src/parser.h
 Makefile
 CMakeLists.txt.user
 CMakeCache.txt

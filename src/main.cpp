@@ -6,7 +6,7 @@
 #include "settings.h"
 #include "astbuilder.h"
 #include "lexer.h"
-#include "python_parser.hpp"
+#include "parser.h"
 
 #define EXIT_CMDLINE_HELP 64
 

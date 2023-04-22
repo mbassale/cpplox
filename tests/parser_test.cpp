@@ -1,3 +1,7 @@
+#include "common.h"
+#include "ast.h"
+#include "astbuilder.h"
+#include "lexer.h"
 #include "parser.h"
 
 #include <gtest/gtest.h>
@@ -5,6 +9,7 @@
 #include "common.h"
 
 using namespace cpplox;
+using Parser::PythonParser;
 
 struct ParserTestData {
   const char *name;
@@ -38,9 +43,13 @@ TEST_F(ParserTest, LiteralExprAssertions) {
                              ast::BooleanLiteral::makeFalse())})),
   };
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -96,9 +105,13 @@ TEST_F(ParserTest, ParserAssertions) {
                          ast::ReturnStatement::make()}))};
 
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -140,9 +153,13 @@ TEST_F(ParserTest, ParseFunctionDeclaration) {
                                      ast::VariableExpr::make("a"))}))})),
   };
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -162,9 +179,13 @@ TEST_F(ParserTest, AssignmentExprAssertions) {
                                       ast::IntegerLiteral::make(1))))}))};
 
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -184,9 +205,13 @@ TEST_F(ParserTest, UnaryExprAssertions) {
   };
 
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -236,9 +261,13 @@ TEST_F(ParserTest, CallExprAssertions) {
                               ast::VariableExpr::make("arg2")})}))}))};
 
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -368,9 +397,13 @@ TEST_F(ParserTest, BinaryExprAssertions) {
   };
 
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -419,9 +452,13 @@ TEST_F(ParserTest, ForStatementAssertions) {
                       ast::VariableExpr::make("i"))}))}))};
 
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -444,9 +481,13 @@ TEST_F(ParserTest, BreakStatementAssertions) {
                                  ast::BreakStatement::make()}))}))};
 
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
@@ -504,9 +545,13 @@ TEST_F(ParserTest, ArrayLiteralAssertions) {
                                             ast::VariableExpr::make("a"),
                                             ast::IntegerLiteral::make(1)))}))};
   for (const auto &testCase : testCases) {
-    Scanner scanner(testCase.source);
-    Parser parser(scanner);
-    const auto actualProgram = parser.parse();
+    std::istringstream ss(testCase.source);
+    PythonLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    PythonParser parser(builder, lexer);
+    parser.parse();
+    auto actualProgram = builder.getProgram();
+    ASSERT_NE(actualProgram, nullptr);
     ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
   }
 }
