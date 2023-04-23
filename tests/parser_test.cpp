@@ -121,7 +121,7 @@ TEST_F(ParserTest, StatementAssertions) {
 
 TEST_F(ParserTest, ParseFunctionDeclaration) {
   std::vector<ParserTestData> testCases = {
-      ParserTestData("FunctionDeclarationNoArgs", "fun test() { return true; }",
+      ParserTestData("FunctionDeclarationNoArgs", "def test() { return true; }",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::FunctionDeclaration::make(
                              Token(TokenType::TOKEN_IDENTIFIER, "test"),
@@ -129,8 +129,18 @@ TEST_F(ParserTest, ParseFunctionDeclaration) {
                              ast::Block::make(std::vector<ast::StatementPtr>{
                                  ast::ReturnStatement::make(
                                      ast::BooleanLiteral::makeTrue())}))})),
+      ParserTestData(
+          "FunctionDeclarationOneArg", "def test(arg1) { return true; }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::FunctionDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "test"),
+                  std::vector<Token>{
+                      Token(TokenType::TOKEN_IDENTIFIER, "arg1")},
+                  ast::Block::make(
+                      std::vector<ast::StatementPtr>{ast::ReturnStatement::make(
+                          ast::BooleanLiteral::makeTrue())}))})),
       ParserTestData("FunctionDeclarationMultipleArgs",
-                     "fun test(arg1, arg2) { return true; }",
+                     "def test(arg1, arg2) { return true; }",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::FunctionDeclaration::make(
                              Token(TokenType::TOKEN_IDENTIFIER, "test"),
@@ -141,7 +151,7 @@ TEST_F(ParserTest, ParseFunctionDeclaration) {
                                  ast::ReturnStatement::make(
                                      ast::BooleanLiteral::makeTrue())}))})),
       ParserTestData("FunctionDeclarationLocalVars",
-                     "fun test(arg1) { var a = arg1; return a; }",
+                     "def test(arg1) { var a = arg1; return a; }",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::FunctionDeclaration::make(
                              Token(TokenType::TOKEN_IDENTIFIER, "test"),

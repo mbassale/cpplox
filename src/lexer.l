@@ -54,7 +54,7 @@ std::string currentString;
   return JSParser::token::IDENTIFIER; 
 }
 
-  /* Operators */
+  /* Operators and Single Character Tokens */
 <*>\+ { return JSParser::token::PLUS; }
 <*>\- { return JSParser::token::MINUS; }
 <*>\* { return JSParser::token::STAR; }

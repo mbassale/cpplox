@@ -176,8 +176,10 @@ var_declaration
 
 arguments
     : /* empty */ { $$ = std::vector<cpplox::ast::VariableExprPtr>(); }
-    | arguments COMMA varExpr
-      { $1.push_back($3); $$ = $1; }
+    | arguments varExpr COMMA
+      { $1.push_back($2); $$ = $1; }
+    | arguments varExpr
+      { $1.push_back($2); $$ = $1; }
 
 varExpr
     : IDENTIFIER { $$ = builder.emitVarExpression($1); }
