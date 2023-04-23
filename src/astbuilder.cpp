@@ -4,7 +4,6 @@ using namespace cpplox::ast;
 
 ProgramPtr ASTBuilderImpl::emitProgram(
     const std::vector<StatementPtr> &statements) {
-  LOG(INFO) << "Program: " << statements.size();
   program = Program::make(statements);
   return program;
 }
@@ -50,8 +49,12 @@ BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
 StatementPtr ASTBuilderImpl::emitEmptyStatement() { return Statement::make(); }
 
 IfStatementPtr ASTBuilderImpl::emitIfStatement(
-    cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) {
-  return IfStatement::make(condition, body);
+    cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody,
+    cpplox::ast::BlockPtr elseBody) {
+  if (elseBody == nullptr) {
+    return IfStatement::make(condition, thenBody);
+  }
+  return IfStatement::make(condition, thenBody, elseBody);
 }
 
 WhileStatementPtr ASTBuilderImpl::emitWhileStatement(

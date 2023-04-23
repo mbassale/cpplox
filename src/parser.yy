@@ -41,7 +41,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
         virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::StatementPtr emitEmptyStatement() = 0;
-        virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
+        virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody = nullptr) = 0;
         virtual cpplox::ast::WhileStatementPtr emitWhileStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(cpplox::ast::VariableExprPtr name, const std::vector<cpplox::ast::VariableExprPtr>& arguments, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::BlockPtr emitBlock(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
@@ -55,6 +55,7 @@ using namespace cpplox::ast;
 %token<Token> STRING_LITERAL "STRING_LITERAL"
 
 %token IF "if"
+%token ELSE "else"
 %token WHILE "while"
 %token DEF "def"
 %token VAR "var"
@@ -134,9 +135,10 @@ compound_statement
     ;
 
 if_statement
-    : IF LPAREN expr RPAREN suite
+    : IF LPAREN expr RPAREN suite ELSE suite
+      { $$ = builder.emitIfStatement($3, $5, $7); }
+    | IF LPAREN expr RPAREN suite
       { $$ = builder.emitIfStatement($3, $5); }
-    ;
 
 while_statement
     : WHILE LPAREN expr RPAREN suite

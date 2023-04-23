@@ -66,7 +66,7 @@ TEST_F(ParserTest, LiteralExprAssertions) {
   assertTestCases(testCases);
 }
 
-TEST_F(ParserTest, ParserAssertions) {
+TEST_F(ParserTest, StatementAssertions) {
   std::vector<ParserTestData> testCases = {
       ParserTestData("EmptyStatement", ";",
                      ast::Program::make(std::vector<ast::StatementPtr>{

@@ -28,7 +28,7 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::StatementPtr emitEmptyStatement() override;
   cpplox::ast::IfStatementPtr emitIfStatement(
       cpplox::ast::ExpressionPtr condition,
-      cpplox::ast::BlockPtr body) override;
+      cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody) override;
   cpplox::ast::WhileStatementPtr emitWhileStatement(
       cpplox::ast::ExpressionPtr condition,
       cpplox::ast::BlockPtr body) override;
