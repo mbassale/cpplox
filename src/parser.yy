@@ -44,6 +44,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody = nullptr) = 0;
         virtual cpplox::ast::WhileStatementPtr emitWhileStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(cpplox::ast::VariableExprPtr name, const std::vector<cpplox::ast::VariableExprPtr>& arguments, cpplox::ast::BlockPtr body) = 0;
+        virtual cpplox::ast::PrintStatementPtr emitPrintStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::BlockPtr emitBlock(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
     };
 }
@@ -62,6 +63,7 @@ using namespace cpplox::ast;
 %token NIL "null"
 %token TRUE "true"
 %token FALSE "false"
+%token PRINT "print"
 %token PLUS "+"
 %token MINUS "-"
 %token STAR "*"
@@ -98,6 +100,7 @@ using namespace cpplox::ast;
 %type<cpplox::ast::WhileStatementPtr> while_statement
 %type<cpplox::ast::FunctionDeclarationPtr> def_statement
 %type<std::vector<cpplox::ast::VariableExprPtr>> arguments
+%type<cpplox::ast::PrintStatementPtr> print_statement
 
 %left PLUS MINUS
 %left STAR SLASH
@@ -132,6 +135,7 @@ compound_statement
     | if_statement { $$ = $1; }
     | while_statement { $$ = $1; }
     | def_statement { $$ = $1; }
+    | print_statement { $$ = $1; }
     ;
 
 if_statement
@@ -149,6 +153,12 @@ def_statement
     : DEF varExpr LPAREN arguments RPAREN suite
       { $$ = builder.emitDefStatement($2, $4, $6); }
     ;
+
+print_statement
+    : PRINT LPAREN expr RPAREN SEMICOLON
+      { $$ = builder.emitPrintStatement($3); }
+    | PRINT expr SEMICOLON
+      { $$ = builder.emitPrintStatement($2); }
 
 var_declaration
     : VAR varExpr EQUAL expr SEMICOLON { $$ = builder.emitVarDeclaration($2, $4); }

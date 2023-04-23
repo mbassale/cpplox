@@ -74,6 +74,10 @@ FunctionDeclarationPtr ASTBuilderImpl::emitDefStatement(
   return FunctionDeclaration::make(nameToken, argumentTokens, body);
 }
 
+PrintStatementPtr ASTBuilderImpl::emitPrintStatement(ExpressionPtr expr) {
+  return PrintStatement::make(expr);
+}
+
 BlockPtr ASTBuilderImpl::emitBlock(
     const std::vector<cpplox::ast::StatementPtr> &statements) {
   return Block::make(statements);

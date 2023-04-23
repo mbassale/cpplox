@@ -27,8 +27,8 @@ class ASTBuilderImpl : public ASTBuilder {
       cpplox::ast::ExpressionPtr rhs) override;
   cpplox::ast::StatementPtr emitEmptyStatement() override;
   cpplox::ast::IfStatementPtr emitIfStatement(
-      cpplox::ast::ExpressionPtr condition,
-      cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody) override;
+      cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody,
+      cpplox::ast::BlockPtr elseBody) override;
   cpplox::ast::WhileStatementPtr emitWhileStatement(
       cpplox::ast::ExpressionPtr condition,
       cpplox::ast::BlockPtr body) override;
@@ -36,6 +36,8 @@ class ASTBuilderImpl : public ASTBuilder {
       cpplox::ast::VariableExprPtr name,
       const std::vector<cpplox::ast::VariableExprPtr> &arguments,
       cpplox::ast::BlockPtr body) override;
+  cpplox::ast::PrintStatementPtr emitPrintStatement(
+      cpplox::ast::ExpressionPtr expr) override;
   cpplox::ast::BlockPtr emitBlock(
       const std::vector<cpplox::ast::StatementPtr> &statements) override;
 

@@ -39,6 +39,7 @@ std::string currentString;
 <*>true     { return JSParser::token::TRUE; }  
 <*>false    { return JSParser::token::FALSE; }
 <*>null     { return JSParser::token::NIL; }
+<*>print    { return JSParser::token::PRINT; }
 
   /* Integer */
 <*>[0-9]+ { 
