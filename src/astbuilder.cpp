@@ -22,7 +22,7 @@ StringLiteralPtr ASTBuilderImpl::emitStringLiteral(const Token &value) {
   return StringLiteral::make(value.lexeme());
 }
 
-VariableExprPtr ASTBuilderImpl::emitIdentifier(const Token &value) {
+VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
   return VariableExpr::make(value.lexeme());
 }
 
@@ -43,8 +43,15 @@ WhileStatementPtr ASTBuilderImpl::emitWhileStatement(
 }
 
 FunctionDeclarationPtr ASTBuilderImpl::emitDefStatement(
-    const Token &name, cpplox::ast::BlockPtr body) {
-  return FunctionDeclaration::make(name, {}, body);
+    cpplox::ast::VariableExprPtr name,
+    const std::vector<cpplox::ast::VariableExprPtr> &arguments,
+    cpplox::ast::BlockPtr body) {
+  Token nameToken(TokenType::TOKEN_IDENTIFIER, name->identifier);
+  std::vector<Token> argumentTokens;
+  for (const auto &arg : arguments) {
+    argumentTokens.emplace_back(TokenType::TOKEN_IDENTIFIER, arg->identifier);
+  }
+  return FunctionDeclaration::make(nameToken, argumentTokens, body);
 }
 
 BlockPtr ASTBuilderImpl::emitBlock(

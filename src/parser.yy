@@ -30,11 +30,11 @@ using namespace cpplox::ast;
         virtual cpplox::ast::ExpressionStatementPtr emitExpressionStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
         virtual cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) = 0;
-        virtual cpplox::ast::VariableExprPtr emitIdentifier(const Token &value) = 0;
+        virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
         virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::WhileStatementPtr emitWhileStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
-        virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(const Token &name, cpplox::ast::BlockPtr body) = 0;
+        virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(cpplox::ast::VariableExprPtr name, const std::vector<cpplox::ast::VariableExprPtr>& arguments, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::BlockPtr emitBlock(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
     };
 }
@@ -75,11 +75,13 @@ using namespace cpplox::ast;
 %token COLON ":"
 
 %type<cpplox::ast::ProgramPtr> program
+%type<cpplox::ast::VariableExprPtr> varExpr
 %type<cpplox::ast::ExpressionPtr> expr
 %type<cpplox::ast::BlockPtr> suite
 %type<cpplox::ast::StatementPtr> statement
 %type<cpplox::ast::ExpressionStatementPtr> simple_statement
 %type<std::vector<cpplox::ast::StatementPtr>> statements
+%type<std::vector<cpplox::ast::VariableExprPtr>> arguments
 
 %left PLUS MINUS
 %left STAR SLASH
@@ -127,16 +129,23 @@ while_statement
     ;
 
 def_statement
-    : DEF IDENTIFIER '(' ')' ':' suite
+    : DEF varExpr LPAREN arguments RPAREN COLON suite
       %prec INDENT
-      { builder.emitDefStatement($2, $6); }
+      { builder.emitDefStatement($2, $4, $7); }
+    ;
+
+arguments
+    : /* empty */ { $$ = std::vector<cpplox::ast::VariableExprPtr>(); }
+    | arguments COMMA varExpr
+      { $1.push_back($3); $$ = $1; }
+
+varExpr
+    : IDENTIFIER { $$ = builder.emitVarExpression($1); }
     ;
 
 expr
-    : INTEGER { $$ = builder.emitIntegerLiteral($1); }
-    | STRING_LITERAL { $$ = builder.emitStringLiteral($1); }
-    | IDENTIFIER { $$ = builder.emitIdentifier($1); }
-    | LPAREN expr RPAREN { $$ = $2; }
+    : LPAREN expr RPAREN { $$ = $2; }
+    | varExpr { $$ = $1; }
     | expr PLUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_PLUS, $1, $3); }
     | expr MINUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_MINUS, $1, $3); }
     | expr STAR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_STAR, $1, $3); }
@@ -147,6 +156,8 @@ expr
     | expr GREATER_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_GREATER_EQUAL, $1, $3); }
     | expr LESS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS, $1, $3); }
     | expr LESS_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS_EQUAL, $1, $3); }
+    | INTEGER { $$ = builder.emitIntegerLiteral($1); }
+    | STRING_LITERAL { $$ = builder.emitStringLiteral($1); }
     ;
 
 suite
