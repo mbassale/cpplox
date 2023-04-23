@@ -25,10 +25,14 @@ std::string currentString;
   /* String Literal */
 <STRING>\" { BEGIN(INITIAL); 
   yylval.emplace<Token>(Token(TokenType::TOKEN_STRING, currentString));
+  currentString = "";
   return JSParser::token::STRING_LITERAL; 
 }
 <STRING>[^\"]* { currentString = yytext; }
-<*>\" { BEGIN(STRING); }
+<*>\" { 
+  BEGIN(STRING);
+  currentString = ""; 
+}
 
   /* Keywords */
 <*>while    { return JSParser::token::WHILE; }
