@@ -43,6 +43,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
         virtual cpplox::ast::AssignmentPtr emitAssignmentExpression(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr value) = 0;
         virtual cpplox::ast::CallExprPtr emitCallExpression(cpplox::ast::ExpressionPtr callee, const std::vector<cpplox::ast::ExpressionPtr> &arguments) = 0;
+        virtual cpplox::ast::UnaryExprPtr emitUnaryOp(TokenType op, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::StatementPtr emitEmptyStatement() = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody = nullptr) = 0;
@@ -126,6 +127,7 @@ using namespace cpplox::ast;
 %type<cpplox::ast::ArrayLiteralPtr> array_literal
 %type<std::vector<cpplox::ast::ExpressionPtr>> array_elements
 %type<cpplox::ast::ArraySubscriptExprPtr> array_subscript
+%type<cpplox::ast::UnaryExprPtr> unary_expr
 
 %left PLUS MINUS
 %left STAR SLASH
@@ -260,8 +262,13 @@ array_elements
 array_subscript
     : expr LBRACKET expr RBRACKET { $$ = builder.emitArraySubscript($1, $3); }
 
+unary_expr
+    : BANG expr { $$ = builder.emitUnaryOp(TokenType::TOKEN_BANG, $2); }
+    | MINUS expr { $$ = builder.emitUnaryOp(TokenType::TOKEN_MINUS, $2); }
+
 expr
-    : assignment_expr { $$ = $1; }
+    : unary_expr { $$ = $1; }
+    | assignment_expr { $$ = $1; }
     | call_expr { $$ = $1; }
     | array_subscript { $$ = $1; }
     | array_literal { $$ = $1; }

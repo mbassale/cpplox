@@ -60,6 +60,10 @@ CallExprPtr ASTBuilderImpl::emitCallExpression(
   return CallExpr::make(callee, arguments);
 }
 
+UnaryExprPtr ASTBuilderImpl::emitUnaryOp(TokenType op, ExpressionPtr rhs) {
+  return UnaryExpr::make(Token::make(op), rhs);
+}
+
 BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
                                            cpplox::ast::ExpressionPtr lhs,
                                            cpplox::ast::ExpressionPtr rhs) {
