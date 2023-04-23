@@ -36,6 +36,9 @@ std::stack<int> indentStack;
 <*>while    { return PythonParser::token::WHILE; }
 <*>if       { return PythonParser::token::IF; }
 <*>def      { return PythonParser::token::DEF; }
+<*>True     { return PythonParser::token::TRUE; }  
+<*>False    { return PythonParser::token::FALSE; }
+<*>None     { return PythonParser::token::NONE; }
 
   /* Integer */
 <*>[0-9]+ { 

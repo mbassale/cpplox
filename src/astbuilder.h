@@ -16,6 +16,8 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(
       const Token &value) override;
   cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) override;
+  cpplox::ast::BooleanLiteralPtr emitBooleanLiteral(bool value) override;
+  cpplox::ast::NilLiteralPtr emitNilLiteral() override;
   cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) override;
   cpplox::ast::BinaryExprPtr emitBinaryOp(
       TokenType op, cpplox::ast::ExpressionPtr lhs,

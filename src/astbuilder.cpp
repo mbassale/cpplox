@@ -22,6 +22,12 @@ StringLiteralPtr ASTBuilderImpl::emitStringLiteral(const Token &value) {
   return StringLiteral::make(value.lexeme());
 }
 
+BooleanLiteralPtr ASTBuilderImpl::emitBooleanLiteral(bool value) {
+  return BooleanLiteral::make(value);
+}
+
+NilLiteralPtr ASTBuilderImpl::emitNilLiteral() { return NilLiteral::make(); }
+
 VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
   return VariableExpr::make(value.lexeme());
 }

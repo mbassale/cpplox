@@ -4,9 +4,11 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include "common.h"
 #include "ast.h"
 #include "scanner.h"
 #include "lexer.h"
+#include "astbuilder.h"
 
 using namespace std;
 using namespace cpplox::ast;
@@ -21,6 +23,9 @@ using namespace cpplox::ast;
 %define api.value.type variant
 
 %code requires {
+    #include "ast.h"
+    #include "common.h"
+    
     class PythonLexer;
     class ASTBuilder {
     public:
@@ -30,6 +35,8 @@ using namespace cpplox::ast;
         virtual cpplox::ast::ExpressionStatementPtr emitExpressionStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
         virtual cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) = 0;
+        virtual cpplox::ast::BooleanLiteralPtr emitBooleanLiteral(bool value) = 0;
+        virtual cpplox::ast::NilLiteralPtr emitNilLiteral() = 0;
         virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
         virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
@@ -51,6 +58,9 @@ using namespace cpplox::ast;
 %token IF "if"
 %token WHILE "while"
 %token DEF "def"
+%token NONE "None"
+%token TRUE "True"
+%token FALSE "False"
 %token PLUS "+"
 %token MINUS "-"
 %token STAR "*"
@@ -145,7 +155,6 @@ varExpr
 
 expr
     : LPAREN expr RPAREN { $$ = $2; }
-    | varExpr { $$ = $1; }
     | expr PLUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_PLUS, $1, $3); }
     | expr MINUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_MINUS, $1, $3); }
     | expr STAR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_STAR, $1, $3); }
@@ -158,6 +167,10 @@ expr
     | expr LESS_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS_EQUAL, $1, $3); }
     | INTEGER { $$ = builder.emitIntegerLiteral($1); }
     | STRING_LITERAL { $$ = builder.emitStringLiteral($1); }
+    | NONE { $$ = builder.emitNilLiteral(); }
+    | TRUE { $$ = builder.emitBooleanLiteral(true); }
+    | FALSE { $$ = builder.emitBooleanLiteral(false); }
+    | varExpr { $$ = $1; }
     ;
 
 suite
