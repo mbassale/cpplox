@@ -44,6 +44,7 @@ std::string currentString;
 <*>null     { return JSParser::token::NIL; }
 <*>print    { return JSParser::token::PRINT; }
 <*>return   { return JSParser::token::RETURN; }
+<*>break    { return JSParser::token::BREAK; }
 
   /* Integer */
 <*>[0-9]+ { 

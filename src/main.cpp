@@ -1,12 +1,12 @@
 #include <gflags/gflags.h>
 
+#include "astbuilder.h"
 #include "common.h"
 #include "evaluator.h"
-#include "scanner.h"
-#include "settings.h"
-#include "astbuilder.h"
 #include "lexer.h"
 #include "parser.h"
+#include "scanner.h"
+#include "settings.h"
 
 #define EXIT_CMDLINE_HELP 64
 
@@ -60,8 +60,15 @@ class Driver {
       JSParser parser(builder, lexer);
       parser.parse();
       auto program = builder.getProgram();
-      LOG(INFO) << "Program: " << program->toString();
+      LOG(INFO) << "Program: " << (program ? program->toString() : "nullptr");
       LOG(INFO) << "======== PARSING END ========";
+      if (program == nullptr) {
+        return false;
+      }
+      LOG(INFO) << "======== EVALUATION START ========";
+      auto value = evaluator.eval(program);
+      LOG(INFO) << "Result: " << (value ? value->toString() : "nullptr");
+      LOG(INFO) << "======== EVALUATION END ========";
       return true;
     } catch (std::exception &ex) {
       LOG(ERROR) << "RuntimeError: " << ex.what();

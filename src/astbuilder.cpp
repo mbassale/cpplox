@@ -36,6 +36,16 @@ BooleanLiteralPtr ASTBuilderImpl::emitBooleanLiteral(bool value) {
 
 NilLiteralPtr ASTBuilderImpl::emitNilLiteral() { return NilLiteral::make(); }
 
+ArrayLiteralPtr ASTBuilderImpl::emitArrayLiteral(
+    const std::vector<ExpressionPtr> &elements) {
+  return ArrayLiteral::make(elements);
+}
+
+ArraySubscriptExprPtr ASTBuilderImpl::emitArraySubscript(ExpressionPtr array,
+                                                         ExpressionPtr index) {
+  return ArraySubscriptExpr::make(array, index);
+}
+
 VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
   return VariableExpr::make(value.lexeme());
 }
@@ -43,6 +53,15 @@ VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
 AssignmentPtr ASTBuilderImpl::emitAssignmentExpression(
     VariableExprPtr identifier, ExpressionPtr value) {
   return Assignment::make(identifier->identifier, value);
+}
+
+CallExprPtr ASTBuilderImpl::emitCallExpression(
+    ExpressionPtr callee, const std::vector<ExpressionPtr> &arguments) {
+  return CallExpr::make(callee, arguments);
+}
+
+UnaryExprPtr ASTBuilderImpl::emitUnaryOp(TokenType op, ExpressionPtr rhs) {
+  return UnaryExpr::make(Token::make(op), rhs);
 }
 
 BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
@@ -106,6 +125,10 @@ PrintStatementPtr ASTBuilderImpl::emitPrintStatement(ExpressionPtr expr) {
 
 ReturnStatementPtr ASTBuilderImpl::emitReturnStatement(ExpressionPtr expr) {
   return ReturnStatement::make(expr);
+}
+
+BreakStatementPtr ASTBuilderImpl::emitBreakStatement() {
+  return BreakStatement::make();
 }
 
 BlockPtr ASTBuilderImpl::emitBlock(
