@@ -38,6 +38,8 @@ using namespace cpplox::ast;
         virtual cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) = 0;
         virtual cpplox::ast::BooleanLiteralPtr emitBooleanLiteral(bool value) = 0;
         virtual cpplox::ast::NilLiteralPtr emitNilLiteral() = 0;
+        virtual cpplox::ast::ArrayLiteralPtr emitArrayLiteral(const std::vector<cpplox::ast::ExpressionPtr> &elements) = 0;
+        virtual cpplox::ast::ArraySubscriptExprPtr emitArraySubscript(cpplox::ast::ExpressionPtr array, cpplox::ast::ExpressionPtr index) = 0;
         virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
         virtual cpplox::ast::AssignmentPtr emitAssignmentExpression(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr value) = 0;
         virtual cpplox::ast::CallExprPtr emitCallExpression(cpplox::ast::ExpressionPtr callee, const std::vector<cpplox::ast::ExpressionPtr> &arguments) = 0;
@@ -121,6 +123,9 @@ using namespace cpplox::ast;
 %type<cpplox::ast::PrintStatementPtr> print_statement
 %type<cpplox::ast::ReturnStatementPtr> return_statement
 %type<cpplox::ast::BreakStatementPtr> break_statement
+%type<cpplox::ast::ArrayLiteralPtr> array_literal
+%type<std::vector<cpplox::ast::ExpressionPtr>> array_elements
+%type<cpplox::ast::ArraySubscriptExprPtr> array_subscript
 
 %left PLUS MINUS
 %left STAR SLASH
@@ -242,9 +247,24 @@ call_arguments
     | call_arguments expr
       { $1.push_back($2); $$ = $1; }
 
+array_literal
+    : LBRACKET array_elements RBRACKET { $$ = builder.emitArrayLiteral($2); }
+
+array_elements
+    : /* empty */ { $$ = std::vector<cpplox::ast::ExpressionPtr>(); }
+    | array_elements expr COMMA
+      { $1.push_back($2); $$ = $1; }
+    | array_elements expr
+      { $1.push_back($2); $$ = $1; }
+
+array_subscript
+    : expr LBRACKET expr RBRACKET { $$ = builder.emitArraySubscript($1, $3); }
+
 expr
     : assignment_expr { $$ = $1; }
     | call_expr { $$ = $1; }
+    | array_subscript { $$ = $1; }
+    | array_literal { $$ = $1; }
     | LPAREN expr RPAREN { $$ = $2; }
     | expr PLUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_PLUS, $1, $3); }
     | expr MINUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_MINUS, $1, $3); }

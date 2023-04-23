@@ -36,6 +36,16 @@ BooleanLiteralPtr ASTBuilderImpl::emitBooleanLiteral(bool value) {
 
 NilLiteralPtr ASTBuilderImpl::emitNilLiteral() { return NilLiteral::make(); }
 
+ArrayLiteralPtr ASTBuilderImpl::emitArrayLiteral(
+    const std::vector<ExpressionPtr> &elements) {
+  return ArrayLiteral::make(elements);
+}
+
+ArraySubscriptExprPtr ASTBuilderImpl::emitArraySubscript(ExpressionPtr array,
+                                                         ExpressionPtr index) {
+  return ArraySubscriptExpr::make(array, index);
+}
+
 VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
   return VariableExpr::make(value.lexeme());
 }
