@@ -10,7 +10,7 @@
 
 #define EXIT_CMDLINE_HELP 64
 
-using Parser::PythonParser;
+using Parser::JSParser;
 
 DEFINE_bool(debug, false, "Enable debugging");
 
@@ -55,9 +55,9 @@ class Driver {
     try {
       LOG(INFO) << "======== PARSING START ========";
       ASTBuilderImpl builder;
-      std::stringstream ss(source + '\n');
-      PythonLexer lexer(&ss);
-      PythonParser parser(builder, lexer);
+      std::stringstream ss(source);
+      JSLexer lexer(&ss);
+      JSParser parser(builder, lexer);
       parser.parse();
       auto program = builder.getProgram();
       LOG(INFO) << "Program: " << program->toString();

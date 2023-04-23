@@ -19,19 +19,20 @@ using namespace cpplox::ast;
 %require "3.8"
 %define api.namespace {Parser}
 %define parse.error verbose
-%define api.parser.class {PythonParser}
+%define api.parser.class {JSParser}
 %define api.value.type variant
 
 %code requires {
     #include "ast.h"
     #include "common.h"
     
-    class PythonLexer;
+    class JSLexer;
     class ASTBuilder {
     public:
         virtual ~ASTBuilder() = default;
         
         virtual cpplox::ast::ProgramPtr emitProgram(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
+        virtual cpplox::ast::VarDeclarationPtr emitVarDeclaration(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr initializer = nullptr) = 0;
         virtual cpplox::ast::ExpressionStatementPtr emitExpressionStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
         virtual cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) = 0;
@@ -39,6 +40,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::NilLiteralPtr emitNilLiteral() = 0;
         virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
         virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
+        virtual cpplox::ast::StatementPtr emitEmptyStatement() = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::WhileStatementPtr emitWhileStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(cpplox::ast::VariableExprPtr name, const std::vector<cpplox::ast::VariableExprPtr>& arguments, cpplox::ast::BlockPtr body) = 0;
@@ -46,21 +48,19 @@ using namespace cpplox::ast;
     };
 }
 
-%param {ASTBuilder& builder} {PythonLexer& lexer}
+%param {ASTBuilder& builder} {JSLexer& lexer}
 
-%token<Token> INDENT "INDENT"
-%token<Token> DEDENT "DEDENT"
 %token<Token> INTEGER "INTEGER"
 %token<Token> IDENTIFIER "IDENTIFIER"
 %token<Token> STRING_LITERAL "STRING_LITERAL"
 
-%token NEWLINE "NEWLINE"
 %token IF "if"
 %token WHILE "while"
 %token DEF "def"
-%token NONE "None"
-%token TRUE "True"
-%token FALSE "False"
+%token VAR "var"
+%token NIL "null"
+%token TRUE "true"
+%token FALSE "false"
 %token PLUS "+"
 %token MINUS "-"
 %token STAR "*"
@@ -91,6 +91,11 @@ using namespace cpplox::ast;
 %type<cpplox::ast::StatementPtr> statement
 %type<cpplox::ast::ExpressionStatementPtr> simple_statement
 %type<std::vector<cpplox::ast::StatementPtr>> statements
+%type<cpplox::ast::StatementPtr> compound_statement
+%type<cpplox::ast::VarDeclarationPtr> var_declaration
+%type<cpplox::ast::IfStatementPtr> if_statement
+%type<cpplox::ast::WhileStatementPtr> while_statement
+%type<cpplox::ast::FunctionDeclarationPtr> def_statement
 %type<std::vector<cpplox::ast::VariableExprPtr>> arguments
 
 %left PLUS MINUS
@@ -112,37 +117,40 @@ statements
     ;
 
 statement
-    : simple_statement NEWLINE { $$ = $1; }
-    | compound_statement
+    : compound_statement
+    | simple_statement { $$ = $1; }
+    | SEMICOLON { $$ = builder.emitEmptyStatement(); }
     ;
 
 simple_statement
-    : expr { $$ = builder.emitExpressionStatement($1); }
+    : expr SEMICOLON { $$ = builder.emitExpressionStatement($1); }
     ;
 
 compound_statement
-    : if_statement
-    | while_statement
-    | def_statement
+    : var_declaration { $$ = $1; }
+    | if_statement { $$ = $1; }
+    | while_statement { $$ = $1; }
+    | def_statement { $$ = $1; }
     ;
 
 if_statement
-    : IF expr COLON suite
-      %prec INDENT
-      { builder.emitIfStatement($2, $4); }
+    : IF LPAREN expr RPAREN suite
+      { $$ = builder.emitIfStatement($3, $5); }
     ;
 
 while_statement
-    : WHILE expr COLON suite
-      %prec INDENT
-      { builder.emitWhileStatement($2, $4); }
+    : WHILE LPAREN expr RPAREN suite
+      { $$ = builder.emitWhileStatement($3, $5); }
     ;
 
 def_statement
-    : DEF varExpr LPAREN arguments RPAREN COLON suite
-      %prec INDENT
-      { builder.emitDefStatement($2, $4, $7); }
+    : DEF varExpr LPAREN arguments RPAREN suite
+      { $$ = builder.emitDefStatement($2, $4, $6); }
     ;
+
+var_declaration
+    : VAR varExpr EQUAL expr SEMICOLON { $$ = builder.emitVarDeclaration($2, $4); }
+    | VAR varExpr SEMICOLON { $$ = builder.emitVarDeclaration($2); }
 
 arguments
     : /* empty */ { $$ = std::vector<cpplox::ast::VariableExprPtr>(); }
@@ -167,15 +175,15 @@ expr
     | expr LESS_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS_EQUAL, $1, $3); }
     | INTEGER { $$ = builder.emitIntegerLiteral($1); }
     | STRING_LITERAL { $$ = builder.emitStringLiteral($1); }
-    | NONE { $$ = builder.emitNilLiteral(); }
+    | NIL { $$ = builder.emitNilLiteral(); }
     | TRUE { $$ = builder.emitBooleanLiteral(true); }
     | FALSE { $$ = builder.emitBooleanLiteral(false); }
     | varExpr { $$ = $1; }
     ;
 
 suite
-    : NEWLINE INDENT statements DEDENT
-      { $$ = builder.emitBlock($3); }
+    : LBRACE statements RBRACE { $$ = builder.emitBlock($2); }
+    | statement { $$ = builder.emitBlock({ $1 }); }
     ;
 
 %%
@@ -183,7 +191,7 @@ suite
 namespace Parser
 {
   // Report an error to the user.
-  auto PythonParser::error (const std::string& msg) -> void
+  auto JSParser::error (const std::string& msg) -> void
   {
     std::cerr << msg << '\n';
   }

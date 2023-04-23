@@ -9,7 +9,7 @@
 #include "parser.h"
 #include "scanner.h"
 
-using Parser::PythonParser;
+using Parser::JSParser;
 
 using namespace cpplox;
 using namespace std;
@@ -46,9 +46,9 @@ TEST_F(EvaluatorTest, TestLiterals) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -69,9 +69,9 @@ TEST_F(EvaluatorTest, TestUnaryExpression) {
                                 TestCase{"!true;", nullopt, false}};
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -121,9 +121,9 @@ TEST_F(EvaluatorTest, TestBinaryExpression) {
   };
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -159,9 +159,9 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -196,9 +196,9 @@ TEST_F(EvaluatorTest, TestAssignmentExpressions) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -233,9 +233,9 @@ TEST_F(EvaluatorTest, TestBlockStmts) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -264,9 +264,9 @@ TEST_F(EvaluatorTest, TestIfStmts) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -295,9 +295,9 @@ TEST_F(EvaluatorTest, TestForStmts) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -326,9 +326,9 @@ TEST_F(EvaluatorTest, TestWhileStmts) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -356,9 +356,9 @@ TEST_F(EvaluatorTest, TestPrintStmts) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -386,9 +386,9 @@ TEST_F(EvaluatorTest, TestFunctionDeclarationStmts) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -429,9 +429,9 @@ TEST_F(EvaluatorTest, TestFunctionCallExpression) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -463,9 +463,9 @@ TEST_F(EvaluatorTest, TestBreakStatement) {
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
@@ -495,9 +495,9 @@ TEST_F(EvaluatorTest, TestArrayExpressions) {
                {{"a", vector<int>{1, 2, 3}}, {"b", 1}, {"c", 2}, {"d", 3}}}};
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
-    PythonLexer lexer(&ss);
+    JSLexer lexer(&ss);
     ASTBuilderImpl builder;
-    PythonParser parser(builder, lexer);
+    JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);

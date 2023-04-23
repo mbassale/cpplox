@@ -6,14 +6,15 @@
 #include <iostream>
 #include <stack>
 #include <string>
+
 #include "ast.h"
 #include "astbuilder.h"
 #include "parser.h"
 
-class PythonLexer : public yyFlexLexer {
+class JSLexer : public yyFlexLexer {
  public:
-  PythonLexer(std::istream *in) : yyFlexLexer(in) {}
+  JSLexer(std::istream* in) : yyFlexLexer(in) {}
 };
 
-int yylex(Parser::PythonParser::value_type* value, ASTBuilder& builder,
-          PythonLexer& lexer);
+int yylex(Parser::JSParser::value_type* value, ASTBuilder& builder,
+          JSLexer& lexer);

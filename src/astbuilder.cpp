@@ -9,6 +9,15 @@ ProgramPtr ASTBuilderImpl::emitProgram(
   return program;
 }
 
+VarDeclarationPtr ASTBuilderImpl::emitVarDeclaration(
+    VariableExprPtr identifier, ExpressionPtr initializer) {
+  Token nameToken(TokenType::TOKEN_IDENTIFIER, identifier->identifier);
+  if (!initializer) {
+    initializer = NilLiteral::make();
+  }
+  return VarDeclaration::make(nameToken, initializer);
+}
+
 ExpressionStatementPtr ASTBuilderImpl::emitExpressionStatement(
     cpplox::ast::ExpressionPtr expr) {
   return ExpressionStatement::make(expr);
@@ -37,6 +46,8 @@ BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
                                            cpplox::ast::ExpressionPtr rhs) {
   return BinaryExpr::make(lhs, Token::make(op), rhs);
 }
+
+StatementPtr ASTBuilderImpl::emitEmptyStatement() { return Statement::make(); }
 
 IfStatementPtr ASTBuilderImpl::emitIfStatement(
     cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) {

@@ -8,7 +8,7 @@
 #include "lexer.h"
 
 using namespace cpplox;
-using Parser::PythonParser;
+using Parser::JSParser;
 
 struct ParserTestData {
   const char *name;
@@ -26,13 +26,16 @@ class ParserTest : public ::testing::Test {
       std::ostringstream os;
       os << testCase.source << std::endl;
       std::istringstream is(os.str());
-      PythonLexer lexer(&is);
+      JSLexer lexer(&is);
       ASTBuilderImpl builder;
-      PythonParser parser(builder, lexer);
+      JSParser parser(builder, lexer);
       parser.parse();
       auto actualProgram = builder.getProgram();
-      ASSERT_NE(actualProgram, nullptr);
-      ASSERT_TRUE(actualProgram->isEqual(*testCase.program)) << testCase.name;
+      ASSERT_NE(actualProgram, nullptr) << testCase.name << ": "
+                                        << "actualProgram is null";
+      ASSERT_TRUE(actualProgram->isEqual(*testCase.program))
+          << testCase.name << ": " << actualProgram->toString()
+          << " != " << testCase.program->toString();
     }
   }
 };
@@ -40,22 +43,22 @@ class ParserTest : public ::testing::Test {
 TEST_F(ParserTest, LiteralExprAssertions) {
   std::vector<ParserTestData> testCases = {
       ParserTestData(
-          "NoneLiteral", "None",
+          "NullLiteral", "null;",
           ast::Program::make(std::vector<ast::StatementPtr>{
               ast::ExpressionStatement::make(ast::NilLiteral::make())})),
-      ParserTestData("TrueLiteral", "True",
+      ParserTestData("TrueLiteral", "true;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(
                              ast::BooleanLiteral::makeTrue())})),
-      ParserTestData("FalseLiteral", "False",
+      ParserTestData("FalseLiteral", "false;",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(
                              ast::BooleanLiteral::makeFalse())})),
       ParserTestData(
-          "IntegerLiteral", "123",
+          "IntegerLiteral", "123;",
           ast::Program::make(std::vector<ast::StatementPtr>{
               ast::ExpressionStatement::make(ast::IntegerLiteral::make(123))})),
-      ParserTestData("StringLiteral", "\"test\"",
+      ParserTestData("StringLiteral", "\"test\";",
                      ast::Program::make(std::vector<ast::StatementPtr>{
                          ast::ExpressionStatement::make(
                              ast::StringLiteral::make("test"))})),

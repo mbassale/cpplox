@@ -415,14 +415,15 @@ struct Program : public Node {
            std::equal(this->statements.cbegin(), this->statements.cend(),
                       other.statements.cbegin(),
                       [](const auto& stmt1, const auto& stmt2) {
-                        return stmt1->isEqual(*stmt2);
+                        return stmt1 != nullptr && stmt2 != nullptr &&
+                               stmt1->isEqual(*stmt2);
                       });
   }
 
   std::string toString() const override {
     std::string result = "(Program";
     for (const auto& stmt : statements) {
-      result += " " + stmt->toString();
+      result += " " + (stmt != nullptr ? stmt->toString() : "nullptr");
     }
     result += ")";
     return result;

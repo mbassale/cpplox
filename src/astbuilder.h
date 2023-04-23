@@ -11,6 +11,9 @@ class ASTBuilderImpl : public ASTBuilder {
 
   cpplox::ast::ProgramPtr emitProgram(
       const std::vector<cpplox::ast::StatementPtr> &statements) override;
+  cpplox::ast::VarDeclarationPtr emitVarDeclaration(
+      cpplox::ast::VariableExprPtr identifier,
+      cpplox::ast::ExpressionPtr initializer) override;
   cpplox::ast::ExpressionStatementPtr emitExpressionStatement(
       cpplox::ast::ExpressionPtr expr) override;
   cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(
@@ -22,6 +25,7 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::BinaryExprPtr emitBinaryOp(
       TokenType op, cpplox::ast::ExpressionPtr lhs,
       cpplox::ast::ExpressionPtr rhs) override;
+  cpplox::ast::StatementPtr emitEmptyStatement() override;
   cpplox::ast::IfStatementPtr emitIfStatement(
       cpplox::ast::ExpressionPtr condition,
       cpplox::ast::BlockPtr body) override;

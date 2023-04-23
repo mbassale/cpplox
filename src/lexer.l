@@ -10,16 +10,14 @@
 #include "scanner.h"
 #include "ast.h"
 
-class PythonLexer;
+class JSLexer;
 #include "parser.h" // Include Bison-generated header file for token definitions
 
-using Parser::PythonParser;
-PythonParser::value_type yylval;
+using Parser::JSParser;
+JSParser::value_type yylval;
 std::string currentString;
-std::stack<int> indentStack;
 %}
 
-%x INDENT_MODE
 %x STRING
 
 %%
@@ -27,74 +25,57 @@ std::stack<int> indentStack;
   /* String Literal */
 <STRING>\" { BEGIN(INITIAL); 
   yylval.emplace<Token>(Token(TokenType::TOKEN_STRING, currentString));
-  return PythonParser::token::STRING_LITERAL; 
+  return JSParser::token::STRING_LITERAL; 
 }
 <STRING>[^\"]* { currentString = yytext; }
 <*>\" { BEGIN(STRING); }
 
   /* Keywords */
-<*>while    { return PythonParser::token::WHILE; }
-<*>if       { return PythonParser::token::IF; }
-<*>def      { return PythonParser::token::DEF; }
-<*>True     { return PythonParser::token::TRUE; }  
-<*>False    { return PythonParser::token::FALSE; }
-<*>None     { return PythonParser::token::NONE; }
+<*>while    { return JSParser::token::WHILE; }
+<*>if       { return JSParser::token::IF; }
+<*>def      { return JSParser::token::DEF; }
+<*>var      { return JSParser::token::VAR; }
+<*>true     { return JSParser::token::TRUE; }  
+<*>false    { return JSParser::token::FALSE; }
+<*>null     { return JSParser::token::NIL; }
 
   /* Integer */
 <*>[0-9]+ { 
   yylval.emplace<Token>(Token(TokenType::TOKEN_NUMBER, yytext));
-  return PythonParser::token::INTEGER; 
+  return JSParser::token::INTEGER; 
 }
 
   /* Identifier */
 <*>[a-zA-Z_][a-zA-Z0-9_]* { 
   yylval.emplace<Token>(Token(TokenType::TOKEN_IDENTIFIER, yytext));
-  return PythonParser::token::IDENTIFIER; 
+  return JSParser::token::IDENTIFIER; 
 }
 
   /* Operators */
-<*>\+ { return PythonParser::token::PLUS; }
-<*>\- { return PythonParser::token::MINUS; }
-<*>\* { return PythonParser::token::STAR; }
-<*>\/ { return PythonParser::token::SLASH; }
-<*>\( { return PythonParser::token::LPAREN; }
-<*>\) { return PythonParser::token::RPAREN; }
-<*>\{ { return PythonParser::token::LBRACE; }
-<*>\} { return PythonParser::token::RBRACE; }
-<*>\[ { return PythonParser::token::LBRACKET; }
-<*>\] { return PythonParser::token::RBRACKET; }
-<*>\= { return PythonParser::token::EQUAL; }
-<*>\, { return PythonParser::token::COMMA; }
-<*>\. { return PythonParser::token::DOT; }
-<*>\! { return PythonParser::token::BANG; }
-<*>\!\= { return PythonParser::token::BANG_EQUAL; }
-<*>\=\= { return PythonParser::token::EQUAL_EQUAL; }
-<*>\> { return PythonParser::token::GREATER; }
-<*>\>\= { return PythonParser::token::GREATER_EQUAL; }
-<*>\< { return PythonParser::token::LESS; }
-<*>\<\= { return PythonParser::token::LESS_EQUAL; }
-<*>\; { return PythonParser::token::SEMICOLON; }
-<*>\: { return PythonParser::token::COLON; }
+<*>\+ { return JSParser::token::PLUS; }
+<*>\- { return JSParser::token::MINUS; }
+<*>\* { return JSParser::token::STAR; }
+<*>\/ { return JSParser::token::SLASH; }
+<*>\( { return JSParser::token::LPAREN; }
+<*>\) { return JSParser::token::RPAREN; }
+<*>\{ { return JSParser::token::LBRACE; }
+<*>\} { return JSParser::token::RBRACE; }
+<*>\[ { return JSParser::token::LBRACKET; }
+<*>\] { return JSParser::token::RBRACKET; }
+<*>\= { return JSParser::token::EQUAL; }
+<*>\, { return JSParser::token::COMMA; }
+<*>\. { return JSParser::token::DOT; }
+<*>\! { return JSParser::token::BANG; }
+<*>\!\= { return JSParser::token::BANG_EQUAL; }
+<*>\=\= { return JSParser::token::EQUAL_EQUAL; }
+<*>\> { return JSParser::token::GREATER; }
+<*>\>\= { return JSParser::token::GREATER_EQUAL; }
+<*>\< { return JSParser::token::LESS; }
+<*>\<\= { return JSParser::token::LESS_EQUAL; }
+<*>\; { return JSParser::token::SEMICOLON; }
+<*>\: { return JSParser::token::COLON; }
 
-  /* Identation and Blocks */
-<*>[ \t]*\n { 
-  BEGIN(INDENT_MODE); 
-  return PythonParser::token::NEWLINE; 
-}
-<INDENT_MODE>[ \t]+ {
-  indentStack.push(yyleng);
-  return PythonParser::token::INDENT;
-}
-<INDENT_MODE>[^ \t\n] {
-  while (!indentStack.empty() && indentStack.top() >= yyleng) {
-    indentStack.pop();
-    return PythonParser::token::DEDENT;
-  }
-  BEGIN(INITIAL);
-  yyless(0); // Put back the non-whitespace character
-}
-
-<*>[ \t]+ { /* Ignore whitespace */ }
+<*>[ \t\r\n]+ { /* Ignore whitespace */ }
 <*>. { /* Ignore any other characters */ }
 
 %%

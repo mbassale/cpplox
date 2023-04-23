@@ -4,12 +4,11 @@
 #include "parser.h"
 #include "scanner.h"
 
-using Parser::PythonParser;
+using Parser::JSParser;
 
-extern PythonParser::value_type yylval;
+extern JSParser::value_type yylval;
 
-int yylex(PythonParser::value_type* value, ASTBuilder& builder,
-          PythonLexer& lexer) {
+int yylex(JSParser::value_type* value, ASTBuilder& builder, JSLexer& lexer) {
   int yyToken = lexer.yylex();
   const auto& token = yylval.as<Token>();
   LOG(INFO) << "YYTOKEN: " << yyToken << " TOKEN: " << (int)token.type << " "

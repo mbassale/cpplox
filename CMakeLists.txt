@@ -41,7 +41,7 @@ configure_file(config.h.in ${PROJECT_SOURCE_DIR}/src/config.h)
 
 # Bison
 BISON_TARGET(
-  PythonLikeParser 
+  JSParser 
   ${PROJECT_SOURCE_DIR}/src/parser.yy 
   ${PROJECT_SOURCE_DIR}/src/parser.cpp
   DEFINES_FILE ${PROJECT_SOURCE_DIR}/src/parser.h)
@@ -49,7 +49,7 @@ BISON_TARGET(
 # Flex
 set(LEXER_INPUT_FILE ${PROJECT_SOURCE_DIR}/src/lexer.l)
 FLEX_TARGET(
-  PythonLikeLexer 
+  JSLexer 
   ${LEXER_INPUT_FILE} 
   ${PROJECT_SOURCE_DIR}/src/lexer.cpp)
 
@@ -79,8 +79,8 @@ set(SOURCES
   src/settings.cpp
   src/lexer.h
   src/lexer_impl.cpp
-  ${BISON_PythonLikeParser_OUTPUTS}
-  ${FLEX_PythonLikeLexer_OUTPUTS}
+  ${BISON_JSParser_OUTPUTS}
+  ${FLEX_JSLexer_OUTPUTS}
 )
 add_library(libcpplox STATIC ${SOURCES})
 
