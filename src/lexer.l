@@ -40,6 +40,7 @@ std::string currentString;
 <*>false    { return JSParser::token::FALSE; }
 <*>null     { return JSParser::token::NIL; }
 <*>print    { return JSParser::token::PRINT; }
+<*>return   { return JSParser::token::RETURN; }
 
   /* Integer */
 <*>[0-9]+ { 

@@ -78,6 +78,10 @@ PrintStatementPtr ASTBuilderImpl::emitPrintStatement(ExpressionPtr expr) {
   return PrintStatement::make(expr);
 }
 
+ReturnStatementPtr ASTBuilderImpl::emitReturnStatement(ExpressionPtr expr) {
+  return ReturnStatement::make(expr);
+}
+
 BlockPtr ASTBuilderImpl::emitBlock(
     const std::vector<cpplox::ast::StatementPtr> &statements) {
   return Block::make(statements);
