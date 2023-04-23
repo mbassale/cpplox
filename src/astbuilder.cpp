@@ -45,6 +45,11 @@ AssignmentPtr ASTBuilderImpl::emitAssignmentExpression(
   return Assignment::make(identifier->identifier, value);
 }
 
+CallExprPtr ASTBuilderImpl::emitCallExpression(
+    ExpressionPtr callee, const std::vector<ExpressionPtr> &arguments) {
+  return CallExpr::make(callee, arguments);
+}
+
 BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
                                            cpplox::ast::ExpressionPtr lhs,
                                            cpplox::ast::ExpressionPtr rhs) {

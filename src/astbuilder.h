@@ -25,6 +25,9 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::AssignmentPtr emitAssignmentExpression(
       cpplox::ast::VariableExprPtr identifier,
       cpplox::ast::ExpressionPtr value) override;
+  cpplox::ast::CallExprPtr emitCallExpression(
+      cpplox::ast::ExpressionPtr callee,
+      const std::vector<cpplox::ast::ExpressionPtr> &arguments) override;
   cpplox::ast::BinaryExprPtr emitBinaryOp(
       TokenType op, cpplox::ast::ExpressionPtr lhs,
       cpplox::ast::ExpressionPtr rhs) override;

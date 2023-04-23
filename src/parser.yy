@@ -40,6 +40,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::NilLiteralPtr emitNilLiteral() = 0;
         virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
         virtual cpplox::ast::AssignmentPtr emitAssignmentExpression(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr value) = 0;
+        virtual cpplox::ast::CallExprPtr emitCallExpression(cpplox::ast::ExpressionPtr callee, const std::vector<cpplox::ast::ExpressionPtr> &arguments) = 0;
         virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::StatementPtr emitEmptyStatement() = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody = nullptr) = 0;
@@ -99,6 +100,8 @@ using namespace cpplox::ast;
 %type<cpplox::ast::ProgramPtr> program
 %type<cpplox::ast::VariableExprPtr> varExpr
 %type<cpplox::ast::AssignmentPtr> assignment_expr
+%type<cpplox::ast::CallExprPtr> call_expr
+%type<std::vector<cpplox::ast::ExpressionPtr>> call_arguments
 %type<cpplox::ast::ExpressionPtr> expr
 %type<cpplox::ast::BlockPtr> suite
 %type<cpplox::ast::StatementPtr> statement
@@ -114,7 +117,7 @@ using namespace cpplox::ast;
 %type<cpplox::ast::ExpressionStatementPtr> for_increment
 %type<cpplox::ast::ExpressionStatementPtr> expr_statement
 %type<cpplox::ast::FunctionDeclarationPtr> def_statement
-%type<std::vector<cpplox::ast::VariableExprPtr>> arguments
+%type<std::vector<cpplox::ast::VariableExprPtr>> function_parameters
 %type<cpplox::ast::PrintStatementPtr> print_statement
 %type<cpplox::ast::ReturnStatementPtr> return_statement
 %type<cpplox::ast::BreakStatementPtr> break_statement
@@ -191,9 +194,16 @@ for_increment
     | /* empty */ { $$ = builder.emitExpressionStatement(builder.emitNilLiteral()); }
 
 def_statement
-    : DEF varExpr LPAREN arguments RPAREN suite
+    : DEF varExpr LPAREN function_parameters RPAREN suite
       { $$ = builder.emitDefStatement($2, $4, $6); }
     ;
+
+function_parameters
+    : /* empty */ { $$ = std::vector<cpplox::ast::VariableExprPtr>(); }
+    | function_parameters varExpr COMMA
+      { $1.push_back($2); $$ = $1; }
+    | function_parameters varExpr
+      { $1.push_back($2); $$ = $1; }
 
 print_statement
     : PRINT LPAREN expr RPAREN SEMICOLON
@@ -215,13 +225,6 @@ var_declaration
     : VAR varExpr EQUAL expr SEMICOLON { $$ = builder.emitVarDeclaration($2, $4); }
     | VAR varExpr SEMICOLON { $$ = builder.emitVarDeclaration($2); }
 
-arguments
-    : /* empty */ { $$ = std::vector<cpplox::ast::VariableExprPtr>(); }
-    | arguments varExpr COMMA
-      { $1.push_back($2); $$ = $1; }
-    | arguments varExpr
-      { $1.push_back($2); $$ = $1; }
-
 varExpr
     : IDENTIFIER { $$ = builder.emitVarExpression($1); }
     ;
@@ -229,8 +232,19 @@ varExpr
 assignment_expr 
     : varExpr EQUAL expr { $$ = builder.emitAssignmentExpression($1, $3); }
 
+call_expr
+    : expr LPAREN call_arguments RPAREN { $$ = builder.emitCallExpression($1, $3); }
+
+call_arguments
+    : /* empty */ { $$ = std::vector<cpplox::ast::ExpressionPtr>(); }
+    | call_arguments expr COMMA
+      { $1.push_back($2); $$ = $1; }
+    | call_arguments expr
+      { $1.push_back($2); $$ = $1; }
+
 expr
     : assignment_expr { $$ = $1; }
+    | call_expr { $$ = $1; }
     | LPAREN expr RPAREN { $$ = $2; }
     | expr PLUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_PLUS, $1, $3); }
     | expr MINUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_MINUS, $1, $3); }
