@@ -39,6 +39,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::BooleanLiteralPtr emitBooleanLiteral(bool value) = 0;
         virtual cpplox::ast::NilLiteralPtr emitNilLiteral() = 0;
         virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
+        virtual cpplox::ast::AssignmentPtr emitAssignmentExpression(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr value) = 0;
         virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
         virtual cpplox::ast::StatementPtr emitEmptyStatement() = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody = nullptr) = 0;
@@ -93,6 +94,7 @@ using namespace cpplox::ast;
 
 %type<cpplox::ast::ProgramPtr> program
 %type<cpplox::ast::VariableExprPtr> varExpr
+%type<cpplox::ast::AssignmentPtr> assignment_expr
 %type<cpplox::ast::ExpressionPtr> expr
 %type<cpplox::ast::BlockPtr> suite
 %type<cpplox::ast::StatementPtr> statement
@@ -213,8 +215,12 @@ varExpr
     : IDENTIFIER { $$ = builder.emitVarExpression($1); }
     ;
 
+assignment_expr 
+    : varExpr EQUAL expr { $$ = builder.emitAssignmentExpression($1, $3); }
+
 expr
-    : LPAREN expr RPAREN { $$ = $2; }
+    : assignment_expr { $$ = $1; }
+    | LPAREN expr RPAREN { $$ = $2; }
     | expr PLUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_PLUS, $1, $3); }
     | expr MINUS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_MINUS, $1, $3); }
     | expr STAR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_STAR, $1, $3); }

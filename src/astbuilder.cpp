@@ -40,6 +40,11 @@ VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
   return VariableExpr::make(value.lexeme());
 }
 
+AssignmentPtr ASTBuilderImpl::emitAssignmentExpression(
+    VariableExprPtr identifier, ExpressionPtr value) {
+  return Assignment::make(identifier->identifier, value);
+}
+
 BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
                                            cpplox::ast::ExpressionPtr lhs,
                                            cpplox::ast::ExpressionPtr rhs) {

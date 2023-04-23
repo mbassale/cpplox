@@ -404,19 +404,21 @@ TEST_F(ParserTest, ForStatementAssertions) {
                       ast::ExpressionStatement::make(
                           ast::BooleanLiteral::makeFalse())}))})),
       ParserTestData(
-          "ForStatementSimple", "for(var i = 0; i < 10; true) { i; }",
-          ast::Program::make(
-              std::vector<ast::StatementPtr>{ast::ForStatement::make(
-                  ast::VarDeclaration::make(
-                      Token(TokenType::TOKEN_IDENTIFIER, "i"),
-                      ast::IntegerLiteral::make(0)),
-                  ast::BinaryExpr::make(ast::VariableExpr::make("i"),
-                                        Token::make(TokenType::TOKEN_LESS),
-                                        ast::IntegerLiteral::make(10)),
-                  ast::BooleanLiteral::makeTrue(),
-                  ast::Block::make(std::vector<ast::StatementPtr>{
-                      ast::ExpressionStatement::make(
-                          ast::VariableExpr::make("i"))}))}))};
+          "ForStatementSimple", "for(var i = 0; i < 10; i = i + 1) { i; }",
+          ast::Program::make(std::vector<
+                             ast::StatementPtr>{ast::ForStatement::make(
+              ast::VarDeclaration::make(Token(TokenType::TOKEN_IDENTIFIER, "i"),
+                                        ast::IntegerLiteral::make(0)),
+              ast::BinaryExpr::make(ast::VariableExpr::make("i"),
+                                    Token::make(TokenType::TOKEN_LESS),
+                                    ast::IntegerLiteral::make(10)),
+              ast::Assignment::make(
+                  "i", ast::BinaryExpr::make(ast::VariableExpr::make("i"),
+                                             Token::make(TokenType::TOKEN_PLUS),
+                                             ast::IntegerLiteral::make(1))),
+              ast::Block::make(
+                  std::vector<ast::StatementPtr>{ast::ExpressionStatement::make(
+                      ast::VariableExpr::make("i"))}))}))};
 
   assertTestCases(testCases);
 }
