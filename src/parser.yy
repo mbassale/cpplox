@@ -62,6 +62,8 @@ using namespace cpplox::ast;
 %token ELSE "else"
 %token WHILE "while"
 %token FOR "for"
+%token AND "and"
+%token OR "or"
 %token DEF "def"
 %token VAR "var"
 %token NIL "null"
@@ -117,6 +119,7 @@ using namespace cpplox::ast;
 %left PLUS MINUS
 %left STAR SLASH
 %left BANG_EQUAL EQUAL_EQUAL GREATER GREATER_EQUAL LESS LESS_EQUAL
+%left AND OR
 
 %start program
 
@@ -231,6 +234,8 @@ expr
     | expr GREATER_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_GREATER_EQUAL, $1, $3); }
     | expr LESS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS, $1, $3); }
     | expr LESS_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS_EQUAL, $1, $3); }
+    | expr AND expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_AND, $1, $3); }
+    | expr OR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_OR, $1, $3); }
     | INTEGER { $$ = builder.emitIntegerLiteral($1); }
     | STRING_LITERAL { $$ = builder.emitStringLiteral($1); }
     | NIL { $$ = builder.emitNilLiteral(); }
