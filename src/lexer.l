@@ -32,6 +32,7 @@ std::string currentString;
 
   /* Keywords */
 <*>while    { return JSParser::token::WHILE; }
+<*>for      { return JSParser::token::FOR; }
 <*>if       { return JSParser::token::IF; }
 <*>else     { return JSParser::token::ELSE; }
 <*>def      { return JSParser::token::DEF; }

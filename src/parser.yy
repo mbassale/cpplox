@@ -43,6 +43,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::StatementPtr emitEmptyStatement() = 0;
         virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody = nullptr) = 0;
         virtual cpplox::ast::WhileStatementPtr emitWhileStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
+        virtual cpplox::ast::ForStatementPtr emitForStatement(cpplox::ast::StatementPtr initialization, cpplox::ast::ExpressionStatementPtr condition, cpplox::ast::ExpressionStatementPtr increment, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(cpplox::ast::VariableExprPtr name, const std::vector<cpplox::ast::VariableExprPtr>& arguments, cpplox::ast::BlockPtr body) = 0;
         virtual cpplox::ast::PrintStatementPtr emitPrintStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::ReturnStatementPtr emitReturnStatement(cpplox::ast::ExpressionPtr expr = nullptr) = 0;
@@ -59,6 +60,7 @@ using namespace cpplox::ast;
 %token IF "if"
 %token ELSE "else"
 %token WHILE "while"
+%token FOR "for"
 %token DEF "def"
 %token VAR "var"
 %token NIL "null"
@@ -94,12 +96,17 @@ using namespace cpplox::ast;
 %type<cpplox::ast::ExpressionPtr> expr
 %type<cpplox::ast::BlockPtr> suite
 %type<cpplox::ast::StatementPtr> statement
-%type<cpplox::ast::ExpressionStatementPtr> simple_statement
+%type<cpplox::ast::StatementPtr> simple_statement
 %type<std::vector<cpplox::ast::StatementPtr>> statements
 %type<cpplox::ast::StatementPtr> compound_statement
 %type<cpplox::ast::VarDeclarationPtr> var_declaration
 %type<cpplox::ast::IfStatementPtr> if_statement
 %type<cpplox::ast::WhileStatementPtr> while_statement
+%type<cpplox::ast::ForStatementPtr> for_statement
+%type<cpplox::ast::StatementPtr> for_initialization
+%type<cpplox::ast::ExpressionStatementPtr> for_condition
+%type<cpplox::ast::ExpressionStatementPtr> for_increment
+%type<cpplox::ast::ExpressionStatementPtr> expr_statement
 %type<cpplox::ast::FunctionDeclarationPtr> def_statement
 %type<std::vector<cpplox::ast::VariableExprPtr>> arguments
 %type<cpplox::ast::PrintStatementPtr> print_statement
@@ -126,10 +133,14 @@ statements
 statement
     : compound_statement
     | simple_statement { $$ = $1; }
-    | SEMICOLON { $$ = builder.emitEmptyStatement(); }
     ;
 
 simple_statement
+    : expr_statement { $$ = $1; }
+    | SEMICOLON { $$ = builder.emitEmptyStatement(); }
+    ;
+
+expr_statement
     : expr SEMICOLON { $$ = builder.emitExpressionStatement($1); }
     ;
 
@@ -137,6 +148,7 @@ compound_statement
     : var_declaration { $$ = $1; }
     | if_statement { $$ = $1; }
     | while_statement { $$ = $1; }
+    | for_statement { $$ = $1; }
     | def_statement { $$ = $1; }
     | print_statement { $$ = $1; }
     | return_statement { $$ = $1; }
@@ -152,6 +164,22 @@ while_statement
     : WHILE LPAREN expr RPAREN suite
       { $$ = builder.emitWhileStatement($3, $5); }
     ;
+
+for_statement
+    : FOR LPAREN for_initialization for_condition for_increment RPAREN suite
+      { $$ = builder.emitForStatement($3, $4, $5, $7); }
+
+for_initialization
+    : var_declaration { $$ = $1; }
+    | simple_statement { $$ = $1; }
+
+for_condition
+    : expr SEMICOLON { $$ = builder.emitExpressionStatement($1); }
+    | SEMICOLON { $$ = builder.emitExpressionStatement(builder.emitBooleanLiteral(true)); }
+
+for_increment
+    : expr { $$ = builder.emitExpressionStatement($1); }
+    | /* empty */ { $$ = builder.emitExpressionStatement(builder.emitNilLiteral()); }
 
 def_statement
     : DEF varExpr LPAREN arguments RPAREN suite

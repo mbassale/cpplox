@@ -62,6 +62,27 @@ WhileStatementPtr ASTBuilderImpl::emitWhileStatement(
   return WhileStatement::make(condition, body);
 }
 
+ForStatementPtr ASTBuilderImpl::emitForStatement(
+    cpplox::ast::StatementPtr initialization,
+    cpplox::ast::ExpressionStatementPtr condition,
+    cpplox::ast::ExpressionStatementPtr increment, cpplox::ast::BlockPtr body) {
+  ExpressionPtr conditionExpr;
+  if (condition != nullptr) {
+    conditionExpr = condition->expression;
+  }
+  if (conditionExpr == nullptr) {
+    conditionExpr = BooleanLiteral::makeTrue();
+  }
+  ExpressionPtr incrementExpr;
+  if (increment != nullptr) {
+    incrementExpr = increment->expression;
+  }
+  if (incrementExpr == nullptr) {
+    incrementExpr = NilLiteral::make();
+  }
+  return ForStatement::make(initialization, conditionExpr, incrementExpr, body);
+}
+
 FunctionDeclarationPtr ASTBuilderImpl::emitDefStatement(
     cpplox::ast::VariableExprPtr name,
     const std::vector<cpplox::ast::VariableExprPtr> &arguments,

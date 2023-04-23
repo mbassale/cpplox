@@ -32,6 +32,11 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::WhileStatementPtr emitWhileStatement(
       cpplox::ast::ExpressionPtr condition,
       cpplox::ast::BlockPtr body) override;
+  cpplox::ast::ForStatementPtr emitForStatement(
+      cpplox::ast::StatementPtr initialization,
+      cpplox::ast::ExpressionStatementPtr condition,
+      cpplox::ast::ExpressionStatementPtr increment,
+      cpplox::ast::BlockPtr body) override;
   cpplox::ast::FunctionDeclarationPtr emitDefStatement(
       cpplox::ast::VariableExprPtr name,
       const std::vector<cpplox::ast::VariableExprPtr> &arguments,
