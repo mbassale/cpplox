@@ -39,10 +39,10 @@ TEST_F(EvaluatorTest, TestLiterals) {
     string expectedValue;
   };
   vector<TestCase> testCases = {
-      TestCase{"true;", "true"},   TestCase{"false;", "false"},
-      TestCase{"nil;", "nil"},     TestCase{"1;", "1"},
-      TestCase{"10000;", "10000"}, TestCase{"\"test\";", "test"},
-      TestCase{"\"\";", ""},       TestCase{";", "nil"}};
+      TestCase{"true;", "true"},     TestCase{"false;", "false"},
+      TestCase{"nil;", "nil"},       TestCase{"1;", "1"},
+      TestCase{"10000;", "10000"},   TestCase{";", "nil"},
+      TestCase{"\"test\";", "test"}, TestCase{"\"\";", ""}};
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
@@ -54,8 +54,9 @@ TEST_F(EvaluatorTest, TestLiterals) {
     ASSERT_NE(program, nullptr);
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
-    ASSERT_NE(value, nullptr);
-    EXPECT_EQ(testCase.expectedValue, value->toString());
+    ASSERT_NE(value, nullptr) << "TestCase: " << testCase.source;
+    EXPECT_EQ(testCase.expectedValue, value->toString())
+        << "TestCase: " << testCase.source;
   }
 }
 
@@ -78,13 +79,16 @@ TEST_F(EvaluatorTest, TestUnaryExpression) {
     Evaluator evaluator;
     const auto value = evaluator.eval(program);
     if (testCase.expectedIntValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER);
+      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER)
+          << "TestCase: " << testCase.source;
       auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedIntValue);
+      EXPECT_EQ(intValue->Value, *testCase.expectedIntValue)
+          << "TestCase: " << testCase.source;
     } else if (testCase.expectedBoolValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN);
+      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN) << testCase.source;
       auto boolValue = std::static_pointer_cast<BooleanObject>(value);
-      EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue);
+      EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue)
+          << "TestCase: " << testCase.source;
     }
   }
 }
@@ -171,14 +175,17 @@ TEST_F(EvaluatorTest, TestVarDeclarationStmts) {
       auto it = testCase.expectedValues.begin();
       while (it != testCase.expectedValues.end()) {
         auto actualValue = evaluator.getGlobalValue(it->first);
-        ASSERT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER);
+        ASSERT_EQ(actualValue->Type, ObjectType::OBJ_INTEGER)
+            << "TestCase: " << testCase.source;
         auto actualIntValue =
             std::static_pointer_cast<IntegerObject>(actualValue);
-        EXPECT_EQ(actualIntValue->Value, it->second);
+        EXPECT_EQ(actualIntValue->Value, it->second)
+            << "TestCase: " << testCase.source;
         it++;
       }
     } else {
-      EXPECT_EQ(value->Type, ObjectType::OBJ_NULL);
+      EXPECT_EQ(value->Type, ObjectType::OBJ_NULL)
+          << "TestCase: " << testCase.source;
     }
   }
 }
@@ -217,7 +224,8 @@ TEST_F(EvaluatorTest, TestAssignmentExpressions) {
         }
       }
     } else {
-      EXPECT_EQ(value->Type, ObjectType::OBJ_NULL);
+      EXPECT_EQ(value->Type, ObjectType::OBJ_NULL)
+          << "TestCase: " << testCase.source;
     }
   }
 }
