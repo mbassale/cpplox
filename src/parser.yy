@@ -133,6 +133,7 @@ using namespace cpplox::ast;
 %left STAR SLASH
 %left BANG_EQUAL EQUAL_EQUAL GREATER GREATER_EQUAL LESS LESS_EQUAL
 %left AND OR
+%nonassoc UMINUS
 
 %start program
 
@@ -264,10 +265,10 @@ array_subscript
 
 unary_expr
     : BANG expr { $$ = builder.emitUnaryOp(TokenType::TOKEN_BANG, $2); }
-    | MINUS expr { $$ = builder.emitUnaryOp(TokenType::TOKEN_MINUS, $2); }
+    | MINUS expr %prec UMINUS { $$ = builder.emitUnaryOp(TokenType::TOKEN_MINUS, $2); }
 
 expr
-    : unary_expr { $$ = $1; }
+    : unary_expr { $$ = $1; } 
     | assignment_expr { $$ = $1; }
     | call_expr { $$ = $1; }
     | array_subscript { $$ = $1; }
@@ -283,14 +284,14 @@ expr
     | expr GREATER_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_GREATER_EQUAL, $1, $3); }
     | expr LESS expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS, $1, $3); }
     | expr LESS_EQUAL expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_LESS_EQUAL, $1, $3); }
-    | expr AND expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_AND, $1, $3); }
-    | expr OR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_OR, $1, $3); }
     | INTEGER { $$ = builder.emitIntegerLiteral($1); }
     | STRING_LITERAL { $$ = builder.emitStringLiteral($1); }
     | NIL { $$ = builder.emitNilLiteral(); }
     | TRUE { $$ = builder.emitBooleanLiteral(true); }
     | FALSE { $$ = builder.emitBooleanLiteral(false); }
     | varExpr { $$ = $1; }
+    | expr AND expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_AND, $1, $3); }
+    | expr OR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_OR, $1, $3); }
     ;
 
 suite

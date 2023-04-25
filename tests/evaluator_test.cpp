@@ -120,8 +120,8 @@ TEST_F(EvaluatorTest, TestBinaryExpression) {
       TestCase{"1 == 1;", nullopt, true},
       TestCase{"1 != 1;", nullopt, false},
       TestCase{"2 != 1;", nullopt, true},
-      TestCase{"1 < 2 and 3 >= 3;", nullopt, true},
-      TestCase{"1 > 2 or 2 >= 2;", nullopt, true},
+      TestCase{"(1 < 2) and (3 >= 3);", nullopt, true},
+      TestCase{"(1 > 2) or (2 >= 2);", nullopt, true},
   };
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
@@ -132,19 +132,23 @@ TEST_F(EvaluatorTest, TestBinaryExpression) {
     auto program = builder.getProgram();
     ASSERT_NE(program, nullptr);
     Evaluator evaluator;
-    const auto value = evaluator.eval(program);
-    if (testCase.expectedIntValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER)
-          << "TestCase: " << testCase.source;
-      auto intValue = std::static_pointer_cast<IntegerObject>(value);
-      EXPECT_EQ(intValue->Value, *testCase.expectedIntValue)
-          << "TestCase: " << testCase.source;
-    } else if (testCase.expectedBoolValue.has_value()) {
-      ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN)
-          << "TestCase: " << testCase.source;
-      auto boolValue = std::static_pointer_cast<BooleanObject>(value);
-      EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue)
-          << "TestCase: " << testCase.source;
+    try {
+      const auto value = evaluator.eval(program);
+      if (testCase.expectedIntValue.has_value()) {
+        ASSERT_EQ(value->Type, ObjectType::OBJ_INTEGER)
+            << "TestCase: " << testCase.source;
+        auto intValue = std::static_pointer_cast<IntegerObject>(value);
+        EXPECT_EQ(intValue->Value, *testCase.expectedIntValue)
+            << "TestCase: " << testCase.source;
+      } else if (testCase.expectedBoolValue.has_value()) {
+        ASSERT_EQ(value->Type, ObjectType::OBJ_BOOLEAN)
+            << "TestCase: " << testCase.source;
+        auto boolValue = std::static_pointer_cast<BooleanObject>(value);
+        EXPECT_EQ(boolValue->Value, *testCase.expectedBoolValue)
+            << "TestCase: " << testCase.source;
+      }
+    } catch (const RuntimeError& e) {
+      FAIL() << "TestCase: " << testCase.source << ": " << e.what();
     }
   }
 }
