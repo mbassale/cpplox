@@ -22,6 +22,8 @@ std::string currentString;
 
 %%
 
+<*>\/\/[^\n]*\n { /* Ignore single line comments */ }
+
   /* String Literal */
 <STRING>\" { BEGIN(INITIAL); 
   yylval.emplace<Token>(Token(TokenType::TOKEN_STRING, currentString));
