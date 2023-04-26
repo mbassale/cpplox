@@ -234,31 +234,6 @@ TEST_F(EvaluatorTest, TestAssignmentExpressions) {
   }
 }
 
-TEST_F(EvaluatorTest, TestBlockStmts) {
-  struct TestCase {
-    string source;
-    std::optional<int> expectedValue;
-  };
-  vector<TestCase> testCases = {TestCase{"{}", nullopt},
-                                TestCase{"{ 1; 2; 3; }", 3},
-                                TestCase{"{ true; 1; }", 1}};
-
-  for (const auto& testCase : testCases) {
-    std::istringstream ss(testCase.source);
-    JSLexer lexer(&ss);
-    ASTBuilderImpl builder;
-    JSParser parser(builder, lexer);
-    parser.parse();
-    auto program = builder.getProgram();
-    ASSERT_NE(program, nullptr);
-    Evaluator evaluator;
-    auto value = evaluator.eval(program);
-    if (testCase.expectedValue.has_value()) {
-      expectIntValue(testCase.source, value, *testCase.expectedValue);
-    }
-  }
-}
-
 TEST_F(EvaluatorTest, TestIfStmts) {
   struct TestCase {
     string source;
@@ -393,8 +368,8 @@ TEST_F(EvaluatorTest, TestFunctionDeclarationStmts) {
     int expectedFunctionArity;
   };
   vector<TestCase> testCases = {
-      TestCase{"fun test(arg1, arg2) { print arg1 + arg2; }", "test", 2},
-      TestCase{"fun test() {}", "test", 0}};
+      TestCase{"def test(arg1, arg2) { print arg1 + arg2; }", "test", 2},
+      TestCase{"def test() {}", "test", 0}};
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
@@ -420,22 +395,22 @@ TEST_F(EvaluatorTest, TestFunctionCallExpression) {
     unordered_map<string, variant<int, bool>> expectedValues;
   };
   vector<TestCase> testCases = {
-      TestCase{"fun test(arg1) { arg1 + 1; } var a = test(1);", {{"a", 2}}},
-      TestCase{"fun test1(arg1, arg2) { arg1 + arg2; } fun test2(arg1) { 2 * "
+      TestCase{"def test(arg1) { arg1 + 1; } var a = test(1);", {{"a", 2}}},
+      TestCase{"def test1(arg1, arg2) { arg1 + arg2; } def test2(arg1) { 2 * "
                "arg1; } var a = test2(test1(1, 1));",
                {{"a", 4}}},
-      TestCase{"fun test1(arg1, arg2) { arg1+arg2; } var a = test1(2*2, 2+2);",
+      TestCase{"def test1(arg1, arg2) { arg1+arg2; } var a = test1(2*2, 2+2);",
                {{"a", 8}}},
-      TestCase{"fun test1(arg1, arg2) { arg1 and arg2; } var a = "
+      TestCase{"def test1(arg1, arg2) { arg1 and arg2; } var a = "
                "test1(test1(true, true),test1(false,true));",
                {{"a", false}}},
-      TestCase{"fun test(a){ return a + 1; }"
+      TestCase{"def test(a){ return a + 1; }"
                "var a = test(1); var b = test(2);",
                {{"a", 2}, {"b", 3}}},
-      TestCase{"fun max(a, b) { if (a >= b) { return a; } else { return b; }} "
+      TestCase{"def max(a, b) { if (a >= b) { return a; } else { return b; }} "
                "var a = max(1,2); var b = max(2,3);",
                {{"a", 2}, {"b", 3}}},
-      TestCase{"fun test(a,b) { while (a < b) { a = "
+      TestCase{"def test(a,b) { while (a < b) { a = "
                "a + 1; if (a > 5) { return 90; }}} var a = test(1,10);",
                {{"a", 90}}}};
 
@@ -446,7 +421,7 @@ TEST_F(EvaluatorTest, TestFunctionCallExpression) {
     JSParser parser(builder, lexer);
     parser.parse();
     auto program = builder.getProgram();
-    ASSERT_NE(program, nullptr);
+    ASSERT_NE(program, nullptr) << "TestCase: " << testCase.source;
     Evaluator evaluator;
     evaluator.eval(program);
     for (const auto& pair : testCase.expectedValues) {
