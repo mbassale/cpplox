@@ -43,6 +43,8 @@ class Evaluator {
   ObjectPtr evalReturnStatement(EnvironmentPtr ctx,
                                 ast::ReturnStatementPtr stmt);
   ObjectPtr evalBreakStatement(EnvironmentPtr ctx, ast::BreakStatementPtr stmt);
+  ObjectPtr evalContinueStatement(EnvironmentPtr ctx,
+                                  ast::ContinueStatementPtr stmt);
   ObjectPtr evalBlockStatement(EnvironmentPtr ctx, ast::BlockPtr stmt);
 
   ObjectPtr evalExpression(EnvironmentPtr ctx, ast::ExpressionPtr expr);

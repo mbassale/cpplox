@@ -14,6 +14,10 @@ static bool isBreakObject(ObjectPtr value) {
   return value->Type == ObjectType::OBJ_BREAK;
 }
 
+static bool isContinueObject(ObjectPtr value) {
+  return value->Type == ObjectType::OBJ_CONTINUE;
+}
+
 }  // namespace
 
 namespace cpplox {
@@ -41,7 +45,7 @@ ObjectPtr Evaluator::eval(ProgramPtr program) {
     lastValue = evalStatement(globalCtx, stmt);
     if (isReturnObject(lastValue)) {
       return lastValue;
-    } else if (isBreakObject(lastValue)) {
+    } else if (isBreakObject(lastValue) || isContinueObject(lastValue)) {
       std::ostringstream ss;
       ss << "Invalid statement: " << lastValue->toString();
       throw RuntimeError::make(__FILE__, __LINE__, ss.str());
@@ -92,6 +96,10 @@ ObjectPtr Evaluator::evalStatement(EnvironmentPtr ctx, StatementPtr stmt) {
       auto breakStmt = std::static_pointer_cast<BreakStatement>(stmt);
       return evalBreakStatement(ctx, breakStmt);
     }
+    case NodeType::CONTINUE_STATEMENT: {
+      auto continueStmt = std::static_pointer_cast<ContinueStatement>(stmt);
+      return evalContinueStatement(ctx, continueStmt);
+    }
     case NodeType::EMPTY_STATEMENT:
     default:
       return NULL_OBJECT_PTR;
@@ -125,7 +133,8 @@ ObjectPtr Evaluator::evalBlockStatement(EnvironmentPtr ctx,
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : stmt->statements) {
     lastValue = evalStatement(localCtx, stmt);
-    if (isReturnObject(lastValue) || isBreakObject(lastValue)) {
+    if (isReturnObject(lastValue) || isBreakObject(lastValue) ||
+        isContinueObject(lastValue)) {
       return lastValue;
     }
   }
@@ -196,6 +205,11 @@ ObjectPtr Evaluator::evalReturnStatement(EnvironmentPtr ctx,
 ObjectPtr Evaluator::evalBreakStatement(EnvironmentPtr ctx,
                                         BreakStatementPtr stmt) {
   return BreakObject::make();
+}
+
+ObjectPtr Evaluator::evalContinueStatement(EnvironmentPtr ctx,
+                                           ContinueStatementPtr stmt) {
+  return ContinueObject::make();
 }
 
 ObjectPtr Evaluator::evalExpression(EnvironmentPtr ctx, ExpressionPtr expr) {
@@ -288,7 +302,7 @@ ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx,
     auto returnValue = std::dynamic_pointer_cast<ReturnObject>(lastValue);
     assert(returnValue != nullptr);
     return returnValue->Value;
-  } else if (isBreakObject(lastValue)) {
+  } else if (isBreakObject(lastValue) || isContinueObject(lastValue)) {
     std::ostringstream ss;
     ss << "Invalid statement: " << value->toString();
     throw RuntimeError::make(__FILE__, __LINE__, ss.str());
@@ -379,7 +393,7 @@ ObjectPtr Evaluator::evalBinaryExpression(EnvironmentPtr ctx,
     case TokenType::TOKEN_GREATER:
     case TokenType::TOKEN_GREATER_EQUAL: {
       auto result = evalComparisonOperator(ctx, leftValue, expr->operator_.type,
-                                    rightValue);
+                                           rightValue);
       return result;
     }
     default:

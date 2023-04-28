@@ -469,6 +469,43 @@ TEST_F(EvaluatorTest, TestBreakStatement) {
   }
 }
 
+TEST_F(EvaluatorTest, TestContinueStatement) {
+  struct TestCase {
+    string name;
+    string source;
+    unordered_map<string, variant<int, bool>> expectedValues;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"ContinueForLoop",
+               "var a; var b; for (a = 1; a < 10; a = a + 1) { if (a == 5) { b "
+               "= 1; a = 20; continue; }}",
+               {{"a", 21}, {"b", 1}}},
+      TestCase{"ContinueWhileLoop",
+               "var a = 1; var b = 0;while (a < 10) { if (a == 5) {b = 1; a = "
+               "20;continue;}a = a + 1;}",
+               {{"a", 20}, {"b", 1}}}};
+
+  for (const auto& testCase : testCases) {
+    std::istringstream ss(testCase.source);
+    JSLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    JSParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr) << "TestCase: " << testCase.name;
+    Evaluator evaluator;
+    evaluator.eval(program);
+    for (const auto& pair : testCase.expectedValues) {
+      auto value = evaluator.getGlobalValue(pair.first);
+      if (std::holds_alternative<int>(pair.second)) {
+        expectIntValue(testCase.source, value, std::get<int>(pair.second));
+      } else if (std::holds_alternative<bool>(pair.second)) {
+        expectBoolValue(testCase.source, value, std::get<bool>(pair.second));
+      }
+    }
+  }
+}
+
 TEST_F(EvaluatorTest, TestArrayExpressions) {
   struct TestCase {
     string source;
