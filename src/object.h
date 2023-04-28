@@ -11,6 +11,7 @@ enum class ObjectType {
   OBJ_NULL,
   OBJ_RETURN_VALUE,
   OBJ_BREAK,
+  OBJ_CONTINUE,
   OBJ_ERROR,
   OBJ_FUNCTION,
   OBJ_ARRAY,
@@ -180,6 +181,28 @@ struct BreakObject : public Object {
 };
 
 using BreakObjectPtr = std::shared_ptr<BreakObject>;
+
+struct ContinueObject : public Object {
+  ContinueObject() : Object(ObjectType::OBJ_CONTINUE) {}
+
+  std::string toString() const override { return "continue"; }
+
+  bool isFalsey() const override { return false; }
+  bool isTruthy() const override { return true; }
+
+  bool isEqual(const Object &obj) const override {
+    if (obj.Type == Type) {
+      return true;
+    }
+    return false;
+  }
+
+  static std::shared_ptr<ContinueObject> make() {
+    return std::make_shared<ContinueObject>();
+  }
+};
+
+using ContinueObjectPtr = std::shared_ptr<ContinueObject>;
 
 struct ArrayObject : public Object {
   std::vector<ObjectPtr> Values;

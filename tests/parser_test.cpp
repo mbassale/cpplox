@@ -443,6 +443,26 @@ TEST_F(ParserTest, BreakStatementAssertions) {
   assertTestCases(testCases);
 }
 
+TEST_F(ParserTest, ContinueStatementAssertions) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData(
+          "DirectContinueInFor", "for(;;) { continue; }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ForStatement::make(
+                  ast::Statement::make(), ast::BooleanLiteral::makeTrue(),
+                  ast::EmptyExpression::make(),
+                  ast::Block::make(std::vector<ast::StatementPtr>{
+                      ast::ContinueStatement::make()}))})),
+      ParserTestData("DirectContinueInWhile", "while(true) { continue; }",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::WhileStatement::make(
+                             ast::BooleanLiteral::makeTrue(),
+                             ast::Block::make(std::vector<ast::StatementPtr>{
+                                 ast::ContinueStatement::make()}))}))};
+
+  assertTestCases(testCases);
+}
+
 TEST_F(ParserTest, ArrayLiteralAssertions) {
   std::vector testCases = {
       ParserTestData("EmptyArray", "[];",

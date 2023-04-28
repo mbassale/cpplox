@@ -59,6 +59,7 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::ReturnStatementPtr emitReturnStatement(
       cpplox::ast::ExpressionPtr expr) override;
   cpplox::ast::BreakStatementPtr emitBreakStatement() override;
+  cpplox::ast::ContinueStatementPtr emitContinueStatement() override;
   cpplox::ast::BlockPtr emitBlock(
       const std::vector<cpplox::ast::StatementPtr> &statements) override;
 

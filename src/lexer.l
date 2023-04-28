@@ -51,6 +51,7 @@ std::string currentString;
 <*>print    { return JSParser::token::PRINT; }
 <*>return   { return JSParser::token::RETURN; }
 <*>break    { return JSParser::token::BREAK; }
+<*>continue { return JSParser::token::CONTINUE; }
 
   /* Integer */
 <*>[0-9]+ { 

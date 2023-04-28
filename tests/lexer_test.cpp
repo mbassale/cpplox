@@ -75,7 +75,7 @@ TEST_F(LexerTest, PunctuationTokenAssertions) {
 
 TEST_F(LexerTest, KeywordTokenAssertions) {
   vector<LexerTestData> testCases = {
-      LexerTestData("Keywords", "if while def true false null",
+      LexerTestData("Keywords", "if while def true false null continue break",
                     vector<JSParser::token_kind_type>{
                         JSParser::token::IF,
                         JSParser::token::WHILE,
@@ -83,6 +83,8 @@ TEST_F(LexerTest, KeywordTokenAssertions) {
                         JSParser::token::TRUE,
                         JSParser::token::FALSE,
                         JSParser::token::NIL,
+                        JSParser::token::CONTINUE,
+                        JSParser::token::BREAK,
                     }),
   };
   for (const auto testData : testCases) {

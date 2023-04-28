@@ -53,6 +53,7 @@ using namespace cpplox::ast;
         virtual cpplox::ast::PrintStatementPtr emitPrintStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::ReturnStatementPtr emitReturnStatement(cpplox::ast::ExpressionPtr expr = nullptr) = 0;
         virtual cpplox::ast::BreakStatementPtr emitBreakStatement() = 0;
+        virtual cpplox::ast::ContinueStatementPtr emitContinueStatement() = 0;
         virtual cpplox::ast::BlockPtr emitBlock(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
     };
 }
@@ -77,6 +78,7 @@ using namespace cpplox::ast;
 %token PRINT "print"
 %token RETURN "return"
 %token BREAK "break"
+%token CONTINUE "continue"
 %token PLUS "+"
 %token MINUS "-"
 %token STAR "*"
@@ -124,6 +126,7 @@ using namespace cpplox::ast;
 %type<cpplox::ast::PrintStatementPtr> print_statement
 %type<cpplox::ast::ReturnStatementPtr> return_statement
 %type<cpplox::ast::BreakStatementPtr> break_statement
+%type<cpplox::ast::ContinueStatementPtr> continue_statement
 %type<cpplox::ast::ArrayLiteralPtr> array_literal
 %type<std::vector<cpplox::ast::ExpressionPtr>> array_elements
 %type<cpplox::ast::ArraySubscriptExprPtr> array_subscript
@@ -172,6 +175,7 @@ compound_statement
     | print_statement { $$ = $1; }
     | return_statement { $$ = $1; }
     | break_statement { $$ = $1; }
+    | continue_statement { $$ = $1; }
     ;
 
 if_statement
@@ -228,6 +232,10 @@ return_statement
 break_statement
     : BREAK SEMICOLON
       { $$ = builder.emitBreakStatement(); }
+
+continue_statement
+    : CONTINUE SEMICOLON
+      { $$ = builder.emitContinueStatement(); }
 
 var_declaration
     : VAR varExpr EQUAL expr SEMICOLON { $$ = builder.emitVarDeclaration($2, $4); }

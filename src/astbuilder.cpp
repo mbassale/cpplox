@@ -131,6 +131,10 @@ BreakStatementPtr ASTBuilderImpl::emitBreakStatement() {
   return BreakStatement::make();
 }
 
+ContinueStatementPtr ASTBuilderImpl::emitContinueStatement() {
+  return ContinueStatement::make();
+}
+
 BlockPtr ASTBuilderImpl::emitBlock(
     const std::vector<cpplox::ast::StatementPtr> &statements) {
   return Block::make(statements);
