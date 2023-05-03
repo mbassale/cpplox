@@ -563,3 +563,31 @@ TEST_F(ParserTest, ClassDeclarationAssertions) {
 
   assertTestCases(testCases);
 }
+
+TEST_F(ParserTest, MemberExpressionAssertions) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData("Simple", "test.member;",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ExpressionStatement::make(ast::MemberExpr::make(
+                             ast::VariableExpr::make("test"), "member"))})),
+      ParserTestData(
+          "ClassWithMemberAccessAndCall",
+          "class A { def method1() {} } var a = A(); a.method1; a.method1();",
+          ast::Program::make(std::vector<ast::StatementPtr>{
+              ast::ClassDeclaration::make(
+                  "A", {ast::FunctionDeclaration::make(
+                           Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
+                           ast::Block::make({}))}),
+              ast::VarDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                  ast::CallExpr::make(ast::VariableExpr::make("A"),
+                                      std::vector<ast::ExpressionPtr>{})),
+              ast::ExpressionStatement::make(ast::MemberExpr::make(
+                  ast::VariableExpr::make("a"), "method1")),
+              ast::ExpressionStatement::make(ast::CallExpr::make(
+                  ast::MemberExpr::make(ast::VariableExpr::make("a"),
+                                        "method1"),
+                  std::vector<ast::ExpressionPtr>{}))}))};
+
+  assertTestCases(testCases);
+}

@@ -17,10 +17,11 @@ VarDeclarationPtr ASTBuilderImpl::emitVarDeclaration(
   return VarDeclaration::make(nameToken, initializer);
 }
 
-cpplox::ast::ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(const Token& name, 
+cpplox::ast::ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(
+    const Token &name,
     const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods) {
   return ClassDeclaration::make(name.lexeme(), methods);
-    }
+}
 
 ExpressionStatementPtr ASTBuilderImpl::emitExpressionStatement(
     cpplox::ast::ExpressionPtr expr) {
@@ -53,6 +54,11 @@ ArraySubscriptExprPtr ASTBuilderImpl::emitArraySubscript(ExpressionPtr array,
 
 VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
   return VariableExpr::make(value.lexeme());
+}
+
+MemberExprPtr ASTBuilderImpl::emitMemberExpression(
+    cpplox::ast::VariableExprPtr object, const Token &member) {
+  return MemberExpr::make(object, member.lexeme());
 }
 
 AssignmentPtr ASTBuilderImpl::emitAssignmentExpression(

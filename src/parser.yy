@@ -33,6 +33,7 @@ using namespace cpplox::ast;
         
         virtual cpplox::ast::ProgramPtr emitProgram(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
         virtual cpplox::ast::VarDeclarationPtr emitVarDeclaration(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr initializer = nullptr) = 0;
+        virtual cpplox::ast::MemberExprPtr emitMemberExpression(cpplox::ast::VariableExprPtr object, const Token &member) = 0;
         virtual cpplox::ast::ClassDeclarationPtr emitClassDeclaration(const Token& name, const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods = {}) = 0;
         virtual cpplox::ast::ExpressionStatementPtr emitExpressionStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
@@ -106,6 +107,7 @@ using namespace cpplox::ast;
 
 %type<cpplox::ast::ProgramPtr> program
 %type<cpplox::ast::VariableExprPtr> varExpr
+%type<cpplox::ast::MemberExprPtr> member_expr
 %type<cpplox::ast::AssignmentPtr> assignment_expr
 %type<cpplox::ast::CallExprPtr> call_expr
 %type<std::vector<cpplox::ast::ExpressionPtr>> call_arguments
@@ -260,6 +262,9 @@ varExpr
     : IDENTIFIER { $$ = builder.emitVarExpression($1); }
     ;
 
+member_expr
+    : varExpr DOT IDENTIFIER { $$ = builder.emitMemberExpression($1, $3); }
+
 assignment_expr 
     : varExpr EQUAL expr { $$ = builder.emitAssignmentExpression($1, $3); }
 
@@ -312,6 +317,7 @@ expr
     | NIL { $$ = builder.emitNilLiteral(); }
     | TRUE { $$ = builder.emitBooleanLiteral(true); }
     | FALSE { $$ = builder.emitBooleanLiteral(false); }
+    | member_expr { $$ = $1; }
     | varExpr { $$ = $1; }
     | expr AND expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_AND, $1, $3); }
     | expr OR expr { $$ = builder.emitBinaryOp(TokenType::TOKEN_OR, $1, $3); }

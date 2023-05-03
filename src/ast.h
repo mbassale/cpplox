@@ -26,6 +26,7 @@ enum class NodeType {
    */
   EXPRESSION,
   VARIABLE_EXPRESSION,
+  MEMBER_EXPRESSION,
   ASSIGNMENT_EXPRESSION,
   BINARY_EXPRESSION,
   UNARY_EXPRESSION,
@@ -396,6 +397,39 @@ struct CallExpr : public Expression {
   }
 };
 using CallExprPtr = std::shared_ptr<CallExpr>;
+
+struct MemberExpr : public Expression {
+  VariableExprPtr left;
+  std::string member;
+
+  MemberExpr(const VariableExprPtr& left, const std::string& member)
+      : Expression(NodeType::MEMBER_EXPRESSION), left(left), member(member) {}
+
+  bool isEqual(const Node& other) override {
+    if (Type == other.Type) {
+      const auto& otherMemberExpr = dynamic_cast<const MemberExpr&>(other);
+      return isEqual(otherMemberExpr);
+    }
+    return false;
+  }
+
+  bool isEqual(const MemberExpr& other) {
+    if (!left->isEqual(*other.left)) {
+      return false;
+    }
+    return member == other.member;
+  }
+
+  std::string toString() const override {
+    return "(MemberExpr " + left->toString() + " " + member + ")";
+  }
+
+  static std::shared_ptr<MemberExpr> make(const VariableExprPtr& left,
+                                          const std::string& member) {
+    return std::make_shared<MemberExpr>(left, member);
+  }
+};
+using MemberExprPtr = std::shared_ptr<MemberExpr>;
 
 struct Program : public Node {
   std::vector<StatementPtr> statements;

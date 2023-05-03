@@ -14,8 +14,9 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::VarDeclarationPtr emitVarDeclaration(
       cpplox::ast::VariableExprPtr identifier,
       cpplox::ast::ExpressionPtr initializer) override;
-  cpplox::ast::ClassDeclarationPtr emitClassDeclaration(const Token& name, 
-    const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods) override;
+  cpplox::ast::ClassDeclarationPtr emitClassDeclaration(
+      const Token &name,
+      const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods) override;
   cpplox::ast::ExpressionStatementPtr emitExpressionStatement(
       cpplox::ast::ExpressionPtr expr) override;
   cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(
@@ -29,6 +30,8 @@ class ASTBuilderImpl : public ASTBuilder {
       cpplox::ast::ExpressionPtr array,
       cpplox::ast::ExpressionPtr index) override;
   cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) override;
+  cpplox::ast::MemberExprPtr emitMemberExpression(
+      cpplox::ast::VariableExprPtr object, const Token &member) override;
   cpplox::ast::AssignmentPtr emitAssignmentExpression(
       cpplox::ast::VariableExprPtr identifier,
       cpplox::ast::ExpressionPtr value) override;
