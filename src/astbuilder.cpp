@@ -17,6 +17,11 @@ VarDeclarationPtr ASTBuilderImpl::emitVarDeclaration(
   return VarDeclaration::make(nameToken, initializer);
 }
 
+cpplox::ast::ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(const Token& name, 
+    const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods) {
+  return ClassDeclaration::make(name.lexeme(), methods);
+    }
+
 ExpressionStatementPtr ASTBuilderImpl::emitExpressionStatement(
     cpplox::ast::ExpressionPtr expr) {
   return ExpressionStatement::make(expr);

@@ -52,6 +52,7 @@ std::string currentString;
 <*>return   { return JSParser::token::RETURN; }
 <*>break    { return JSParser::token::BREAK; }
 <*>continue { return JSParser::token::CONTINUE; }
+<*>class    { return JSParser::token::CLASS; }
 
   /* Integer */
 <*>[0-9]+ { 

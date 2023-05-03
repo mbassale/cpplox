@@ -517,3 +517,49 @@ TEST_F(ParserTest, ArrayLiteralAssertions) {
                                             ast::IntegerLiteral::make(1)))}))};
   assertTestCases(testCases);
 }
+
+TEST_F(ParserTest, ClassDeclarationAssertions) {
+  std::vector<ParserTestData> testCases = {
+      ParserTestData("EmptyClass", "class A {}",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ClassDeclaration::make("A", {})})),
+      ParserTestData(
+          "ClassWithOneMethod", "class A { def method1() {} }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ClassDeclaration::make(
+                  "A", {ast::FunctionDeclaration::make(
+                           Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
+                           ast::Block::make({}))})})),
+      ParserTestData(
+          "ClassWithTwoMethods",
+          "class A { def method1() {} def method2() {} }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ClassDeclaration::make(
+                  "A", {ast::FunctionDeclaration::make(
+                            Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
+                            ast::Block::make({})),
+                        ast::FunctionDeclaration::make(
+                            Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
+                            ast::Block::make({}))})})),
+      ParserTestData(
+          "ClassWithTwoMethodsWithMultipleArgs",
+          "class A { def method1(a, b) {} def method2(c, d) {} }",
+          ast::Program::make(
+              std::vector<ast::StatementPtr>{ast::ClassDeclaration::make(
+                  "A", {ast::FunctionDeclaration::make(
+                            Token(TokenType::TOKEN_IDENTIFIER, "method1"),
+                            {Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                             Token(TokenType::TOKEN_IDENTIFIER, "b")},
+                            ast::Block::make({})),
+                        ast::FunctionDeclaration::make(
+                            Token(TokenType::TOKEN_IDENTIFIER, "method2"),
+                            {Token(TokenType::TOKEN_IDENTIFIER, "c"),
+                             Token(TokenType::TOKEN_IDENTIFIER, "d")},
+                            ast::Block::make({}))})})),
+      ParserTestData("TwoClasses", "class A {} class B {}",
+                     ast::Program::make(std::vector<ast::StatementPtr>{
+                         ast::ClassDeclaration::make("A", {}),
+                         ast::ClassDeclaration::make("B", {})}))};
+
+  assertTestCases(testCases);
+}

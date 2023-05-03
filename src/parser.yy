@@ -33,6 +33,7 @@ using namespace cpplox::ast;
         
         virtual cpplox::ast::ProgramPtr emitProgram(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
         virtual cpplox::ast::VarDeclarationPtr emitVarDeclaration(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr initializer = nullptr) = 0;
+        virtual cpplox::ast::ClassDeclarationPtr emitClassDeclaration(const Token& name, const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods = {}) = 0;
         virtual cpplox::ast::ExpressionStatementPtr emitExpressionStatement(cpplox::ast::ExpressionPtr expr) = 0;
         virtual cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
         virtual cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) = 0;
@@ -79,6 +80,7 @@ using namespace cpplox::ast;
 %token RETURN "return"
 %token BREAK "break"
 %token CONTINUE "continue"
+%token CLASS "class"
 %token PLUS "+"
 %token MINUS "-"
 %token STAR "*"
@@ -114,6 +116,8 @@ using namespace cpplox::ast;
 %type<std::vector<cpplox::ast::StatementPtr>> statements
 %type<cpplox::ast::StatementPtr> compound_statement
 %type<cpplox::ast::VarDeclarationPtr> var_declaration
+%type<cpplox::ast::ClassDeclarationPtr> class_declaration
+%type<std::vector<cpplox::ast::FunctionDeclarationPtr>> class_body
 %type<cpplox::ast::IfStatementPtr> if_statement
 %type<cpplox::ast::WhileStatementPtr> while_statement
 %type<cpplox::ast::ForStatementPtr> for_statement
@@ -167,7 +171,8 @@ expr_statement
     ;
 
 compound_statement
-    : var_declaration { $$ = $1; }
+    : class_declaration { $$ = $1; }
+    | var_declaration { $$ = $1; }
     | if_statement { $$ = $1; }
     | while_statement { $$ = $1; }
     | for_statement { $$ = $1; }
@@ -236,6 +241,16 @@ break_statement
 continue_statement
     : CONTINUE SEMICOLON
       { $$ = builder.emitContinueStatement(); }
+
+class_declaration
+    : CLASS IDENTIFIER LBRACE class_body RBRACE
+      { $$ = builder.emitClassDeclaration($2, $4); }
+
+class_body
+    : /* empty */ { $$ = std::vector<cpplox::ast::FunctionDeclarationPtr>(); }
+    | class_body def_statement
+      { $1.push_back($2); $$ = $1; }
+    ;
 
 var_declaration
     : VAR varExpr EQUAL expr SEMICOLON { $$ = builder.emitVarDeclaration($2, $4); }

@@ -19,6 +19,7 @@ enum class NodeType {
    */
   VAR_DECLARATION,
   FUNCTION_DECLARATION,
+  CLASS_DECLARATION,
 
   /*
    * EXPRESSIONS
@@ -564,6 +565,40 @@ struct FunctionDeclaration : public Statement {
   }
 };
 using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
+
+struct ClassDeclaration : public Statement {
+  std::string identifier;
+  std::vector<FunctionDeclarationPtr> methods;
+
+  ClassDeclaration(const std::string& identifier)
+      : identifier(identifier), methods() {}
+  ClassDeclaration(const std::string& identifier,
+                   const std::vector<FunctionDeclarationPtr>& methods)
+      : identifier(identifier), methods(methods) {}
+
+  bool isEqual(const ClassDeclaration& other) {
+    if (identifier == other.identifier) {
+      return true;
+    }
+    return false;
+  }
+
+  std::string toString() const {
+    std::string result = "(ClassDeclaration " + identifier;
+    for (const auto& method : methods) {
+      result += " " + method->toString();
+    }
+    result += ")";
+    return result;
+  }
+
+  static std::shared_ptr<ClassDeclaration> make(
+      const std::string& identifier,
+      const std::vector<FunctionDeclarationPtr>& methods = {}) {
+    return std::make_shared<ClassDeclaration>(identifier, methods);
+  }
+};
+using ClassDeclarationPtr = std::shared_ptr<ClassDeclaration>;
 
 struct Block : public Statement {
   std::vector<StatementPtr> statements;

@@ -14,6 +14,8 @@ class ASTBuilderImpl : public ASTBuilder {
   cpplox::ast::VarDeclarationPtr emitVarDeclaration(
       cpplox::ast::VariableExprPtr identifier,
       cpplox::ast::ExpressionPtr initializer) override;
+  cpplox::ast::ClassDeclarationPtr emitClassDeclaration(const Token& name, 
+    const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods) override;
   cpplox::ast::ExpressionStatementPtr emitExpressionStatement(
       cpplox::ast::ExpressionPtr expr) override;
   cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(
