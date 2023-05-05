@@ -71,6 +71,8 @@ set(SOURCES
   src/object.cpp
   src/function.h
   src/function.cpp
+  src/record.h
+  src/record.cpp
   src/environment.h
   src/environment.cpp
   src/evaluator.h

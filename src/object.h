@@ -16,6 +16,7 @@ enum class ObjectType {
   OBJ_FUNCTION,
   OBJ_ARRAY,
   OBJ_NATIVE,
+  OBJ_RECORD,
 };
 
 struct Object {

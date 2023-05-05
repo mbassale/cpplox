@@ -1,9 +1,7 @@
 #include "function.h"
 
-namespace cpplox {
-
 std::shared_ptr<Function> Function::make(
-    FunctionType functionType, ast::FunctionDeclarationPtr declaration,
+    FunctionType functionType, cpplox::ast::FunctionDeclarationPtr declaration,
     const std::string &name, int arity) {
   return std::make_shared<Function>(functionType, declaration, name, arity);
 }
@@ -30,5 +28,3 @@ bool Function::isEqual(const Function &other) const {
   // TODO: implement equality for chunks
   return arity == other.arity && name == other.name;
 }
-
-}  // namespace cpplox
