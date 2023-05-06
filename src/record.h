@@ -1,19 +1,20 @@
 #pragma once
 
 #include "common.h"
-#include "object.h"
 #include "function.h"
+#include "object.h"
 
 class Record : public Object {
  public:
   cpplox::ast::ClassDeclarationPtr classDecl;
-  const std::string name;
   std::unordered_map<std::string, ObjectPtr> fields;
   std::unordered_map<std::string, FunctionPtr> methods;
 
   Record(cpplox::ast::ClassDeclarationPtr classDecl);
 
-  std::string toString() const override { return name; }
+  std::string toString() const override {
+    return "<record " + classDecl->identifier + ">";
+  }
   bool isFalsey() const override;
   bool isTruthy() const override;
 
@@ -22,8 +23,12 @@ class Record : public Object {
       return false;
     }
     auto other = dynamic_cast<const Record &>(obj);
-    return name == other.name;
+    assert(other.classDecl != nullptr);
+    return classDecl->isEqual(*other.classDecl);
   }
+
+  static std::shared_ptr<Record> make(
+      cpplox::ast::ClassDeclarationPtr classDecl);
 };
 
 using RecordPtr = std::shared_ptr<Record>;

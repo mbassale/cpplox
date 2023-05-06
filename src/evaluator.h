@@ -6,6 +6,7 @@
 #include "common.h"
 #include "environment.h"
 #include "function.h"
+#include "record.h"
 #include "object.h"
 #include "settings.h"
 
@@ -55,6 +56,10 @@ class Evaluator {
   ObjectPtr evalUnaryExpression(EnvironmentPtr ctx, ast::UnaryExprPtr expr);
   ObjectPtr evalAssignExpression(EnvironmentPtr ctx, ast::AssignmentPtr expr);
   ObjectPtr evalCallExpression(EnvironmentPtr ctx, ast::CallExprPtr expr);
+  ObjectPtr evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
+                             ast::CallExprPtr expr);
+  ObjectPtr evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
+                          ast::CallExprPtr expr);
   IntegerObjectPtr evalIntegerLiteral(EnvironmentPtr ctx,
                                       ast::IntegerLiteralPtr expr);
   BooleanObjectPtr evalBooleanLiteral(EnvironmentPtr ctx,

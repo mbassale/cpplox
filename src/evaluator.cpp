@@ -18,6 +18,11 @@ static bool isContinueObject(ObjectPtr value) {
   return value->Type == ObjectType::OBJ_CONTINUE;
 }
 
+static bool isCallable(ObjectPtr value) {
+  return value->Type == ObjectType::OBJ_CLASS ||
+         value->Type == ObjectType::OBJ_FUNCTION;
+}
+
 }  // namespace
 
 namespace cpplox {
@@ -293,14 +298,25 @@ ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx,
     auto returnValue = std::dynamic_pointer_cast<ReturnObject>(value);
     value = returnValue->Value;
   }
-  if (value->Type != ObjectType::OBJ_FUNCTION) {
+  if (!isCallable(value)) {
     std::ostringstream ss;
     ss << "Invalid callable: " << value->toString();
     throw RuntimeError::make(__FILE__, __LINE__, ss.str());
   }
-  auto funcValue = std::dynamic_pointer_cast<Function>(value);
-  assert(funcValue != nullptr);
-  auto funcDeclStmt = funcValue->getDeclaration();
+  if (value->Type == ObjectType::OBJ_FUNCTION) {
+    auto funcValue = std::dynamic_pointer_cast<Function>(value);
+    assert(funcValue != nullptr);
+    return evalFunctionCall(ctx, funcValue, expr);
+  } else if (value->Type == ObjectType::OBJ_CLASS) {
+    auto classDeclValue = std::dynamic_pointer_cast<ClassObject>(value);
+    return evalClassCall(ctx, classDeclValue, expr);
+  }
+  throw RuntimeError::make(__FILE__, __LINE__, "Invalid callable");
+}
+
+ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
+                                      ast::CallExprPtr expr) {
+  auto funcDeclStmt = callee->getDeclaration();
   auto funcCtx = Environment::make(ctx);
   // bind arguments
   for (size_t i = 0; i < funcDeclStmt->params.size(); i++) {
@@ -317,10 +333,15 @@ ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx,
     return returnValue->Value;
   } else if (isBreakObject(lastValue) || isContinueObject(lastValue)) {
     std::ostringstream ss;
-    ss << "Invalid statement: " << value->toString();
+    ss << "Invalid statement: " << funcDeclStmt->toString();
     throw RuntimeError::make(__FILE__, __LINE__, ss.str());
   }
-  return lastValue;
+  return lastValue;                                
+}
+
+ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
+                                   ast::CallExprPtr expr) {
+  return Record::make(callee->declaration);
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EnvironmentPtr ctx,

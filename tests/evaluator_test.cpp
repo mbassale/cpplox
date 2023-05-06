@@ -594,3 +594,34 @@ TEST_F(EvaluatorTest, TestClassDeclarationStatement) {
     ASSERT_TRUE(classValue->declaration->isEqual(*testCase.expectedValue));
   }
 }
+
+TEST_F(EvaluatorTest, TestClassObjectInstantiation) {
+  struct TestCase {
+    string source;
+    string recordClassName;
+    string instanceVariableName;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"class A { def method1() {} def method2() {} } var a = A();",
+               "A", "a"},
+      TestCase{"class A { def method1() { } def method2() { } } class B {} var "
+               "a = A();",
+               "A", "a"}};
+
+  for (const auto& testCase : testCases) {
+    std::istringstream ss(testCase.source);
+    JSLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    JSParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr) << "TestCase: " << testCase.source;
+    Evaluator evaluator;
+    evaluator.eval(program);
+    auto value = evaluator.getGlobalValue(testCase.instanceVariableName);
+    ASSERT_NE(value, nullptr);
+    auto recordValue = dynamic_pointer_cast<Record>(value);
+    ASSERT_NE(recordValue, nullptr);
+    ASSERT_EQ(recordValue->classDecl->identifier, testCase.recordClassName);
+  }
+}

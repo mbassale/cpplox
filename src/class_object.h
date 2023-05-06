@@ -2,9 +2,12 @@
 
 #include "ast.h"
 #include "common.h"
+#include "object.h"
+#include "function.h"
 
 struct ClassObject : public Object {
   cpplox::ast::ClassDeclarationPtr declaration;
+  std::vector<FunctionPtr> methods;
 
   ClassObject(cpplox::ast::ClassDeclarationPtr declaration)
       : Object(ObjectType::OBJ_CLASS), declaration(declaration) {}
