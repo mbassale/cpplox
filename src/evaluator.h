@@ -2,6 +2,7 @@
 #define __cpplox_evaluator_h
 
 #include "ast.h"
+#include "class_object.h"
 #include "common.h"
 #include "environment.h"
 #include "function.h"
@@ -36,6 +37,8 @@ class Evaluator {
                                         ast::VarDeclarationPtr stmt);
   ObjectPtr evalFuncDeclarationStatement(EnvironmentPtr ctx,
                                          ast::FunctionDeclarationPtr stmt);
+  ObjectPtr evalClassDeclarationStatement(EnvironmentPtr ctx,
+                                          ast::ClassDeclarationPtr stmt);
   ObjectPtr evalIfStatement(EnvironmentPtr ctx, ast::IfStatementPtr stmt);
   ObjectPtr evalForStatement(EnvironmentPtr ctx, ast::ForStatementPtr stmt);
   ObjectPtr evalWhileStatement(EnvironmentPtr ctx, ast::WhileStatementPtr stmt);

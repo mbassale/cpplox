@@ -14,6 +14,7 @@ enum class ObjectType {
   OBJ_CONTINUE,
   OBJ_ERROR,
   OBJ_FUNCTION,
+  OBJ_CLASS,
   OBJ_ARRAY,
   OBJ_NATIVE,
   OBJ_RECORD,

@@ -68,6 +68,10 @@ ObjectPtr Evaluator::evalStatement(EnvironmentPtr ctx, StatementPtr stmt) {
       auto funcDeclStmt = std::static_pointer_cast<FunctionDeclaration>(stmt);
       return evalFuncDeclarationStatement(ctx, funcDeclStmt);
     }
+    case NodeType::CLASS_DECLARATION: {
+      auto classDeclStmt = std::static_pointer_cast<ClassDeclaration>(stmt);
+      return evalClassDeclarationStatement(ctx, classDeclStmt);
+    }
     case NodeType::BLOCK_STATEMENT: {
       auto blockStmt = std::static_pointer_cast<Block>(stmt);
       return evalBlockStatement(ctx, blockStmt);
@@ -125,6 +129,15 @@ ObjectPtr Evaluator::evalFuncDeclarationStatement(EnvironmentPtr ctx,
                                  functionName, stmt->params.size());
   ctx->set(functionName, function);
   return function;
+}
+
+ObjectPtr Evaluator::evalClassDeclarationStatement(
+    EnvironmentPtr ctx, ast::ClassDeclarationPtr stmt) {
+  const auto& className = stmt->identifier;
+  auto classDeclaration = ClassObject::make(stmt);
+  // classes live in the global ctx
+  globalCtx->set(className, classDeclaration);
+  return classDeclaration;
 }
 
 ObjectPtr Evaluator::evalBlockStatement(EnvironmentPtr ctx,

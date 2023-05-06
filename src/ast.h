@@ -605,10 +605,14 @@ struct ClassDeclaration : public Statement {
   std::vector<FunctionDeclarationPtr> methods;
 
   ClassDeclaration(const std::string& identifier)
-      : identifier(identifier), methods() {}
+      : Statement(NodeType::CLASS_DECLARATION),
+        identifier(identifier),
+        methods() {}
   ClassDeclaration(const std::string& identifier,
                    const std::vector<FunctionDeclarationPtr>& methods)
-      : identifier(identifier), methods(methods) {}
+      : Statement(NodeType::CLASS_DECLARATION),
+        identifier(identifier),
+        methods(methods) {}
 
   bool isEqual(const ClassDeclaration& other) {
     if (identifier == other.identifier) {

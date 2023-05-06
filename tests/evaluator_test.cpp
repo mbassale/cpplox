@@ -12,6 +12,7 @@
 using Parser::JSParser;
 
 using namespace cpplox;
+using namespace cpplox::ast;
 using namespace std;
 
 class EvaluatorTest : public ::testing::Test {
@@ -543,5 +544,53 @@ TEST_F(EvaluatorTest, TestArrayExpressions) {
         }
       }
     }
+  }
+}
+
+TEST_F(EvaluatorTest, TestClassDeclarationStatement) {
+  struct TestCase {
+    string source;
+    string classIdentifier;
+    ClassDeclarationPtr expectedValue;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"class A { def method1() {} def method2() {} }", "A",
+               ast::ClassDeclaration::make(
+                   "A", {ast::FunctionDeclaration::make(
+                             Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
+                             ast::Block::make({})),
+                         ast::FunctionDeclaration::make(
+                             Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
+                             ast::Block::make({}))})},
+      TestCase{
+          "class A { def method1() { } def method2() { } def method3() { } }",
+          "A",
+          ast::ClassDeclaration::make(
+              "A", {ast::FunctionDeclaration::make(
+                        Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
+                        ast::Block::make({})),
+                    ast::FunctionDeclaration::make(
+                        Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
+                        ast::Block::make({})),
+                    ast::FunctionDeclaration::make(
+                        Token(TokenType::TOKEN_IDENTIFIER, "method3"), {},
+                        ast::Block::make({}))})}};
+
+  for (const auto& testCase : testCases) {
+    std::istringstream ss(testCase.source);
+    JSLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    JSParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr) << "TestCase: " << testCase.source;
+    Evaluator evaluator;
+    evaluator.eval(program);
+    auto value = evaluator.getGlobalValue(testCase.classIdentifier);
+    ASSERT_NE(value, nullptr);
+    auto classValue = dynamic_pointer_cast<ClassObject>(value);
+    ASSERT_NE(classValue, nullptr);
+    ASSERT_EQ(classValue->declaration->identifier, testCase.classIdentifier);
+    ASSERT_TRUE(classValue->declaration->isEqual(*testCase.expectedValue));
   }
 }
