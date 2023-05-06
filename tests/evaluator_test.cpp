@@ -625,3 +625,33 @@ TEST_F(EvaluatorTest, TestClassObjectInstantiation) {
     ASSERT_EQ(recordValue->classDecl->identifier, testCase.recordClassName);
   }
 }
+
+TEST_F(EvaluatorTest, TestMemberExpression) {
+  struct TestCase {
+    string name;
+    string source;
+    unordered_map<string, int> expectedValues;
+  };
+  vector<TestCase> testCases = {
+      TestCase{"MemberExpression1",
+               "class A { def method1() { return 1; } def method2() { return "
+               "2;} } var a = A(); var b = a.method1(); var c = a.method2();",
+               {{"b", 1}, {"c", 2}}}};
+
+  for (const auto& testCase : testCases) {
+    std::istringstream ss(testCase.source);
+    JSLexer lexer(&ss);
+    ASTBuilderImpl builder;
+    JSParser parser(builder, lexer);
+    parser.parse();
+    auto program = builder.getProgram();
+    ASSERT_NE(program, nullptr) << "TestCase: " << testCase.name;
+    Evaluator evaluator;
+    evaluator.eval(program);
+    for (const auto& pair : testCase.expectedValues) {
+      auto value = evaluator.getGlobalValue(pair.first);
+      ASSERT_NE(value, nullptr) << "TestCase: " << testCase.name;
+      expectIntValue(testCase.source, value, pair.second);
+    }
+  }
+}

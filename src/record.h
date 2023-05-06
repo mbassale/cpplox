@@ -1,16 +1,19 @@
 #pragma once
 
 #include "common.h"
+#include "environment.h"
 #include "function.h"
 #include "object.h"
 
 class Record : public Object {
  public:
+  EnvironmentPtr ctx;
   cpplox::ast::ClassDeclarationPtr classDecl;
   std::unordered_map<std::string, ObjectPtr> fields;
   std::unordered_map<std::string, FunctionPtr> methods;
 
-  Record(cpplox::ast::ClassDeclarationPtr classDecl);
+  Record(EnvironmentPtr enclosingCtx,
+         cpplox::ast::ClassDeclarationPtr classDecl);
 
   std::string toString() const override {
     return "<record " + classDecl->identifier + ">";
@@ -28,7 +31,7 @@ class Record : public Object {
   }
 
   static std::shared_ptr<Record> make(
-      cpplox::ast::ClassDeclarationPtr classDecl);
+      EnvironmentPtr enclosingCtx, cpplox::ast::ClassDeclarationPtr classDecl);
 };
 
 using RecordPtr = std::shared_ptr<Record>;

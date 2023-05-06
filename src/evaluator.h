@@ -60,6 +60,7 @@ class Evaluator {
                              ast::CallExprPtr expr);
   ObjectPtr evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
                           ast::CallExprPtr expr);
+  ObjectPtr evalMemberExpr(EnvironmentPtr ctx, ast::MemberExprPtr expr);
   IntegerObjectPtr evalIntegerLiteral(EnvironmentPtr ctx,
                                       ast::IntegerLiteralPtr expr);
   BooleanObjectPtr evalBooleanLiteral(EnvironmentPtr ctx,

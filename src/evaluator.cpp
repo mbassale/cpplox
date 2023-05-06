@@ -130,7 +130,7 @@ ObjectPtr Evaluator::evalVarDeclarationStatement(EnvironmentPtr ctx,
 ObjectPtr Evaluator::evalFuncDeclarationStatement(EnvironmentPtr ctx,
                                                   FunctionDeclarationPtr stmt) {
   const auto& functionName = stmt->identifier.lexeme();
-  auto function = Function::make(FunctionType::TYPE_FUNCTION, stmt,
+  auto function = Function::make(ctx, FunctionType::TYPE_FUNCTION, stmt,
                                  functionName, stmt->params.size());
   ctx->set(functionName, function);
   return function;
@@ -277,6 +277,10 @@ ObjectPtr Evaluator::evalExpression(EnvironmentPtr ctx, ExpressionPtr expr) {
       auto callExpr = std::static_pointer_cast<CallExpr>(expr);
       return evalCallExpression(ctx, callExpr);
     }
+    case NodeType::MEMBER_EXPRESSION: {
+      auto memberExpr = std::static_pointer_cast<MemberExpr>(expr);
+      return evalMemberExpr(ctx, memberExpr);
+    }
     default:
       break;
   }
@@ -317,7 +321,7 @@ ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx,
 ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
                                       ast::CallExprPtr expr) {
   auto funcDeclStmt = callee->getDeclaration();
-  auto funcCtx = Environment::make(ctx);
+  auto funcCtx = callee->getCtx();
   // bind arguments
   for (size_t i = 0; i < funcDeclStmt->params.size(); i++) {
     const auto paramName = funcDeclStmt->params[i].lexeme();
@@ -336,17 +340,36 @@ ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
     ss << "Invalid statement: " << funcDeclStmt->toString();
     throw RuntimeError::make(__FILE__, __LINE__, ss.str());
   }
-  return lastValue;                                
+  return lastValue;
 }
 
 ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
                                    ast::CallExprPtr expr) {
-  return Record::make(callee->declaration);
+  return Record::make(globalCtx, callee->declaration);
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EnvironmentPtr ctx,
                                                ast::IntegerLiteralPtr expr) {
   return std::make_shared<IntegerObject>(expr->Value);
+}
+
+ObjectPtr Evaluator::evalMemberExpr(EnvironmentPtr ctx,
+                                    ast::MemberExprPtr expr) {
+  auto varValue = evalExpression(ctx, expr->left);
+  if (varValue->Type == ObjectType::OBJ_RECORD) {
+    auto recordValue = std::dynamic_pointer_cast<Record>(varValue);
+    assert(recordValue != nullptr);
+    auto memberIdentifier = expr->member;
+    if (recordValue->methods.find(memberIdentifier) !=
+        recordValue->methods.end()) {
+      return recordValue->methods[memberIdentifier];
+    }
+    return NULL_OBJECT_PTR;
+  } else {
+    std::ostringstream ss;
+    ss << "Invalid member expression: " << expr->toString();
+    throw RuntimeError::make(__FILE__, __LINE__, ss.str());
+  }
 }
 
 BooleanObjectPtr Evaluator::evalBooleanLiteral(EnvironmentPtr ctx,
