@@ -1,7 +1,5 @@
 #include "settings.h"
 
-namespace cpplox {
-
 Settings* Settings::instance = nullptr;
 
 Settings* Settings::getInstance() {
@@ -10,5 +8,3 @@ Settings* Settings::getInstance() {
   }
   return instance;
 }
-
-}  // namespace cpplox

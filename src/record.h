@@ -8,12 +8,11 @@
 class Record : public Object {
  public:
   EnvironmentPtr ctx;
-  cpplox::ast::ClassDeclarationPtr classDecl;
+  ClassDeclarationPtr classDecl;
   std::unordered_map<std::string, ObjectPtr> fields;
   std::unordered_map<std::string, FunctionPtr> methods;
 
-  Record(EnvironmentPtr enclosingCtx,
-         cpplox::ast::ClassDeclarationPtr classDecl);
+  Record(EnvironmentPtr enclosingCtx, ClassDeclarationPtr classDecl);
 
   std::string toString() const override {
     return "<record " + classDecl->identifier + ">";
@@ -30,8 +29,8 @@ class Record : public Object {
     return classDecl->isEqual(*other.classDecl);
   }
 
-  static std::shared_ptr<Record> make(
-      EnvironmentPtr enclosingCtx, cpplox::ast::ClassDeclarationPtr classDecl);
+  static std::shared_ptr<Record> make(EnvironmentPtr enclosingCtx,
+                                      ClassDeclarationPtr classDecl);
 };
 
 using RecordPtr = std::shared_ptr<Record>;

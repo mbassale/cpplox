@@ -11,7 +11,6 @@
 #include "astbuilder.h"
 
 using namespace std;
-using namespace cpplox::ast;
 
 %}
 
@@ -31,32 +30,32 @@ using namespace cpplox::ast;
     public:
         virtual ~ASTBuilder() = default;
         
-        virtual cpplox::ast::ProgramPtr emitProgram(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
-        virtual cpplox::ast::VarDeclarationPtr emitVarDeclaration(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr initializer = nullptr) = 0;
-        virtual cpplox::ast::MemberExprPtr emitMemberExpression(cpplox::ast::VariableExprPtr object, const Token &member) = 0;
-        virtual cpplox::ast::ClassDeclarationPtr emitClassDeclaration(const Token& name, const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods = {}) = 0;
-        virtual cpplox::ast::ExpressionStatementPtr emitExpressionStatement(cpplox::ast::ExpressionPtr expr) = 0;
-        virtual cpplox::ast::IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
-        virtual cpplox::ast::StringLiteralPtr emitStringLiteral(const Token &value) = 0;
-        virtual cpplox::ast::BooleanLiteralPtr emitBooleanLiteral(bool value) = 0;
-        virtual cpplox::ast::NilLiteralPtr emitNilLiteral() = 0;
-        virtual cpplox::ast::ArrayLiteralPtr emitArrayLiteral(const std::vector<cpplox::ast::ExpressionPtr> &elements) = 0;
-        virtual cpplox::ast::ArraySubscriptExprPtr emitArraySubscript(cpplox::ast::ExpressionPtr array, cpplox::ast::ExpressionPtr index) = 0;
-        virtual cpplox::ast::VariableExprPtr emitVarExpression(const Token &value) = 0;
-        virtual cpplox::ast::AssignmentPtr emitAssignmentExpression(cpplox::ast::VariableExprPtr identifier, cpplox::ast::ExpressionPtr value) = 0;
-        virtual cpplox::ast::CallExprPtr emitCallExpression(cpplox::ast::ExpressionPtr callee, const std::vector<cpplox::ast::ExpressionPtr> &arguments) = 0;
-        virtual cpplox::ast::UnaryExprPtr emitUnaryOp(TokenType op, cpplox::ast::ExpressionPtr rhs) = 0;
-        virtual cpplox::ast::BinaryExprPtr emitBinaryOp(TokenType op, cpplox::ast::ExpressionPtr lhs, cpplox::ast::ExpressionPtr rhs) = 0;
-        virtual cpplox::ast::StatementPtr emitEmptyStatement() = 0;
-        virtual cpplox::ast::IfStatementPtr emitIfStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody, cpplox::ast::BlockPtr elseBody = nullptr) = 0;
-        virtual cpplox::ast::WhileStatementPtr emitWhileStatement(cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) = 0;
-        virtual cpplox::ast::ForStatementPtr emitForStatement(cpplox::ast::StatementPtr initialization, cpplox::ast::ExpressionStatementPtr condition, cpplox::ast::ExpressionStatementPtr increment, cpplox::ast::BlockPtr body) = 0;
-        virtual cpplox::ast::FunctionDeclarationPtr emitDefStatement(cpplox::ast::VariableExprPtr name, const std::vector<cpplox::ast::VariableExprPtr>& arguments, cpplox::ast::BlockPtr body) = 0;
-        virtual cpplox::ast::PrintStatementPtr emitPrintStatement(cpplox::ast::ExpressionPtr expr) = 0;
-        virtual cpplox::ast::ReturnStatementPtr emitReturnStatement(cpplox::ast::ExpressionPtr expr = nullptr) = 0;
-        virtual cpplox::ast::BreakStatementPtr emitBreakStatement() = 0;
-        virtual cpplox::ast::ContinueStatementPtr emitContinueStatement() = 0;
-        virtual cpplox::ast::BlockPtr emitBlock(const std::vector<cpplox::ast::StatementPtr> &statements) = 0;
+        virtual ProgramPtr emitProgram(const std::vector<StatementPtr> &statements) = 0;
+        virtual VarDeclarationPtr emitVarDeclaration(VariableExprPtr identifier, ExpressionPtr initializer = nullptr) = 0;
+        virtual MemberExprPtr emitMemberExpression(VariableExprPtr object, const Token &member) = 0;
+        virtual ClassDeclarationPtr emitClassDeclaration(const Token& name, const std::vector<FunctionDeclarationPtr> &methods = {}) = 0;
+        virtual ExpressionStatementPtr emitExpressionStatement(ExpressionPtr expr) = 0;
+        virtual IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
+        virtual StringLiteralPtr emitStringLiteral(const Token &value) = 0;
+        virtual BooleanLiteralPtr emitBooleanLiteral(bool value) = 0;
+        virtual NilLiteralPtr emitNilLiteral() = 0;
+        virtual ArrayLiteralPtr emitArrayLiteral(const std::vector<ExpressionPtr> &elements) = 0;
+        virtual ArraySubscriptExprPtr emitArraySubscript(ExpressionPtr array, ExpressionPtr index) = 0;
+        virtual VariableExprPtr emitVarExpression(const Token &value) = 0;
+        virtual AssignmentPtr emitAssignmentExpression(VariableExprPtr identifier, ExpressionPtr value) = 0;
+        virtual CallExprPtr emitCallExpression(ExpressionPtr callee, const std::vector<ExpressionPtr> &arguments) = 0;
+        virtual UnaryExprPtr emitUnaryOp(TokenType op, ExpressionPtr rhs) = 0;
+        virtual BinaryExprPtr emitBinaryOp(TokenType op, ExpressionPtr lhs, ExpressionPtr rhs) = 0;
+        virtual StatementPtr emitEmptyStatement() = 0;
+        virtual IfStatementPtr emitIfStatement(ExpressionPtr condition, BlockPtr thenBody, BlockPtr elseBody = nullptr) = 0;
+        virtual WhileStatementPtr emitWhileStatement(ExpressionPtr condition, BlockPtr body) = 0;
+        virtual ForStatementPtr emitForStatement(StatementPtr initialization, ExpressionStatementPtr condition, ExpressionStatementPtr increment, BlockPtr body) = 0;
+        virtual FunctionDeclarationPtr emitDefStatement(VariableExprPtr name, const std::vector<VariableExprPtr>& arguments, BlockPtr body) = 0;
+        virtual PrintStatementPtr emitPrintStatement(ExpressionPtr expr) = 0;
+        virtual ReturnStatementPtr emitReturnStatement(ExpressionPtr expr = nullptr) = 0;
+        virtual BreakStatementPtr emitBreakStatement() = 0;
+        virtual ContinueStatementPtr emitContinueStatement() = 0;
+        virtual BlockPtr emitBlock(const std::vector<StatementPtr> &statements) = 0;
     };
 }
 
@@ -105,38 +104,38 @@ using namespace cpplox::ast;
 %token SEMICOLON ";"
 %token COLON ":"
 
-%type<cpplox::ast::ProgramPtr> program
-%type<cpplox::ast::VariableExprPtr> varExpr
-%type<cpplox::ast::MemberExprPtr> member_expr
-%type<cpplox::ast::AssignmentPtr> assignment_expr
-%type<cpplox::ast::CallExprPtr> call_expr
-%type<std::vector<cpplox::ast::ExpressionPtr>> call_arguments
-%type<cpplox::ast::ExpressionPtr> expr
-%type<cpplox::ast::BlockPtr> suite
-%type<cpplox::ast::StatementPtr> statement
-%type<cpplox::ast::StatementPtr> simple_statement
-%type<std::vector<cpplox::ast::StatementPtr>> statements
-%type<cpplox::ast::StatementPtr> compound_statement
-%type<cpplox::ast::VarDeclarationPtr> var_declaration
-%type<cpplox::ast::ClassDeclarationPtr> class_declaration
-%type<std::vector<cpplox::ast::FunctionDeclarationPtr>> class_body
-%type<cpplox::ast::IfStatementPtr> if_statement
-%type<cpplox::ast::WhileStatementPtr> while_statement
-%type<cpplox::ast::ForStatementPtr> for_statement
-%type<cpplox::ast::StatementPtr> for_initialization
-%type<cpplox::ast::ExpressionStatementPtr> for_condition
-%type<cpplox::ast::ExpressionStatementPtr> for_increment
-%type<cpplox::ast::ExpressionStatementPtr> expr_statement
-%type<cpplox::ast::FunctionDeclarationPtr> def_statement
-%type<std::vector<cpplox::ast::VariableExprPtr>> function_parameters
-%type<cpplox::ast::PrintStatementPtr> print_statement
-%type<cpplox::ast::ReturnStatementPtr> return_statement
-%type<cpplox::ast::BreakStatementPtr> break_statement
-%type<cpplox::ast::ContinueStatementPtr> continue_statement
-%type<cpplox::ast::ArrayLiteralPtr> array_literal
-%type<std::vector<cpplox::ast::ExpressionPtr>> array_elements
-%type<cpplox::ast::ArraySubscriptExprPtr> array_subscript
-%type<cpplox::ast::UnaryExprPtr> unary_expr
+%type<ProgramPtr> program
+%type<VariableExprPtr> varExpr
+%type<MemberExprPtr> member_expr
+%type<AssignmentPtr> assignment_expr
+%type<CallExprPtr> call_expr
+%type<std::vector<ExpressionPtr>> call_arguments
+%type<ExpressionPtr> expr
+%type<BlockPtr> suite
+%type<StatementPtr> statement
+%type<StatementPtr> simple_statement
+%type<std::vector<StatementPtr>> statements
+%type<StatementPtr> compound_statement
+%type<VarDeclarationPtr> var_declaration
+%type<ClassDeclarationPtr> class_declaration
+%type<std::vector<FunctionDeclarationPtr>> class_body
+%type<IfStatementPtr> if_statement
+%type<WhileStatementPtr> while_statement
+%type<ForStatementPtr> for_statement
+%type<StatementPtr> for_initialization
+%type<ExpressionStatementPtr> for_condition
+%type<ExpressionStatementPtr> for_increment
+%type<ExpressionStatementPtr> expr_statement
+%type<FunctionDeclarationPtr> def_statement
+%type<std::vector<VariableExprPtr>> function_parameters
+%type<PrintStatementPtr> print_statement
+%type<ReturnStatementPtr> return_statement
+%type<BreakStatementPtr> break_statement
+%type<ContinueStatementPtr> continue_statement
+%type<ArrayLiteralPtr> array_literal
+%type<std::vector<ExpressionPtr>> array_elements
+%type<ArraySubscriptExprPtr> array_subscript
+%type<UnaryExprPtr> unary_expr
 
 %left PLUS MINUS
 %left STAR SLASH
@@ -153,7 +152,7 @@ program
     ;
 
 statements
-    : /* empty */ { $$ = std::vector<cpplox::ast::StatementPtr>(); }
+    : /* empty */ { $$ = std::vector<StatementPtr>(); }
     | statements statement
       { $1.push_back($2); $$ = $1; }
     ;
@@ -218,7 +217,7 @@ def_statement
     ;
 
 function_parameters
-    : /* empty */ { $$ = std::vector<cpplox::ast::VariableExprPtr>(); }
+    : /* empty */ { $$ = std::vector<VariableExprPtr>(); }
     | function_parameters varExpr COMMA
       { $1.push_back($2); $$ = $1; }
     | function_parameters varExpr
@@ -249,7 +248,7 @@ class_declaration
       { $$ = builder.emitClassDeclaration($2, $4); }
 
 class_body
-    : /* empty */ { $$ = std::vector<cpplox::ast::FunctionDeclarationPtr>(); }
+    : /* empty */ { $$ = std::vector<FunctionDeclarationPtr>(); }
     | class_body def_statement
       { $1.push_back($2); $$ = $1; }
     ;
@@ -272,7 +271,7 @@ call_expr
     : expr LPAREN call_arguments RPAREN { $$ = builder.emitCallExpression($1, $3); }
 
 call_arguments
-    : /* empty */ { $$ = std::vector<cpplox::ast::ExpressionPtr>(); }
+    : /* empty */ { $$ = std::vector<ExpressionPtr>(); }
     | call_arguments expr COMMA
       { $1.push_back($2); $$ = $1; }
     | call_arguments expr
@@ -282,7 +281,7 @@ array_literal
     : LBRACKET array_elements RBRACKET { $$ = builder.emitArrayLiteral($2); }
 
 array_elements
-    : /* empty */ { $$ = std::vector<cpplox::ast::ExpressionPtr>(); }
+    : /* empty */ { $$ = std::vector<ExpressionPtr>(); }
     | array_elements expr COMMA
       { $1.push_back($2); $$ = $1; }
     | array_elements expr

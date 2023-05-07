@@ -12,22 +12,20 @@ class Function : public Object {
   EnvironmentPtr enclosingCtx;
   EnvironmentPtr ctx;
   FunctionType functionType;
-  cpplox::ast::FunctionDeclarationPtr declaration;
+  FunctionDeclarationPtr declaration;
   std::string name;
   int arity;
 
  public:
   Function(EnvironmentPtr enclosingCtx, FunctionType functionType,
-           cpplox::ast::FunctionDeclarationPtr declaration,
-           const std::string &name, int arity = 0);
+           FunctionDeclarationPtr declaration, const std::string &name,
+           int arity = 0);
 
   inline FunctionType getType() const { return functionType; }
   inline const std::string &getName() const { return name; }
   inline int getArity() const { return arity; }
   inline int incrArity() { return ++arity; }
-  inline cpplox::ast::FunctionDeclarationPtr getDeclaration() {
-    return declaration;
-  }
+  inline FunctionDeclarationPtr getDeclaration() { return declaration; }
 
   std::string toString() const override;
   bool isFalsey() const override;
@@ -36,10 +34,10 @@ class Function : public Object {
   inline bool isEqual(const Function &other) const;
   inline EnvironmentPtr getCtx() const { return ctx; }
 
-  static std::shared_ptr<Function> make(
-      EnvironmentPtr enclosingCtx, FunctionType functionType,
-      cpplox::ast::FunctionDeclarationPtr declaration, const std::string &name,
-      int arity);
+  static std::shared_ptr<Function> make(EnvironmentPtr enclosingCtx,
+                                        FunctionType functionType,
+                                        FunctionDeclarationPtr declaration,
+                                        const std::string &name, int arity);
 };
 
 using FunctionPtr = std::shared_ptr<Function>;

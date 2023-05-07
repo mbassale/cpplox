@@ -1,12 +1,9 @@
-#ifndef __cpplox_ast_h
-#define __cpplox_ast_h
+#pragma once
 
 #include "common.h"
+#include "location.h"
 #include "object.h"
 #include "token.h"
-#include "location.h"
-
-namespace cpplox::ast {
 
 enum class NodeType {
 
@@ -1172,7 +1169,3 @@ class NodeVisitor {
   virtual T visitExpressionStatement(ExpressionPtr stmt);
   virtual T visitForStatement(ForStatementPtr stmt);
 };
-
-}  // namespace cpplox::ast
-
-#endif

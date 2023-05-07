@@ -10,9 +10,6 @@
 #include "token.h"
 
 using Parser::JSParser;
-
-using namespace cpplox;
-using namespace cpplox::ast;
 using namespace std;
 
 class EvaluatorTest : public ::testing::Test {
@@ -555,26 +552,26 @@ TEST_F(EvaluatorTest, TestClassDeclarationStatement) {
   };
   vector<TestCase> testCases = {
       TestCase{"class A { def method1() {} def method2() {} }", "A",
-               ast::ClassDeclaration::make(
-                   "A", {ast::FunctionDeclaration::make(
+               ClassDeclaration::make(
+                   "A", {FunctionDeclaration::make(
                              Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
-                             ast::Block::make({})),
-                         ast::FunctionDeclaration::make(
+                             Block::make({})),
+                         FunctionDeclaration::make(
                              Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
-                             ast::Block::make({}))})},
+                             Block::make({}))})},
       TestCase{
           "class A { def method1() { } def method2() { } def method3() { } }",
           "A",
-          ast::ClassDeclaration::make(
-              "A", {ast::FunctionDeclaration::make(
+          ClassDeclaration::make(
+              "A", {FunctionDeclaration::make(
                         Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
-                        ast::Block::make({})),
-                    ast::FunctionDeclaration::make(
+                        Block::make({})),
+                    FunctionDeclaration::make(
                         Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
-                        ast::Block::make({})),
-                    ast::FunctionDeclaration::make(
+                        Block::make({})),
+                    FunctionDeclaration::make(
                         Token(TokenType::TOKEN_IDENTIFIER, "method3"), {},
-                        ast::Block::make({}))})}};
+                        Block::make({}))})}};
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);

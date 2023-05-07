@@ -4,7 +4,6 @@
 #include <filesystem>
 
 namespace {
-using namespace cpplox;
 
 static bool isReturnObject(ObjectPtr value) {
   return value->Type == ObjectType::OBJ_RETURN_VALUE;
@@ -24,9 +23,6 @@ static bool isCallable(ObjectPtr value) {
 }
 
 }  // namespace
-
-namespace cpplox {
-using namespace ast;
 
 static IntegerObjectPtr tryCastAsInteger(ObjectPtr obj);
 
@@ -136,8 +132,8 @@ ObjectPtr Evaluator::evalFuncDeclarationStatement(EnvironmentPtr ctx,
   return function;
 }
 
-ObjectPtr Evaluator::evalClassDeclarationStatement(
-    EnvironmentPtr ctx, ast::ClassDeclarationPtr stmt) {
+ObjectPtr Evaluator::evalClassDeclarationStatement(EnvironmentPtr ctx,
+                                                   ClassDeclarationPtr stmt) {
   const auto& className = stmt->identifier;
   auto classDeclaration = ClassObject::make(stmt);
   // classes live in the global ctx
@@ -145,8 +141,7 @@ ObjectPtr Evaluator::evalClassDeclarationStatement(
   return classDeclaration;
 }
 
-ObjectPtr Evaluator::evalBlockStatement(EnvironmentPtr ctx,
-                                        ast::BlockPtr stmt) {
+ObjectPtr Evaluator::evalBlockStatement(EnvironmentPtr ctx, BlockPtr stmt) {
   auto localCtx = Environment::make(ctx);
   ObjectPtr lastValue = NULL_OBJECT_PTR;
   for (const auto& stmt : stmt->statements) {
@@ -288,15 +283,14 @@ ObjectPtr Evaluator::evalExpression(EnvironmentPtr ctx, ExpressionPtr expr) {
 }
 
 ObjectPtr Evaluator::evalAssignExpression(EnvironmentPtr ctx,
-                                          ast::AssignmentPtr expr) {
+                                          AssignmentPtr expr) {
   const auto& identifier = expr->identifier;
   auto value = evalExpression(ctx, expr->value);
   ctx->set(identifier, value);
   return ctx->get(identifier);
 }
 
-ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx,
-                                        ast::CallExprPtr expr) {
+ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx, CallExprPtr expr) {
   auto value = evalExpression(ctx, expr->left);
   if (isReturnObject(value)) {
     auto returnValue = std::dynamic_pointer_cast<ReturnObject>(value);
@@ -319,7 +313,7 @@ ObjectPtr Evaluator::evalCallExpression(EnvironmentPtr ctx,
 }
 
 ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
-                                      ast::CallExprPtr expr) {
+                                      CallExprPtr expr) {
   auto funcDeclStmt = callee->getDeclaration();
   auto funcCtx = callee->getCtx();
   // bind arguments
@@ -344,17 +338,16 @@ ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
 }
 
 ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
-                                   ast::CallExprPtr expr) {
+                                   CallExprPtr expr) {
   return Record::make(globalCtx, callee->declaration);
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EnvironmentPtr ctx,
-                                               ast::IntegerLiteralPtr expr) {
+                                               IntegerLiteralPtr expr) {
   return std::make_shared<IntegerObject>(expr->Value);
 }
 
-ObjectPtr Evaluator::evalMemberExpr(EnvironmentPtr ctx,
-                                    ast::MemberExprPtr expr) {
+ObjectPtr Evaluator::evalMemberExpr(EnvironmentPtr ctx, MemberExprPtr expr) {
   auto varValue = evalExpression(ctx, expr->left);
   if (varValue->Type == ObjectType::OBJ_RECORD) {
     auto recordValue = std::dynamic_pointer_cast<Record>(varValue);
@@ -373,7 +366,7 @@ ObjectPtr Evaluator::evalMemberExpr(EnvironmentPtr ctx,
 }
 
 BooleanObjectPtr Evaluator::evalBooleanLiteral(EnvironmentPtr ctx,
-                                               ast::BooleanLiteralPtr expr) {
+                                               BooleanLiteralPtr expr) {
   if (expr->Value) {
     return TRUE_OBJECT_PTR;
   } else {
@@ -382,17 +375,17 @@ BooleanObjectPtr Evaluator::evalBooleanLiteral(EnvironmentPtr ctx,
 }
 
 NullObjectPtr Evaluator::evalNilLiteral(EnvironmentPtr ctx,
-                                        ast::NilLiteralPtr expr) {
+                                        NilLiteralPtr expr) {
   return NULL_OBJECT_PTR;
 }
 
 StringObjectPtr Evaluator::evalStringLiteral(EnvironmentPtr ctx,
-                                             ast::StringLiteralPtr expr) {
+                                             StringLiteralPtr expr) {
   return std::make_shared<StringObject>(expr->Value);
 }
 
 ArrayObjectPtr Evaluator::evalArrayLiteral(EnvironmentPtr ctx,
-                                           ast::ArrayLiteralPtr expr) {
+                                           ArrayLiteralPtr expr) {
   std::vector<ObjectPtr> elements;
   for (auto elementExpr : expr->elements) {
     auto elementValue = evalExpression(ctx, elementExpr);
@@ -401,8 +394,8 @@ ArrayObjectPtr Evaluator::evalArrayLiteral(EnvironmentPtr ctx,
   return ArrayObject::make(elements);
 }
 
-ObjectPtr Evaluator::evalArraySubscriptExpression(
-    EnvironmentPtr ctx, ast::ArraySubscriptExprPtr expr) {
+ObjectPtr Evaluator::evalArraySubscriptExpression(EnvironmentPtr ctx,
+                                                  ArraySubscriptExprPtr expr) {
   auto arrayValue = evalExpression(ctx, expr->array);
   auto indexValue = evalExpression(ctx, expr->index);
   if (arrayValue->Type != ObjectType::OBJ_ARRAY) {
@@ -429,7 +422,7 @@ ObjectPtr Evaluator::evalArraySubscriptExpression(
 }
 
 ObjectPtr Evaluator::evalBinaryExpression(EnvironmentPtr ctx,
-                                          ast::BinaryExprPtr expr) {
+                                          BinaryExprPtr expr) {
   auto leftValue = evalExpression(ctx, expr->left);
   auto rightValue = evalExpression(ctx, expr->right);
   switch (expr->operator_.type) {
@@ -460,7 +453,7 @@ ObjectPtr Evaluator::evalBinaryExpression(EnvironmentPtr ctx,
 }
 
 ObjectPtr Evaluator::evalUnaryExpression(EnvironmentPtr ctx,
-                                         ast::UnaryExprPtr expr) {
+                                         UnaryExprPtr expr) {
   auto rhsValue = evalExpression(ctx, expr->right);
 
   switch (expr->operator_.type) {
@@ -595,5 +588,3 @@ IntegerObjectPtr tryCastAsInteger(ObjectPtr obj) {
   ss << "Cannot convert object to integer: " << obj->toString();
   throw RuntimeError::make(__FILE__, __LINE__, ss.str());
 }
-
-}  // namespace cpplox

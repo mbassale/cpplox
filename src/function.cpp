@@ -1,8 +1,8 @@
 #include "function.h"
 
 Function::Function(EnvironmentPtr enclosingCtx, FunctionType functionType,
-                   cpplox::ast::FunctionDeclarationPtr declaration,
-                   const std::string &name, int arity)
+                   FunctionDeclarationPtr declaration, const std::string &name,
+                   int arity)
     : Object(ObjectType::OBJ_FUNCTION),
       enclosingCtx(enclosingCtx),
       functionType(functionType),
@@ -12,10 +12,10 @@ Function::Function(EnvironmentPtr enclosingCtx, FunctionType functionType,
   ctx = Environment::make(enclosingCtx);
 }
 
-std::shared_ptr<Function> Function::make(
-    EnvironmentPtr enclosingCtx, FunctionType functionType,
-    cpplox::ast::FunctionDeclarationPtr declaration, const std::string &name,
-    int arity) {
+std::shared_ptr<Function> Function::make(EnvironmentPtr enclosingCtx,
+                                         FunctionType functionType,
+                                         FunctionDeclarationPtr declaration,
+                                         const std::string &name, int arity) {
   return std::make_shared<Function>(enclosingCtx, functionType, declaration,
                                     name, arity);
 }

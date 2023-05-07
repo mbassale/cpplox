@@ -2,8 +2,6 @@
 
 class Driver;
 
-namespace cpplox {
-
 class Settings {
  private:
   static Settings* instance;
@@ -26,7 +24,3 @@ class Settings {
 
   friend class ::Driver;
 };
-
-
-
-}  // namespace cpplox

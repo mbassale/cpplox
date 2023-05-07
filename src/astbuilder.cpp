@@ -1,7 +1,5 @@
 #include "astbuilder.h"
 
-using namespace cpplox::ast;
-
 ProgramPtr ASTBuilderImpl::emitProgram(
     const std::vector<StatementPtr> &statements) {
   program = Program::make(statements);
@@ -17,14 +15,13 @@ VarDeclarationPtr ASTBuilderImpl::emitVarDeclaration(
   return VarDeclaration::make(nameToken, initializer);
 }
 
-cpplox::ast::ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(
-    const Token &name,
-    const std::vector<cpplox::ast::FunctionDeclarationPtr> &methods) {
+ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(
+    const Token &name, const std::vector<FunctionDeclarationPtr> &methods) {
   return ClassDeclaration::make(name.lexeme(), methods);
 }
 
 ExpressionStatementPtr ASTBuilderImpl::emitExpressionStatement(
-    cpplox::ast::ExpressionPtr expr) {
+    ExpressionPtr expr) {
   return ExpressionStatement::make(expr);
 }
 
@@ -56,8 +53,8 @@ VariableExprPtr ASTBuilderImpl::emitVarExpression(const Token &value) {
   return VariableExpr::make(value.lexeme());
 }
 
-MemberExprPtr ASTBuilderImpl::emitMemberExpression(
-    cpplox::ast::VariableExprPtr object, const Token &member) {
+MemberExprPtr ASTBuilderImpl::emitMemberExpression(VariableExprPtr object,
+                                                   const Token &member) {
   return MemberExpr::make(object, member.lexeme());
 }
 
@@ -75,32 +72,30 @@ UnaryExprPtr ASTBuilderImpl::emitUnaryOp(TokenType op, ExpressionPtr rhs) {
   return UnaryExpr::make(Token::make(op), rhs);
 }
 
-BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op,
-                                           cpplox::ast::ExpressionPtr lhs,
-                                           cpplox::ast::ExpressionPtr rhs) {
+BinaryExprPtr ASTBuilderImpl::emitBinaryOp(TokenType op, ExpressionPtr lhs,
+                                           ExpressionPtr rhs) {
   return BinaryExpr::make(lhs, Token::make(op), rhs);
 }
 
 StatementPtr ASTBuilderImpl::emitEmptyStatement() { return Statement::make(); }
 
-IfStatementPtr ASTBuilderImpl::emitIfStatement(
-    cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr thenBody,
-    cpplox::ast::BlockPtr elseBody) {
+IfStatementPtr ASTBuilderImpl::emitIfStatement(ExpressionPtr condition,
+                                               BlockPtr thenBody,
+                                               BlockPtr elseBody) {
   if (elseBody == nullptr) {
     return IfStatement::make(condition, thenBody);
   }
   return IfStatement::make(condition, thenBody, elseBody);
 }
 
-WhileStatementPtr ASTBuilderImpl::emitWhileStatement(
-    cpplox::ast::ExpressionPtr condition, cpplox::ast::BlockPtr body) {
+WhileStatementPtr ASTBuilderImpl::emitWhileStatement(ExpressionPtr condition,
+                                                     BlockPtr body) {
   return WhileStatement::make(condition, body);
 }
 
 ForStatementPtr ASTBuilderImpl::emitForStatement(
-    cpplox::ast::StatementPtr initialization,
-    cpplox::ast::ExpressionStatementPtr condition,
-    cpplox::ast::ExpressionStatementPtr increment, cpplox::ast::BlockPtr body) {
+    StatementPtr initialization, ExpressionStatementPtr condition,
+    ExpressionStatementPtr increment, BlockPtr body) {
   ExpressionPtr conditionExpr;
   if (condition != nullptr) {
     conditionExpr = condition->expression;
@@ -119,9 +114,8 @@ ForStatementPtr ASTBuilderImpl::emitForStatement(
 }
 
 FunctionDeclarationPtr ASTBuilderImpl::emitDefStatement(
-    cpplox::ast::VariableExprPtr name,
-    const std::vector<cpplox::ast::VariableExprPtr> &arguments,
-    cpplox::ast::BlockPtr body) {
+    VariableExprPtr name, const std::vector<VariableExprPtr> &arguments,
+    BlockPtr body) {
   Token nameToken(TokenType::TOKEN_IDENTIFIER, name->identifier);
   std::vector<Token> argumentTokens;
   for (const auto &arg : arguments) {
@@ -147,6 +141,6 @@ ContinueStatementPtr ASTBuilderImpl::emitContinueStatement() {
 }
 
 BlockPtr ASTBuilderImpl::emitBlock(
-    const std::vector<cpplox::ast::StatementPtr> &statements) {
+    const std::vector<StatementPtr> &statements) {
   return Block::make(statements);
 }

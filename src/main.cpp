@@ -5,8 +5,8 @@
 #include "evaluator.h"
 #include "lexer.h"
 #include "parser.h"
-#include "token.h"
 #include "settings.h"
+#include "token.h"
 
 #define EXIT_CMDLINE_HELP 64
 
@@ -16,12 +16,12 @@ DEFINE_bool(debug, false, "Enable debugging");
 
 class Driver {
  private:
-  cpplox::Evaluator evaluator;
+  Evaluator evaluator;
 
  public:
   Driver() {
     if (FLAGS_debug) {
-      cpplox::Settings::getInstance()->debugMode = true;
+      Settings::getInstance()->debugMode = true;
     }
   }
 

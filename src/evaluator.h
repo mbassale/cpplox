@@ -1,16 +1,13 @@
-#ifndef __cpplox_evaluator_h
-#define __cpplox_evaluator_h
+#pragma once
 
 #include "ast.h"
 #include "class_object.h"
 #include "common.h"
 #include "environment.h"
 #include "function.h"
-#include "record.h"
 #include "object.h"
+#include "record.h"
 #include "settings.h"
-
-namespace cpplox {
 
 class RuntimeError : public std::runtime_error {
  public:
@@ -27,51 +24,48 @@ class Evaluator {
  public:
   Evaluator();
 
-  ObjectPtr eval(ast::ProgramPtr program);
+  ObjectPtr eval(ProgramPtr program);
   ObjectPtr getGlobalValue(const std::string& identifier) const {
     return globalCtx->get(identifier);
   }
 
  private:
-  ObjectPtr evalStatement(EnvironmentPtr ctx, ast::StatementPtr stmt);
+  ObjectPtr evalStatement(EnvironmentPtr ctx, StatementPtr stmt);
   ObjectPtr evalVarDeclarationStatement(EnvironmentPtr ctx,
-                                        ast::VarDeclarationPtr stmt);
+                                        VarDeclarationPtr stmt);
   ObjectPtr evalFuncDeclarationStatement(EnvironmentPtr ctx,
-                                         ast::FunctionDeclarationPtr stmt);
+                                         FunctionDeclarationPtr stmt);
   ObjectPtr evalClassDeclarationStatement(EnvironmentPtr ctx,
-                                          ast::ClassDeclarationPtr stmt);
-  ObjectPtr evalIfStatement(EnvironmentPtr ctx, ast::IfStatementPtr stmt);
-  ObjectPtr evalForStatement(EnvironmentPtr ctx, ast::ForStatementPtr stmt);
-  ObjectPtr evalWhileStatement(EnvironmentPtr ctx, ast::WhileStatementPtr stmt);
-  ObjectPtr evalPrintStatement(EnvironmentPtr ctx, ast::PrintStatementPtr stmt);
-  ObjectPtr evalReturnStatement(EnvironmentPtr ctx,
-                                ast::ReturnStatementPtr stmt);
-  ObjectPtr evalBreakStatement(EnvironmentPtr ctx, ast::BreakStatementPtr stmt);
+                                          ClassDeclarationPtr stmt);
+  ObjectPtr evalIfStatement(EnvironmentPtr ctx, IfStatementPtr stmt);
+  ObjectPtr evalForStatement(EnvironmentPtr ctx, ForStatementPtr stmt);
+  ObjectPtr evalWhileStatement(EnvironmentPtr ctx, WhileStatementPtr stmt);
+  ObjectPtr evalPrintStatement(EnvironmentPtr ctx, PrintStatementPtr stmt);
+  ObjectPtr evalReturnStatement(EnvironmentPtr ctx, ReturnStatementPtr stmt);
+  ObjectPtr evalBreakStatement(EnvironmentPtr ctx, BreakStatementPtr stmt);
   ObjectPtr evalContinueStatement(EnvironmentPtr ctx,
-                                  ast::ContinueStatementPtr stmt);
-  ObjectPtr evalBlockStatement(EnvironmentPtr ctx, ast::BlockPtr stmt);
+                                  ContinueStatementPtr stmt);
+  ObjectPtr evalBlockStatement(EnvironmentPtr ctx, BlockPtr stmt);
 
-  ObjectPtr evalExpression(EnvironmentPtr ctx, ast::ExpressionPtr expr);
-  ObjectPtr evalBinaryExpression(EnvironmentPtr ctx, ast::BinaryExprPtr expr);
-  ObjectPtr evalUnaryExpression(EnvironmentPtr ctx, ast::UnaryExprPtr expr);
-  ObjectPtr evalAssignExpression(EnvironmentPtr ctx, ast::AssignmentPtr expr);
-  ObjectPtr evalCallExpression(EnvironmentPtr ctx, ast::CallExprPtr expr);
+  ObjectPtr evalExpression(EnvironmentPtr ctx, ExpressionPtr expr);
+  ObjectPtr evalBinaryExpression(EnvironmentPtr ctx, BinaryExprPtr expr);
+  ObjectPtr evalUnaryExpression(EnvironmentPtr ctx, UnaryExprPtr expr);
+  ObjectPtr evalAssignExpression(EnvironmentPtr ctx, AssignmentPtr expr);
+  ObjectPtr evalCallExpression(EnvironmentPtr ctx, CallExprPtr expr);
   ObjectPtr evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
-                             ast::CallExprPtr expr);
+                             CallExprPtr expr);
   ObjectPtr evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
-                          ast::CallExprPtr expr);
-  ObjectPtr evalMemberExpr(EnvironmentPtr ctx, ast::MemberExprPtr expr);
+                          CallExprPtr expr);
+  ObjectPtr evalMemberExpr(EnvironmentPtr ctx, MemberExprPtr expr);
   IntegerObjectPtr evalIntegerLiteral(EnvironmentPtr ctx,
-                                      ast::IntegerLiteralPtr expr);
+                                      IntegerLiteralPtr expr);
   BooleanObjectPtr evalBooleanLiteral(EnvironmentPtr ctx,
-                                      ast::BooleanLiteralPtr expr);
-  NullObjectPtr evalNilLiteral(EnvironmentPtr ctx, ast::NilLiteralPtr expr);
-  StringObjectPtr evalStringLiteral(EnvironmentPtr ctx,
-                                    ast::StringLiteralPtr expr);
-  ArrayObjectPtr evalArrayLiteral(EnvironmentPtr ctx,
-                                  ast::ArrayLiteralPtr expr);
+                                      BooleanLiteralPtr expr);
+  NullObjectPtr evalNilLiteral(EnvironmentPtr ctx, NilLiteralPtr expr);
+  StringObjectPtr evalStringLiteral(EnvironmentPtr ctx, StringLiteralPtr expr);
+  ArrayObjectPtr evalArrayLiteral(EnvironmentPtr ctx, ArrayLiteralPtr expr);
   ObjectPtr evalArraySubscriptExpression(EnvironmentPtr ctx,
-                                         ast::ArraySubscriptExprPtr expr);
+                                         ArraySubscriptExprPtr expr);
   ObjectPtr evalBinaryOperator(EnvironmentPtr ctx, ObjectPtr lhsValue,
                                TokenType operator_, ObjectPtr rhsValue);
   ObjectPtr evalLogicOperator(EnvironmentPtr ctx, ObjectPtr lhsValue,
@@ -81,7 +75,3 @@ class Evaluator {
   ObjectPtr evalMinusOperator(EnvironmentPtr ctx, ObjectPtr rhsValue);
   ObjectPtr evalBangOperator(EnvironmentPtr ctx, ObjectPtr rhsValue);
 };
-
-}  // namespace cpplox
-
-#endif  // __cpplox_evaluator_h

@@ -16,6 +16,6 @@ bool ClassObject::isEqual(const ClassObject &other) const {
 }
 
 std::shared_ptr<ClassObject> ClassObject::make(
-    cpplox::ast::ClassDeclarationPtr declaration) {
+    ClassDeclarationPtr declaration) {
   return std::make_shared<ClassObject>(declaration);
 }
