@@ -4,6 +4,7 @@
 #include "common.h"
 #include "object.h"
 #include "token.h"
+#include "location.h"
 
 namespace cpplox::ast {
 

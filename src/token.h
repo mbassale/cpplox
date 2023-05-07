@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "location.h"
 
 enum class TokenType {
   TOKEN_EMPTY,
@@ -60,29 +61,23 @@ class Scanner;
 struct Token {
  public:
   TokenType type;
-  std::string::const_iterator start;
-  size_t length;
-  size_t line;
+  SourceLocation location_;
   std::string error;
   std::string lexeme_;
 
-  explicit Token() : type(TokenType::TOKEN_EMPTY) {}
-  explicit Token(TokenType type) : type(type), start(), length(), line() {}
+  explicit Token() : type(TokenType::TOKEN_EMPTY), location_() {}
+  explicit Token(TokenType type) : type(type), location_() {}
   explicit Token(TokenType type, const std::string &lexeme)
-      : type(type), lexeme_(lexeme), line(1) {
-    start = lexeme_.cbegin();
-    length = lexeme_.size();
-  }
-  explicit Token(TokenType type, std::string::const_iterator start,
-                 size_t length, size_t line)
-      : type(type), start(start), length(length), line(line) {
-    lexeme_ = std::string(start, start + length);
-  }
+      : type(type), location_(), lexeme_(lexeme) {}
+  explicit Token(TokenType type, const SourceLocation &location,
+                 const std::string &lexeme)
+      : type(type), location_(location), lexeme_(lexeme) {}
   const std::string lexeme() const { return lexeme_; }
   const std::string str() const {
     std::ostringstream ss;
-    ss << std::setfill('0') << std::setw(4) << line << " " << std::setfill('0')
-       << std::setw(2) << (int)type << " " << lexeme();
+    ss << std::setfill('0') << std::setw(4) << location_.line << ":"
+       << location_.column << " " << std::setfill('0') << std::setw(2)
+       << (int)type << " " << lexeme();
     return ss.str();
   }
 

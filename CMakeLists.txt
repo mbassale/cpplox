@@ -83,6 +83,7 @@ set(SOURCES
   src/settings.cpp
   src/lexer.h
   src/lexer_impl.cpp
+  src/location.h
   ${BISON_JSParser_OUTPUTS}
   ${FLEX_JSLexer_OUTPUTS}
 )
