@@ -1,5 +1,4 @@
-#ifndef __cpplox_scanner_h
-#define __cpplox_scanner_h
+#pragma once
 
 #include "common.h"
 
@@ -79,9 +78,7 @@ struct Token {
       : type(type), start(start), length(length), line(line) {
     lexeme_ = std::string(start, start + length);
   }
-  const std::string lexeme() const {
-    return lexeme_;
-  }
+  const std::string lexeme() const { return lexeme_; }
   const std::string str() const {
     std::ostringstream ss;
     ss << std::setfill('0') << std::setw(4) << line << " " << std::setfill('0')
@@ -94,54 +91,6 @@ struct Token {
   }
 
   static Token make(TokenType type);
-  static Token make(const Scanner &scanner, TokenType type);
-  static Token makeError(const Scanner &scanner, const std::string &error);
 };
 
 bool operator==(const Token &lhs, const Token &rhs);
-
-class Scanner {
-  const std::string source;
-  std::string::const_iterator start;
-  std::string::const_iterator current;
-  size_t line;
-
- public:
-  explicit Scanner(const std::string &source) : source(source) {
-    start = this->source.begin();
-    current = this->source.begin();
-    line = 1;
-  }
-
-  Token next();
-
- private:
-  friend class Token;
-  inline bool isAtEnd() { return current == source.cend(); }
-  inline char advance() {
-    current++;
-    return *(current - 1);
-  }
-  inline bool match(char expected) {
-    if (isAtEnd()) return false;
-    if (*current != expected) return false;
-    current++;
-    return true;
-  }
-  inline char peek() { return *current; }
-  inline char peekNext() {
-    if (isAtEnd()) return '\0';
-    return *(current + 1);
-  }
-  void skipWhitespaceAndComments();
-  Token scanString();
-  Token scanNumber();
-  Token scanIdentifier();
-  TokenType identifierType();
-  TokenType checkKeyword(size_t offset, const std::string &rest,
-                         TokenType type);
-};
-
-typedef std::shared_ptr<Scanner> ScannerPtr;
-
-#endif  // __cpplox_scanner_h

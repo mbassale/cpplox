@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "common.h"
 #include "ast.h"
-#include "scanner.h"
+#include "token.h"
 #include "lexer.h"
 #include "astbuilder.h"
 

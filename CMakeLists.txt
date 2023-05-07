@@ -63,8 +63,8 @@ set(SOURCES
   src/config.h
   src/lineinfo.h
   src/lineinfo.cpp
-  src/scanner.h
-  src/scanner.cpp
+  src/token.h
+  src/token.cpp
   src/parser.h
   src/parser.cpp
   src/object.h

@@ -7,7 +7,7 @@
 #include <string>
 #include <stack>
 #include "common.h"
-#include "scanner.h"
+#include "token.h"
 #include "ast.h"
 
 class JSLexer;

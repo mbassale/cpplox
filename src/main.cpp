@@ -5,7 +5,7 @@
 #include "evaluator.h"
 #include "lexer.h"
 #include "parser.h"
-#include "scanner.h"
+#include "token.h"
 #include "settings.h"
 
 #define EXIT_CMDLINE_HELP 64

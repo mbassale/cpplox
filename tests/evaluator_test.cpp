@@ -7,7 +7,7 @@
 #include "common.h"
 #include "lexer.h"
 #include "parser.h"
-#include "scanner.h"
+#include "token.h"
 
 using Parser::JSParser;
 

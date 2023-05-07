@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "object.h"
-#include "scanner.h"
+#include "token.h"
 
 namespace cpplox::ast {
 
