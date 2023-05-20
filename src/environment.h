@@ -16,6 +16,7 @@ class Environment : public std::enable_shared_from_this<Environment> {
   Environment() {}
   Environment(EnvironmentPtr enclosing) : enclosing(enclosing) {}
 
+  void declare(const std::string& identifier, ObjectPtr value);
   void set(const std::string& identifier, ObjectPtr value);
   ObjectPtr get(const std::string& identifier);
 

@@ -27,6 +27,10 @@ std::string Environment::toString() {
   return result;
 }
 
+void Environment::declare(const std::string& identifier, ObjectPtr value) {
+  values[identifier] = value;
+}
+
 void Environment::set(const std::string& identifier, ObjectPtr value) {
   if (existsInLocalScope(identifier)) {
     values[identifier] = value;
