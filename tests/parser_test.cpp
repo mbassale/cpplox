@@ -542,7 +542,49 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
                   MemberExpr::make(VariableExpr::make("a"), "method1")),
               ExpressionStatement::make(CallExpr::make(
                   MemberExpr::make(VariableExpr::make("a"), "method1"),
-                  std::vector<ExpressionPtr>{}))}))};
+                  std::vector<ExpressionPtr>{}))})),
+      ParserTestData(
+          "ClassWithMemberArgumentsAndCall",
+          "class A { def method1(a, b) {} } var a = A(); a.method1(1, 2);",
+          Program::make(std::vector<StatementPtr>{
+              ClassDeclaration::make(
+                  "A", {FunctionDeclaration::make(
+                           Token(TokenType::TOKEN_IDENTIFIER, "method1"),
+                           {Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                            Token(TokenType::TOKEN_IDENTIFIER, "b")},
+                           Block::make({}))}),
+              VarDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                  CallExpr::make(VariableExpr::make("A"),
+                                 std::vector<ExpressionPtr>{})),
+              ExpressionStatement::make(CallExpr::make(
+                  MemberExpr::make(VariableExpr::make("a"), "method1"),
+                  std::vector<ExpressionPtr>{IntegerLiteral::make(1),
+                                             IntegerLiteral::make(2)}))})),
+      ParserTestData(
+          "ClassWithMemberArgumentsAndCallAndReturn",
+          "class A { def method1(a, b) { return a + b; } } var a = A(); var b "
+          "= a.method1(1, 2);",
+          Program::make(std::vector<StatementPtr>{
+              ClassDeclaration::make(
+                  "A", {FunctionDeclaration::make(
+                           Token(TokenType::TOKEN_IDENTIFIER, "method1"),
+                           {Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                            Token(TokenType::TOKEN_IDENTIFIER, "b")},
+                           Block::make({ReturnStatement::make(BinaryExpr::make(
+                               VariableExpr::make("a"),
+                               Token::make(TokenType::TOKEN_PLUS),
+                               VariableExpr::make("b")))}))}),
+              VarDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
+                  CallExpr::make(VariableExpr::make("A"),
+                                 std::vector<ExpressionPtr>{})),
+              VarDeclaration::make(
+                  Token(TokenType::TOKEN_IDENTIFIER, "b"),
+                  CallExpr::make(
+                      MemberExpr::make(VariableExpr::make("a"), "method1"),
+                      std::vector<ExpressionPtr>{IntegerLiteral::make(1),
+                                                 IntegerLiteral::make(2)}))}))};
 
   assertTestCases(testCases);
 }
