@@ -321,7 +321,7 @@ ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
     const auto paramName = funcDeclStmt->params[i].lexeme();
     auto argExpr = expr->arguments[i];
     auto argValue = evalExpression(ctx, argExpr);
-    funcCtx->set(paramName, argValue);
+    funcCtx->declare(paramName, argValue);
   }
   // execute function body
   auto lastValue = evalStatement(funcCtx, funcDeclStmt->body);

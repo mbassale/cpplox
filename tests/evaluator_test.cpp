@@ -648,8 +648,8 @@ class A {                 \
                                 TestCase{"MemberExpression2",
                                          "\
   class A {                 \
-      def method1(a_, b_) { \
-        return a_ + b_;     \
+      def method1(a, b) {   \
+        return a + b;       \
       }                     \
   }                         \
   var a1 = A();             \
