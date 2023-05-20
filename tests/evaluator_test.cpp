@@ -629,11 +629,34 @@ TEST_F(EvaluatorTest, TestMemberExpression) {
     string source;
     unordered_map<string, int> expectedValues;
   };
-  vector<TestCase> testCases = {
-      TestCase{"MemberExpression1",
-               "class A { def method1() { return 1; } def method2() { return "
-               "2;} } var a = A(); var b = a.method1(); var c = a.method2();",
-               {{"b", 1}, {"c", 2}}}};
+  vector<TestCase> testCases = {TestCase{"MemberExpression1",
+                                         " \
+class A {                 \
+    def method1() {       \
+      return 1;           \
+    }                     \
+                          \
+    def method2() {       \
+      return 2;           \
+    }                     \
+  }                       \
+                          \
+  var a = A();            \
+  var b = a.method1();    \
+  var c = a.method2();",
+                                         {{"b", 1}, {"c", 2}}},
+                                TestCase{"MemberExpression2",
+                                         "\
+  class A {                 \
+      def method1(a_, b_) { \
+        return a_ + b_;     \
+      }                     \
+  }                         \
+  var a1 = A();             \
+  var b = a1.method1(1,2);  \
+  var a2 = A();             \
+  var c = a2.method1(3,4);",
+                                         {{"b", 3}, {"c", 7}}}};
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);
