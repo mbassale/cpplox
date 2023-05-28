@@ -1,5 +1,7 @@
 #include "astbuilder.h"
 
+using std::vector;
+
 ProgramPtr ASTBuilderImpl::emitProgram(
     const std::vector<StatementPtr> &statements) {
   program = Program::make(statements);
@@ -15,8 +17,20 @@ VarDeclarationPtr ASTBuilderImpl::emitVarDeclaration(
 }
 
 ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(
-    const Token &name, const std::vector<FunctionDeclarationPtr> &methods) {
-  return ClassDeclaration::make(name.lexeme(), methods);
+    const Token &name, const std::vector<StatementPtr> &definitions) {
+  vector<VarDeclarationPtr> fields;
+  vector<FunctionDeclarationPtr> methods;
+  for (const auto &definition : definitions) {
+    if (definition->Type == NodeType::VAR_DECLARATION) {
+      fields.push_back(std::dynamic_pointer_cast<VarDeclaration>(definition));
+    } else if (definition->Type == NodeType::FUNCTION_DECLARATION) {
+      methods.push_back(
+          std::dynamic_pointer_cast<FunctionDeclaration>(definition));
+    } else {
+      assert(false);
+    }
+  }
+  return ClassDeclaration::make(name.lexeme(), fields, methods);
 }
 
 ExpressionStatementPtr ASTBuilderImpl::emitExpressionStatement(

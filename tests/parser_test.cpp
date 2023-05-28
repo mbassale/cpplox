@@ -473,23 +473,24 @@ TEST_F(ParserTest, ClassDeclarationAssertions) {
       ParserTestData(
           "ClassWithOneMethod", "class A { def method1() {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A",
+              "A", {},
               {FunctionDeclaration::make("method1", {}, Block::make({}))})})),
       ParserTestData(
           "ClassWithTwoMethods",
           "class A { def method1() {} def method2() {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A",
+              "A", {},
               {FunctionDeclaration::make("method1", {}, Block::make({})),
                FunctionDeclaration::make("method2", {}, Block::make({}))})})),
       ParserTestData(
           "ClassWithTwoMethodsWithMultipleArgs",
           "class A { def method1(a, b) {} def method2(c, d) {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A", {FunctionDeclaration::make("method1", {"a", "b"},
-                                              Block::make({})),
-                    FunctionDeclaration::make("method2", {"c", "d"},
-                                              Block::make({}))})})),
+              "A", {},
+              {FunctionDeclaration::make("method1", {"a", "b"},
+                                         Block::make({})),
+               FunctionDeclaration::make("method2", {"c", "d"},
+                                         Block::make({}))})})),
       ParserTestData("TwoClasses", "class A {} class B {}",
                      Program::make(std::vector<StatementPtr>{
                          ClassDeclaration::make("A", {}),
@@ -508,8 +509,9 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           "ClassWithMemberAccessAndCall",
           "class A { def method1() {} } var a = A(); a.method1; a.method1();",
           Program::make(std::vector<StatementPtr>{
-              ClassDeclaration::make("A", {FunctionDeclaration::make(
-                                              "method1", {}, Block::make({}))}),
+              ClassDeclaration::make(
+                  "A", {},
+                  {FunctionDeclaration::make("method1", {}, Block::make({}))}),
               VarDeclaration::make(
                   "a", CallExpr::make(VariableExpr::make("A"),
                                       std::vector<ExpressionPtr>{})),
@@ -520,11 +522,13 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
                   std::vector<ExpressionPtr>{}))})),
       ParserTestData(
           "ClassWithMemberArgumentsAndCall",
-          "class A { def method1(a, b) {} } var a = A(); a.method1(1, 2);",
+          "class A { var a = 1; def method1(a, b) {} } var a = A(); "
+          "a.method1(1, 2);",
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
-                  "A", {FunctionDeclaration::make("method1", {"a", "b"},
-                                                  Block::make({}))}),
+                  "A", {VarDeclaration::make("a", IntegerLiteral::make(1))},
+                  {FunctionDeclaration::make("method1", {"a", "b"},
+                                             Block::make({}))}),
               VarDeclaration::make(
                   "a", CallExpr::make(VariableExpr::make("A"),
                                       std::vector<ExpressionPtr>{})),
@@ -534,16 +538,23 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
                                              IntegerLiteral::make(2)}))})),
       ParserTestData(
           "ClassWithMemberArgumentsAndCallAndReturn",
-          "class A { def method1(a, b) { return a + b; } } var a = A(); var b "
+          "class A { var a = 1; def method1(a, b) { return a + b; } var b = 2; "
+          "} var a = "
+          "A(); var b "
           "= a.method1(1, 2);",
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
-                  "A", {FunctionDeclaration::make(
-                           "method1", {"a", "b"},
-                           Block::make({ReturnStatement::make(BinaryExpr::make(
-                               VariableExpr::make("a"),
-                               Token::make(TokenType::TOKEN_PLUS),
-                               VariableExpr::make("b")))}))}),
+                  "A",
+                  {
+                      VarDeclaration::make("a", IntegerLiteral::make(1)),
+                      VarDeclaration::make("b", IntegerLiteral::make(2)),
+                  },
+                  {FunctionDeclaration::make(
+                      "method1", {"a", "b"},
+                      Block::make({ReturnStatement::make(
+                          BinaryExpr::make(VariableExpr::make("a"),
+                                           Token::make(TokenType::TOKEN_PLUS),
+                                           VariableExpr::make("b")))}))}),
               VarDeclaration::make(
                   "a", CallExpr::make(VariableExpr::make("A"),
                                       std::vector<ExpressionPtr>{})),

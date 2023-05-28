@@ -33,7 +33,7 @@ using namespace std;
         virtual ProgramPtr emitProgram(const std::vector<StatementPtr> &statements) = 0;
         virtual VarDeclarationPtr emitVarDeclaration(VariableExprPtr identifier, ExpressionPtr initializer = nullptr) = 0;
         virtual MemberExprPtr emitMemberExpression(VariableExprPtr object, const Token &member) = 0;
-        virtual ClassDeclarationPtr emitClassDeclaration(const Token& name, const std::vector<FunctionDeclarationPtr> &methods = {}) = 0;
+        virtual ClassDeclarationPtr emitClassDeclaration(const Token& name, const std::vector<StatementPtr> &definitions = {}) = 0;
         virtual ExpressionStatementPtr emitExpressionStatement(ExpressionPtr expr) = 0;
         virtual IntegerLiteralPtr emitIntegerLiteral(const Token &value) = 0;
         virtual StringLiteralPtr emitStringLiteral(const Token &value) = 0;
@@ -118,7 +118,7 @@ using namespace std;
 %type<StatementPtr> compound_statement
 %type<VarDeclarationPtr> var_declaration
 %type<ClassDeclarationPtr> class_declaration
-%type<std::vector<FunctionDeclarationPtr>> class_body
+%type<std::vector<StatementPtr>> class_body
 %type<IfStatementPtr> if_statement
 %type<WhileStatementPtr> while_statement
 %type<ForStatementPtr> for_statement
@@ -248,8 +248,10 @@ class_declaration
       { $$ = builder.emitClassDeclaration($2, $4); }
 
 class_body
-    : /* empty */ { $$ = std::vector<FunctionDeclarationPtr>(); }
+    : /* empty */ { $$ = std::vector<StatementPtr>(); }
     | class_body def_statement
+      { $1.push_back($2); $$ = $1; }
+    | class_body var_declaration
       { $1.push_back($2); $$ = $1; }
     ;
 

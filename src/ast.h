@@ -603,6 +603,7 @@ using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
 
 struct ClassDeclaration : public Statement {
   std::string identifier;
+  std::vector<VarDeclarationPtr> fields;
   std::vector<FunctionDeclarationPtr> methods;
 
   ClassDeclaration(const std::string& identifier)
@@ -610,9 +611,11 @@ struct ClassDeclaration : public Statement {
         identifier(identifier),
         methods() {}
   ClassDeclaration(const std::string& identifier,
+                   const std::vector<VarDeclarationPtr>& fields,
                    const std::vector<FunctionDeclarationPtr>& methods)
       : Statement(NodeType::CLASS_DECLARATION),
         identifier(identifier),
+        fields(fields),
         methods(methods) {}
 
   bool isEqual(const ClassDeclaration& other) {
@@ -623,9 +626,12 @@ struct ClassDeclaration : public Statement {
   }
 
   std::string toString() const {
-    std::string result = "(ClassDeclaration " + identifier;
+    std::string result = "(ClassDeclaration " + identifier + " ";
+    for (const auto& field : fields) {
+      result += "var " + field->toString() + ", ";
+    }
     for (const auto& method : methods) {
-      result += " " + method->toString();
+      result += "def " + method->toString() + ", ";
     }
     result += ")";
     return result;
@@ -633,8 +639,9 @@ struct ClassDeclaration : public Statement {
 
   static std::shared_ptr<ClassDeclaration> make(
       const std::string& identifier,
+      const std::vector<VarDeclarationPtr>& fields = {},
       const std::vector<FunctionDeclarationPtr>& methods = {}) {
-    return std::make_shared<ClassDeclaration>(identifier, methods);
+    return std::make_shared<ClassDeclaration>(identifier, fields, methods);
   }
 };
 using ClassDeclarationPtr = std::shared_ptr<ClassDeclaration>;

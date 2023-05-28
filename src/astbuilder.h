@@ -13,8 +13,7 @@ class ASTBuilderImpl : public ASTBuilder {
   VarDeclarationPtr emitVarDeclaration(VariableExprPtr identifier,
                                        ExpressionPtr initializer) override;
   ClassDeclarationPtr emitClassDeclaration(
-      const Token &name,
-      const std::vector<FunctionDeclarationPtr> &methods) override;
+      const Token &name, const std::vector<StatementPtr> &definitions) override;
   ExpressionStatementPtr emitExpressionStatement(ExpressionPtr expr) override;
   IntegerLiteralPtr emitIntegerLiteral(const Token &value) override;
   StringLiteralPtr emitStringLiteral(const Token &value) override;
