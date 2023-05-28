@@ -117,11 +117,11 @@ FunctionDeclarationPtr ASTBuilderImpl::emitDefStatement(
     VariableExprPtr name, const std::vector<VariableExprPtr> &arguments,
     BlockPtr body) {
   Token nameToken(TokenType::TOKEN_IDENTIFIER, name->identifier);
-  std::vector<Token> argumentTokens;
+  std::vector<std::string> argumentNames;
   for (const auto &arg : arguments) {
-    argumentTokens.emplace_back(TokenType::TOKEN_IDENTIFIER, arg->identifier);
+    argumentNames.push_back(arg->identifier);
   }
-  return FunctionDeclaration::make(nameToken, argumentTokens, body);
+  return FunctionDeclaration::make(name->identifier, argumentNames, body);
 }
 
 PrintStatementPtr ASTBuilderImpl::emitPrintStatement(ExpressionPtr expr) {

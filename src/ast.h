@@ -528,16 +528,17 @@ struct VarDeclaration : public Statement {
 using VarDeclarationPtr = std::shared_ptr<VarDeclaration>;
 
 struct FunctionDeclaration : public Statement {
-  Token identifier;
-  std::vector<Token> params;
+  std::string identifier;
+  std::vector<std::string> params;
   StatementPtr body;
 
-  FunctionDeclaration(const Token& identifier)
+  FunctionDeclaration(const std::string& identifier)
       : Statement(NodeType::FUNCTION_DECLARATION),
         identifier(identifier),
         params(),
         body(nullptr) {}
-  FunctionDeclaration(const Token& identifier, const std::vector<Token>& params,
+  FunctionDeclaration(const std::string& identifier,
+                      const std::vector<std::string>& params,
                       const StatementPtr& body)
       : Statement(NodeType::FUNCTION_DECLARATION),
         identifier(identifier),
@@ -554,7 +555,7 @@ struct FunctionDeclaration : public Statement {
   }
 
   bool isEqual(const FunctionDeclaration& other) {
-    if (!identifier.isEqual(other.identifier)) {
+    if (identifier != other.identifier) {
       return false;
     }
 
@@ -579,9 +580,9 @@ struct FunctionDeclaration : public Statement {
   }
 
   std::string toString() const override {
-    std::string result = "(FunctionDeclaration " + identifier.lexeme();
+    std::string result = "(FunctionDeclaration " + identifier;
     for (const auto& param : params) {
-      result += " " + param.lexeme();
+      result += " " + param;
     }
     if (body) {
       result += " " + body->toString();
@@ -591,7 +592,7 @@ struct FunctionDeclaration : public Statement {
   }
 
   static std::shared_ptr<FunctionDeclaration> make(
-      const Token& identifier, const std::vector<Token>& params,
+      const std::string& identifier, const std::vector<std::string>& params,
       const StatementPtr& body) {
     return std::make_shared<FunctionDeclaration>(identifier, params, body);
   }

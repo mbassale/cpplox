@@ -551,27 +551,20 @@ TEST_F(EvaluatorTest, TestClassDeclarationStatement) {
     ClassDeclarationPtr expectedValue;
   };
   vector<TestCase> testCases = {
-      TestCase{"class A { def method1() {} def method2() {} }", "A",
-               ClassDeclaration::make(
-                   "A", {FunctionDeclaration::make(
-                             Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
-                             Block::make({})),
-                         FunctionDeclaration::make(
-                             Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
-                             Block::make({}))})},
+      TestCase{
+          "class A { def method1() {} def method2() {} }", "A",
+          ClassDeclaration::make(
+              "A",
+              {FunctionDeclaration::make("method1", {}, Block::make({})),
+               FunctionDeclaration::make("method2", {}, Block::make({}))})},
       TestCase{
           "class A { def method1() { } def method2() { } def method3() { } }",
           "A",
           ClassDeclaration::make(
-              "A", {FunctionDeclaration::make(
-                        Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
-                        Block::make({})),
-                    FunctionDeclaration::make(
-                        Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
-                        Block::make({})),
-                    FunctionDeclaration::make(
-                        Token(TokenType::TOKEN_IDENTIFIER, "method3"), {},
-                        Block::make({}))})}};
+              "A",
+              {FunctionDeclaration::make("method1", {}, Block::make({})),
+               FunctionDeclaration::make("method2", {}, Block::make({})),
+               FunctionDeclaration::make("method3", {}, Block::make({}))})}};
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);

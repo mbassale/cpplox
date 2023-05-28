@@ -4,7 +4,7 @@ Record::Record(EnvironmentPtr enclosingCtx, ClassDeclarationPtr classDecl)
     : Object(ObjectType::OBJ_RECORD), classDecl(classDecl) {
   ctx = Environment::make(enclosingCtx);
   for (auto& method : classDecl->methods) {
-    const auto& methodName = method->identifier.lexeme();
+    const auto& methodName = method->identifier;
     const auto arity = method->params.size();
     methods[methodName] =
         Function::make(ctx, TYPE_METHOD, method, methodName, arity);

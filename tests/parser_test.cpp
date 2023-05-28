@@ -116,33 +116,27 @@ TEST_F(ParserTest, ParseFunctionDeclaration) {
       ParserTestData(
           "FunctionDeclarationNoArgs", "def test() { return true; }",
           Program::make(std::vector<StatementPtr>{FunctionDeclaration::make(
-              Token(TokenType::TOKEN_IDENTIFIER, "test"), std::vector<Token>{},
+              "test", {},
               Block::make(std::vector<StatementPtr>{
                   ReturnStatement::make(BooleanLiteral::makeTrue())}))})),
       ParserTestData(
           "FunctionDeclarationOneArg", "def test(arg1) { return true; }",
           Program::make(std::vector<StatementPtr>{FunctionDeclaration::make(
-              Token(TokenType::TOKEN_IDENTIFIER, "test"),
-              std::vector<Token>{Token(TokenType::TOKEN_IDENTIFIER, "arg1")},
+              "test", {"arg1"},
               Block::make(std::vector<StatementPtr>{
                   ReturnStatement::make(BooleanLiteral::makeTrue())}))})),
       ParserTestData(
           "FunctionDeclarationMultipleArgs",
           "def test(arg1, arg2) { return true; }",
           Program::make(std::vector<StatementPtr>{FunctionDeclaration::make(
-              Token(TokenType::TOKEN_IDENTIFIER, "test"),
-              std::vector<Token>{Token(TokenType::TOKEN_IDENTIFIER, "arg1"),
-                                 Token(TokenType::TOKEN_IDENTIFIER, "arg2")},
+              "test", {"arg1", "arg2"},
               Block::make(std::vector<StatementPtr>{
                   ReturnStatement::make(BooleanLiteral::makeTrue())}))})),
       ParserTestData(
           "FunctionDeclarationLocalVars",
           "def test(arg1) { var a = arg1; return a; }",
           Program::make(std::vector<StatementPtr>{FunctionDeclaration::make(
-              Token(TokenType::TOKEN_IDENTIFIER, "test"),
-              std::vector<Token>{
-                  Token(TokenType::TOKEN_IDENTIFIER, "arg1"),
-              },
+              "test", {"arg1"},
               Block::make(std::vector<StatementPtr>{
                   VarDeclaration::make(Token(TokenType::TOKEN_IDENTIFIER, "a"),
                                        VariableExpr::make("arg1")),
@@ -485,33 +479,23 @@ TEST_F(ParserTest, ClassDeclarationAssertions) {
       ParserTestData(
           "ClassWithOneMethod", "class A { def method1() {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A", {FunctionDeclaration::make(
-                       Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
-                       Block::make({}))})})),
+              "A",
+              {FunctionDeclaration::make("method1", {}, Block::make({}))})})),
       ParserTestData(
           "ClassWithTwoMethods",
           "class A { def method1() {} def method2() {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A", {FunctionDeclaration::make(
-                        Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
-                        Block::make({})),
-                    FunctionDeclaration::make(
-                        Token(TokenType::TOKEN_IDENTIFIER, "method2"), {},
-                        Block::make({}))})})),
+              "A",
+              {FunctionDeclaration::make("method1", {}, Block::make({})),
+               FunctionDeclaration::make("method2", {}, Block::make({}))})})),
       ParserTestData(
           "ClassWithTwoMethodsWithMultipleArgs",
           "class A { def method1(a, b) {} def method2(c, d) {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A", {FunctionDeclaration::make(
-                        Token(TokenType::TOKEN_IDENTIFIER, "method1"),
-                        {Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                         Token(TokenType::TOKEN_IDENTIFIER, "b")},
-                        Block::make({})),
-                    FunctionDeclaration::make(
-                        Token(TokenType::TOKEN_IDENTIFIER, "method2"),
-                        {Token(TokenType::TOKEN_IDENTIFIER, "c"),
-                         Token(TokenType::TOKEN_IDENTIFIER, "d")},
-                        Block::make({}))})})),
+              "A", {FunctionDeclaration::make("method1", {"a", "b"},
+                                              Block::make({})),
+                    FunctionDeclaration::make("method2", {"c", "d"},
+                                              Block::make({}))})})),
       ParserTestData("TwoClasses", "class A {} class B {}",
                      Program::make(std::vector<StatementPtr>{
                          ClassDeclaration::make("A", {}),
@@ -530,10 +514,8 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           "ClassWithMemberAccessAndCall",
           "class A { def method1() {} } var a = A(); a.method1; a.method1();",
           Program::make(std::vector<StatementPtr>{
-              ClassDeclaration::make(
-                  "A", {FunctionDeclaration::make(
-                           Token(TokenType::TOKEN_IDENTIFIER, "method1"), {},
-                           Block::make({}))}),
+              ClassDeclaration::make("A", {FunctionDeclaration::make(
+                                              "method1", {}, Block::make({}))}),
               VarDeclaration::make(
                   Token(TokenType::TOKEN_IDENTIFIER, "a"),
                   CallExpr::make(VariableExpr::make("A"),
@@ -548,11 +530,8 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           "class A { def method1(a, b) {} } var a = A(); a.method1(1, 2);",
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
-                  "A", {FunctionDeclaration::make(
-                           Token(TokenType::TOKEN_IDENTIFIER, "method1"),
-                           {Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                            Token(TokenType::TOKEN_IDENTIFIER, "b")},
-                           Block::make({}))}),
+                  "A", {FunctionDeclaration::make("method1", {"a", "b"},
+                                                  Block::make({}))}),
               VarDeclaration::make(
                   Token(TokenType::TOKEN_IDENTIFIER, "a"),
                   CallExpr::make(VariableExpr::make("A"),
@@ -568,9 +547,7 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
                   "A", {FunctionDeclaration::make(
-                           Token(TokenType::TOKEN_IDENTIFIER, "method1"),
-                           {Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                            Token(TokenType::TOKEN_IDENTIFIER, "b")},
+                           "method1", {"a", "b"},
                            Block::make({ReturnStatement::make(BinaryExpr::make(
                                VariableExpr::make("a"),
                                Token::make(TokenType::TOKEN_PLUS),

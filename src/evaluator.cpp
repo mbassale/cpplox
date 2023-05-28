@@ -125,7 +125,7 @@ ObjectPtr Evaluator::evalVarDeclarationStatement(EnvironmentPtr ctx,
 
 ObjectPtr Evaluator::evalFuncDeclarationStatement(EnvironmentPtr ctx,
                                                   FunctionDeclarationPtr stmt) {
-  const auto& functionName = stmt->identifier.lexeme();
+  const auto& functionName = stmt->identifier;
   auto function = Function::make(ctx, FunctionType::TYPE_FUNCTION, stmt,
                                  functionName, stmt->params.size());
   ctx->set(functionName, function);
@@ -318,7 +318,7 @@ ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
   auto funcCtx = callee->getCtx();
   // bind arguments
   for (size_t i = 0; i < funcDeclStmt->params.size(); i++) {
-    const auto paramName = funcDeclStmt->params[i].lexeme();
+    const auto paramName = funcDeclStmt->params[i];
     auto argExpr = expr->arguments[i];
     auto argValue = evalExpression(ctx, argExpr);
     funcCtx->declare(paramName, argValue);
