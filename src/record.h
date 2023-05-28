@@ -12,7 +12,9 @@ class Record : public Object {
   std::unordered_map<std::string, ObjectPtr> fields;
   std::unordered_map<std::string, FunctionPtr> methods;
 
-  Record(EnvironmentPtr enclosingCtx, ClassDeclarationPtr classDecl);
+  Record(EnvironmentPtr ctx, ClassDeclarationPtr classDecl,
+         std::unordered_map<std::string, ObjectPtr> fields,
+         std::unordered_map<std::string, FunctionPtr> methods);
 
   std::string toString() const override {
     return "<record " + classDecl->identifier + ">";
@@ -29,8 +31,10 @@ class Record : public Object {
     return classDecl->isEqual(*other.classDecl);
   }
 
-  static std::shared_ptr<Record> make(EnvironmentPtr enclosingCtx,
-                                      ClassDeclarationPtr classDecl);
+  static std::shared_ptr<Record> make(
+      EnvironmentPtr ctx, ClassDeclarationPtr classDecl,
+      std::unordered_map<std::string, ObjectPtr> fields,
+      std::unordered_map<std::string, FunctionPtr> methods);
 };
 
 using RecordPtr = std::shared_ptr<Record>;

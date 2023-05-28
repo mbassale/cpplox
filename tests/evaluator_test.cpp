@@ -625,8 +625,9 @@ TEST_F(EvaluatorTest, TestMemberExpression) {
   vector<TestCase> testCases = {TestCase{"MemberExpression1",
                                          " \
 class A {                 \
+    var a = 1;            \
     def method1() {       \
-      return 1;           \
+      return a + 1;           \
     }                     \
                           \
     def method2() {       \
@@ -637,19 +638,20 @@ class A {                 \
   var a = A();            \
   var b = a.method1();    \
   var c = a.method2();",
-                                         {{"b", 1}, {"c", 2}}},
+                                         {{"b", 2}, {"c", 2}}},
                                 TestCase{"MemberExpression2",
                                          "\
   class A {                 \
+      var c = 2;            \
       def method1(a, b) {   \
-        return a + b;       \
+        return c*(a + b);   \
       }                     \
   }                         \
   var a1 = A();             \
   var b = a1.method1(1,2);  \
   var a2 = A();             \
   var c = a2.method1(3,4);",
-                                         {{"b", 3}, {"c", 7}}}};
+                                         {{"b", 6}, {"c", 14}}}};
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);

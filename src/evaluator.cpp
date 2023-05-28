@@ -337,7 +337,21 @@ ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
 
 ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
                                    CallExprPtr expr) {
-  return Record::make(globalCtx, callee->declaration);
+  auto recordCtx = Environment::make(ctx);
+  std::unordered_map<std::string, ObjectPtr> fields;
+  auto classDecl = callee->declaration;
+  for (auto& field : classDecl->fields) {
+    const auto& fieldName = field->identifier;
+    fields[fieldName] = evalVarDeclarationStatement(recordCtx, field);
+  }
+  std::unordered_map<std::string, FunctionPtr> methods;
+  for (auto& method : classDecl->methods) {
+    const auto& methodName = method->identifier;
+    const auto arity = method->params.size();
+    methods[methodName] =
+        Function::make(recordCtx, TYPE_METHOD, method, methodName, arity);
+  }
+  return Record::make(recordCtx, callee->declaration, fields, methods);
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EnvironmentPtr ctx,
