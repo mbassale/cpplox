@@ -117,9 +117,7 @@ ObjectPtr Evaluator::evalVarDeclarationStatement(EnvironmentPtr ctx,
   if (stmt->initializer) {
     value = evalExpression(ctx, stmt->initializer);
   }
-  // TODO: we shouldn't access the lexeme here.
-  const auto identifier = stmt->identifier.lexeme();
-  ctx->set(identifier, value);
+  ctx->set(stmt->identifier, value);
   return value;
 }
 

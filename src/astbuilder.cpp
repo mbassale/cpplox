@@ -8,11 +8,10 @@ ProgramPtr ASTBuilderImpl::emitProgram(
 
 VarDeclarationPtr ASTBuilderImpl::emitVarDeclaration(
     VariableExprPtr identifier, ExpressionPtr initializer) {
-  Token nameToken(TokenType::TOKEN_IDENTIFIER, identifier->identifier);
   if (!initializer) {
     initializer = NilLiteral::make();
   }
-  return VarDeclaration::make(nameToken, initializer);
+  return VarDeclaration::make(identifier->identifier, initializer);
 }
 
 ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(

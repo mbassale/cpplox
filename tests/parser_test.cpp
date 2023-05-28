@@ -76,8 +76,7 @@ TEST_F(ParserTest, StatementAssertions) {
       ParserTestData(
           "VarDeclaration", "var test=true;",
           Program::make(std::vector<StatementPtr>{
-              VarDeclaration::make(Token(TokenType::TOKEN_IDENTIFIER, "test"),
-                                   BooleanLiteral::makeTrue())})),
+              VarDeclaration::make("test", BooleanLiteral::makeTrue())})),
       ParserTestData(
           "IfStatement", "if(true){true;}",
           Program::make(std::vector<StatementPtr>{IfStatement::make(
@@ -138,8 +137,7 @@ TEST_F(ParserTest, ParseFunctionDeclaration) {
           Program::make(std::vector<StatementPtr>{FunctionDeclaration::make(
               "test", {"arg1"},
               Block::make(std::vector<StatementPtr>{
-                  VarDeclaration::make(Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                                       VariableExpr::make("arg1")),
+                  VarDeclaration::make("a", VariableExpr::make("arg1")),
                   ReturnStatement::make(VariableExpr::make("a"))}))})),
   };
   assertTestCases(testCases);
@@ -373,8 +371,7 @@ TEST_F(ParserTest, ForStatementAssertions) {
       ParserTestData(
           "ForStatementSimple", "for(var i = 0; i < 10; i = i + 1) { i; }",
           Program::make(std::vector<StatementPtr>{ForStatement::make(
-              VarDeclaration::make(Token(TokenType::TOKEN_IDENTIFIER, "i"),
-                                   IntegerLiteral::make(0)),
+              VarDeclaration::make("i", IntegerLiteral::make(0)),
               BinaryExpr::make(VariableExpr::make("i"),
                                Token::make(TokenType::TOKEN_LESS),
                                IntegerLiteral::make(10)),
@@ -454,20 +451,17 @@ TEST_F(ParserTest, ArrayLiteralAssertions) {
       ParserTestData(
           "ArrayAssignment", "var a = [1, 2];",
           Program::make(std::vector<StatementPtr>{VarDeclaration::make(
-              Token(TokenType::TOKEN_IDENTIFIER, "a"),
-              ArrayLiteral::make(std::vector<ExpressionPtr>{
-                  IntegerLiteral::make(1), IntegerLiteral::make(2)}))})),
+              "a", ArrayLiteral::make(std::vector<ExpressionPtr>{
+                       IntegerLiteral::make(1), IntegerLiteral::make(2)}))})),
       ParserTestData(
           "ArraySubscript", "var a = [1, 2]; var b = a[1];",
           Program::make(std::vector<StatementPtr>{
               VarDeclaration::make(
-                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                  ArrayLiteral::make(std::vector<ExpressionPtr>{
-                      IntegerLiteral::make(1), IntegerLiteral::make(2)})),
+                  "a", ArrayLiteral::make(std::vector<ExpressionPtr>{
+                           IntegerLiteral::make(1), IntegerLiteral::make(2)})),
               VarDeclaration::make(
-                  Token(TokenType::TOKEN_IDENTIFIER, "b"),
-                  ArraySubscriptExpr::make(VariableExpr::make("a"),
-                                           IntegerLiteral::make(1)))}))};
+                  "b", ArraySubscriptExpr::make(VariableExpr::make("a"),
+                                                IntegerLiteral::make(1)))}))};
   assertTestCases(testCases);
 }
 
@@ -517,9 +511,8 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
               ClassDeclaration::make("A", {FunctionDeclaration::make(
                                               "method1", {}, Block::make({}))}),
               VarDeclaration::make(
-                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                  CallExpr::make(VariableExpr::make("A"),
-                                 std::vector<ExpressionPtr>{})),
+                  "a", CallExpr::make(VariableExpr::make("A"),
+                                      std::vector<ExpressionPtr>{})),
               ExpressionStatement::make(
                   MemberExpr::make(VariableExpr::make("a"), "method1")),
               ExpressionStatement::make(CallExpr::make(
@@ -533,9 +526,8 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
                   "A", {FunctionDeclaration::make("method1", {"a", "b"},
                                                   Block::make({}))}),
               VarDeclaration::make(
-                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                  CallExpr::make(VariableExpr::make("A"),
-                                 std::vector<ExpressionPtr>{})),
+                  "a", CallExpr::make(VariableExpr::make("A"),
+                                      std::vector<ExpressionPtr>{})),
               ExpressionStatement::make(CallExpr::make(
                   MemberExpr::make(VariableExpr::make("a"), "method1"),
                   std::vector<ExpressionPtr>{IntegerLiteral::make(1),
@@ -553,11 +545,10 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
                                Token::make(TokenType::TOKEN_PLUS),
                                VariableExpr::make("b")))}))}),
               VarDeclaration::make(
-                  Token(TokenType::TOKEN_IDENTIFIER, "a"),
-                  CallExpr::make(VariableExpr::make("A"),
-                                 std::vector<ExpressionPtr>{})),
+                  "a", CallExpr::make(VariableExpr::make("A"),
+                                      std::vector<ExpressionPtr>{})),
               VarDeclaration::make(
-                  Token(TokenType::TOKEN_IDENTIFIER, "b"),
+                  "b",
                   CallExpr::make(
                       MemberExpr::make(VariableExpr::make("a"), "method1"),
                       std::vector<ExpressionPtr>{IntegerLiteral::make(1),

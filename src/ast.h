@@ -471,14 +471,15 @@ struct Program : public Node {
 using ProgramPtr = std::shared_ptr<Program>;
 
 struct VarDeclaration : public Statement {
-  Token identifier;
+  std::string identifier;
   ExpressionPtr initializer;
 
-  VarDeclaration(const Token& identifier)
+  VarDeclaration(const std::string& identifier)
       : Statement(NodeType::VAR_DECLARATION),
         identifier(identifier),
         initializer(nullptr) {}
-  VarDeclaration(const Token& identifier, const ExpressionPtr& initializer)
+  VarDeclaration(const std::string& identifier,
+                 const ExpressionPtr& initializer)
       : Statement(NodeType::VAR_DECLARATION),
         identifier(identifier),
         initializer(initializer) {}
@@ -492,7 +493,7 @@ struct VarDeclaration : public Statement {
   }
 
   bool isEqual(const VarDeclaration& other) {
-    if (!identifier.isEqual(other.identifier)) {
+    if (identifier != other.identifier) {
       return false;
     }
 
@@ -512,7 +513,7 @@ struct VarDeclaration : public Statement {
   }
 
   std::string toString() const override {
-    std::string result = "(VarDeclaration " + identifier.lexeme();
+    std::string result = "(VarDeclaration " + identifier;
     if (initializer) {
       result += " " + initializer->toString();
     }
@@ -521,7 +522,8 @@ struct VarDeclaration : public Statement {
   }
 
   static std::shared_ptr<VarDeclaration> make(
-      const Token& identifier, const ExpressionPtr& initializer = nullptr) {
+      const std::string& identifier,
+      const ExpressionPtr& initializer = nullptr) {
     return std::make_shared<VarDeclaration>(identifier, initializer);
   }
 };
