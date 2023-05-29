@@ -34,7 +34,8 @@ class Evaluator {
   ObjectPtr evalVarDeclarationStatement(EnvironmentPtr ctx,
                                         VarDeclarationPtr stmt);
   ObjectPtr evalFuncDeclarationStatement(EnvironmentPtr ctx,
-                                         FunctionDeclarationPtr stmt);
+                                         FunctionDeclarationPtr stmt,
+                                         FunctionType functionType);
   ObjectPtr evalClassDeclarationStatement(EnvironmentPtr ctx,
                                           ClassDeclarationPtr stmt);
   ObjectPtr evalIfStatement(EnvironmentPtr ctx, IfStatementPtr stmt);

@@ -651,7 +651,25 @@ class A {                 \
   var b = a1.method1(1,2);  \
   var a2 = A();             \
   var c = a2.method1(3,4);",
-                                         {{"b", 6}, {"c", 14}}}};
+                                         {{"b", 6}, {"c", 14}}},
+                                TestCase{"MemberExpressionWithCtor",
+                                         "\
+  class A {                 \
+      var c = 2;            \
+      def __init__() {      \
+        c = 3;              \
+      }                     \
+      def method1(a, b) {   \
+        return c*(a + b);   \
+      }                     \
+  }                         \
+  var a1 = A();             \
+  var b = a1.method1(1,2);  \
+  var a2 = A();             \
+  var c = a2.method1(3,4);",
+                                         {{"b", 9}, {"c", 21}}}
+
+  };
 
   for (const auto& testCase : testCases) {
     std::istringstream ss(testCase.source);

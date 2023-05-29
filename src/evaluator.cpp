@@ -67,7 +67,8 @@ ObjectPtr Evaluator::evalStatement(EnvironmentPtr ctx, StatementPtr stmt) {
     }
     case NodeType::FUNCTION_DECLARATION: {
       auto funcDeclStmt = std::static_pointer_cast<FunctionDeclaration>(stmt);
-      return evalFuncDeclarationStatement(ctx, funcDeclStmt);
+      return evalFuncDeclarationStatement(ctx, funcDeclStmt,
+                                          FunctionType::TYPE_FUNCTION);
     }
     case NodeType::CLASS_DECLARATION: {
       auto classDeclStmt = std::static_pointer_cast<ClassDeclaration>(stmt);
@@ -122,10 +123,11 @@ ObjectPtr Evaluator::evalVarDeclarationStatement(EnvironmentPtr ctx,
 }
 
 ObjectPtr Evaluator::evalFuncDeclarationStatement(EnvironmentPtr ctx,
-                                                  FunctionDeclarationPtr stmt) {
+                                                  FunctionDeclarationPtr stmt,
+                                                  FunctionType functionType) {
   const auto& functionName = stmt->identifier;
-  auto function = Function::make(ctx, FunctionType::TYPE_FUNCTION, stmt,
-                                 functionName, stmt->params.size());
+  auto function = Function::make(ctx, functionType, stmt, functionName,
+                                 stmt->params.size());
   ctx->set(functionName, function);
   return function;
 }
@@ -348,8 +350,23 @@ ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
   for (auto& method : classDecl->methods) {
     const auto& methodName = method->identifier;
     const auto arity = method->params.size();
-    methods[methodName] =
-        Function::make(recordCtx, TYPE_METHOD, method, methodName, arity);
+    auto functionObj = evalFuncDeclarationStatement(recordCtx, method,
+                                                    FunctionType::TYPE_METHOD);
+    assert(functionObj->Type == ObjectType::OBJ_FUNCTION);
+    auto methodObj = std::dynamic_pointer_cast<Function>(functionObj);
+    assert(methodObj != nullptr);
+    methods[methodName] = methodObj;
+    recordCtx->set(methodName, methodObj);
+  }
+  // If we have a ctor, invoke it.
+  if (callee->declaration->ctor) {
+    // we don't store ctors, they are invoked only once per object.
+    auto functionObj = evalFuncDeclarationStatement(
+        recordCtx, callee->declaration->ctor, FunctionType::TYPE_INITIALIZER);
+    assert(functionObj->Type == ObjectType::OBJ_FUNCTION);
+    auto ctor = std::dynamic_pointer_cast<Function>(functionObj);
+    assert(ctor != nullptr);
+    evalFunctionCall(recordCtx, ctor, expr);
   }
   return Record::make(recordCtx, callee->declaration, fields, methods);
 }
