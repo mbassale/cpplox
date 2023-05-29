@@ -7,7 +7,6 @@
 
 struct ClassObject : public Object {
   ClassDeclarationPtr declaration;
-  std::vector<FunctionPtr> methods;
 
   ClassObject(ClassDeclarationPtr declaration)
       : Object(ObjectType::OBJ_CLASS), declaration(declaration) {}
