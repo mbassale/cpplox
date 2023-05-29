@@ -14,6 +14,12 @@ using Parser::JSParser;
 
 DEFINE_bool(debug, false, "Enable debugging");
 
+void fixNewLineAtEOF(std::string &source) {
+  if (source.length() > 0 && source[source.length() - 1] != '\n') {
+    source.push_back('\n');
+  }
+}
+
 class Driver {
  private:
   Evaluator evaluator;
@@ -48,7 +54,9 @@ class Driver {
     }
     std::ostringstream sstr;
     sstr << file.rdbuf();
-    interpret(sstr.str());
+    auto source = sstr.str();
+    fixNewLineAtEOF(source);
+    interpret(source);
   }
 
   bool interpret(const std::string &source) {
