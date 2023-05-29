@@ -554,14 +554,14 @@ TEST_F(EvaluatorTest, TestClassDeclarationStatement) {
       TestCase{
           "class A { def method1() {} def method2() {} }", "A",
           ClassDeclaration::make(
-              "A", {},
+              "A", nullptr, {},
               {FunctionDeclaration::make("method1", {}, Block::make({})),
                FunctionDeclaration::make("method2", {}, Block::make({}))})},
       TestCase{
           "class A { def method1() { } def method2() { } def method3() { } }",
           "A",
           ClassDeclaration::make(
-              "A", {},
+              "A", nullptr, {},
               {FunctionDeclaration::make("method1", {}, Block::make({})),
                FunctionDeclaration::make("method2", {}, Block::make({})),
                FunctionDeclaration::make("method3", {}, Block::make({}))})}};

@@ -469,32 +469,38 @@ TEST_F(ParserTest, ClassDeclarationAssertions) {
   std::vector<ParserTestData> testCases = {
       ParserTestData("EmptyClass", "class A {}",
                      Program::make(std::vector<StatementPtr>{
-                         ClassDeclaration::make("A", {})})),
+                         ClassDeclaration::make("A", nullptr, {}, {})})),
       ParserTestData(
           "ClassWithOneMethod", "class A { def method1() {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A", {},
+              "A", nullptr, {},
               {FunctionDeclaration::make("method1", {}, Block::make({}))})})),
       ParserTestData(
           "ClassWithTwoMethods",
           "class A { def method1() {} def method2() {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A", {},
+              "A", nullptr, {},
               {FunctionDeclaration::make("method1", {}, Block::make({})),
                FunctionDeclaration::make("method2", {}, Block::make({}))})})),
       ParserTestData(
           "ClassWithTwoMethodsWithMultipleArgs",
           "class A { def method1(a, b) {} def method2(c, d) {} }",
           Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
-              "A", {},
+              "A", nullptr, {},
               {FunctionDeclaration::make("method1", {"a", "b"},
                                          Block::make({})),
                FunctionDeclaration::make("method2", {"c", "d"},
                                          Block::make({}))})})),
       ParserTestData("TwoClasses", "class A {} class B {}",
                      Program::make(std::vector<StatementPtr>{
-                         ClassDeclaration::make("A", {}),
-                         ClassDeclaration::make("B", {})}))};
+                         ClassDeclaration::make("A", nullptr, {}, {}),
+                         ClassDeclaration::make("B", nullptr, {}, {})})),
+      ParserTestData(
+          "ClassWithConstructor", "class A { def __init__() {} }",
+          Program::make(std::vector<StatementPtr>{ClassDeclaration::make(
+              "A", FunctionDeclaration::make("__init__", {}, Block::make({})),
+              {}, {})})),
+  };
 
   assertTestCases(testCases);
 }
@@ -510,7 +516,7 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           "class A { def method1() {} } var a = A(); a.method1; a.method1();",
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
-                  "A", {},
+                  "A", nullptr, {},
                   {FunctionDeclaration::make("method1", {}, Block::make({}))}),
               VarDeclaration::make(
                   "a", CallExpr::make(VariableExpr::make("A"),
@@ -526,7 +532,8 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           "a.method1(1, 2);",
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
-                  "A", {VarDeclaration::make("a", IntegerLiteral::make(1))},
+                  "A", nullptr,
+                  {VarDeclaration::make("a", IntegerLiteral::make(1))},
                   {FunctionDeclaration::make("method1", {"a", "b"},
                                              Block::make({}))}),
               VarDeclaration::make(
@@ -544,7 +551,7 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           "= a.method1(1, 2);",
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
-                  "A",
+                  "A", nullptr,
                   {
                       VarDeclaration::make("a", IntegerLiteral::make(1)),
                       VarDeclaration::make("b", IntegerLiteral::make(2)),

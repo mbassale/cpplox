@@ -2,6 +2,8 @@
 
 using std::vector;
 
+constexpr auto MagicCtorName = "__init__";
+
 ProgramPtr ASTBuilderImpl::emitProgram(
     const std::vector<StatementPtr> &statements) {
   program = Program::make(statements);
@@ -18,19 +20,29 @@ VarDeclarationPtr ASTBuilderImpl::emitVarDeclaration(
 
 ClassDeclarationPtr ASTBuilderImpl::emitClassDeclaration(
     const Token &name, const std::vector<StatementPtr> &definitions) {
+  const auto classIdentifier = name.lexeme();
+  FunctionDeclarationPtr ctor;
   vector<VarDeclarationPtr> fields;
   vector<FunctionDeclarationPtr> methods;
+  // TODO: Add ctor and general class validation here for parsing errors
   for (const auto &definition : definitions) {
     if (definition->Type == NodeType::VAR_DECLARATION) {
       fields.push_back(std::dynamic_pointer_cast<VarDeclaration>(definition));
     } else if (definition->Type == NodeType::FUNCTION_DECLARATION) {
-      methods.push_back(
-          std::dynamic_pointer_cast<FunctionDeclaration>(definition));
+      auto functionPtr =
+          std::dynamic_pointer_cast<FunctionDeclaration>(definition);
+      // TODO: check for ctor validation here: duplicate ctors.
+      // if a method name is exactly as the magic ctor name, it is a ctor.
+      if (functionPtr->identifier == MagicCtorName) {
+        ctor = functionPtr;
+      } else {
+        methods.push_back(functionPtr);
+      }
     } else {
       assert(false);
     }
   }
-  return ClassDeclaration::make(name.lexeme(), fields, methods);
+  return ClassDeclaration::make(classIdentifier, ctor, fields, methods);
 }
 
 ExpressionStatementPtr ASTBuilderImpl::emitExpressionStatement(

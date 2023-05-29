@@ -603,6 +603,7 @@ using FunctionDeclarationPtr = std::shared_ptr<FunctionDeclaration>;
 
 struct ClassDeclaration : public Statement {
   std::string identifier;
+  FunctionDeclarationPtr ctor;
   std::vector<VarDeclarationPtr> fields;
   std::vector<FunctionDeclarationPtr> methods;
 
@@ -611,10 +612,12 @@ struct ClassDeclaration : public Statement {
         identifier(identifier),
         methods() {}
   ClassDeclaration(const std::string& identifier,
+                   const FunctionDeclarationPtr& ctor,
                    const std::vector<VarDeclarationPtr>& fields,
                    const std::vector<FunctionDeclarationPtr>& methods)
       : Statement(NodeType::CLASS_DECLARATION),
         identifier(identifier),
+        ctor(ctor),
         fields(fields),
         methods(methods) {}
 
@@ -638,10 +641,11 @@ struct ClassDeclaration : public Statement {
   }
 
   static std::shared_ptr<ClassDeclaration> make(
-      const std::string& identifier,
-      const std::vector<VarDeclarationPtr>& fields = {},
-      const std::vector<FunctionDeclarationPtr>& methods = {}) {
-    return std::make_shared<ClassDeclaration>(identifier, fields, methods);
+      const std::string& identifier, const FunctionDeclarationPtr& ctor,
+      const std::vector<VarDeclarationPtr>& fields,
+      const std::vector<FunctionDeclarationPtr>& methods) {
+    return std::make_shared<ClassDeclaration>(identifier, ctor, fields,
+                                              methods);
   }
 };
 using ClassDeclarationPtr = std::shared_ptr<ClassDeclaration>;
