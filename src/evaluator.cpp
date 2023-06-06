@@ -340,13 +340,16 @@ ObjectPtr Evaluator::evalFunctionCall(EnvironmentPtr ctx, FunctionPtr callee,
 ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
                                    CallExprPtr expr) {
   auto recordCtx = Environment::make(ctx);
-  std::unordered_map<std::string, ObjectPtr> fields;
+  auto recordObj = Record::make(recordCtx, callee->declaration);
+  recordCtx->declare("self", recordObj);
+
   auto classDecl = callee->declaration;
   for (auto& field : classDecl->fields) {
     const auto& fieldName = field->identifier;
-    fields[fieldName] = evalVarDeclarationStatement(recordCtx, field);
+    auto fieldValue = evalVarDeclarationStatement(recordCtx, field);
+    recordObj->setField(fieldName, fieldValue);
   }
-  std::unordered_map<std::string, FunctionPtr> methods;
+
   for (auto& method : classDecl->methods) {
     const auto& methodName = method->identifier;
     const auto arity = method->params.size();
@@ -355,9 +358,9 @@ ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
     assert(functionObj->Type == ObjectType::OBJ_FUNCTION);
     auto methodObj = std::dynamic_pointer_cast<Function>(functionObj);
     assert(methodObj != nullptr);
-    methods[methodName] = methodObj;
-    recordCtx->set(methodName, methodObj);
+    recordObj->setMethod(methodName, methodObj);
   }
+
   // If we have a ctor, invoke it.
   if (callee->declaration->ctor) {
     // we don't store ctors, they are invoked only once per object.
@@ -368,7 +371,7 @@ ObjectPtr Evaluator::evalClassCall(EnvironmentPtr ctx, ClassObjectPtr callee,
     assert(ctor != nullptr);
     evalFunctionCall(recordCtx, ctor, expr);
   }
-  return Record::make(recordCtx, callee->declaration, fields, methods);
+  return recordObj;
 }
 
 IntegerObjectPtr Evaluator::evalIntegerLiteral(EnvironmentPtr ctx,
