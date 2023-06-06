@@ -512,8 +512,17 @@ TEST_F(ParserTest, MemberExpressionAssertions) {
           Program::make(std::vector<StatementPtr>{ExpressionStatement::make(
               MemberExpr::make(VariableExpr::make("test"), "member"))})),
       ParserTestData(
+          "SimpleSelf", "self.member;",
+          Program::make(std::vector<StatementPtr>{ExpressionStatement::make(
+              MemberExpr::make(VariableExpr::make("self"), "member"))})),
+      ParserTestData(
+          "VariableAssignmentFromSelf", "var a = self.member;",
+          Program::make(std::vector<StatementPtr>{VarDeclaration::make(
+              "a", MemberExpr::make(VariableExpr::make("self"), "member"))})),
+      ParserTestData(
           "ClassWithMemberAccessAndCall",
-          "class A { def method1() {} } var a = A(); a.method1; a.method1();",
+          "class A { def method1() {} } var a = A(); a.method1; "
+          "a.method1();",
           Program::make(std::vector<StatementPtr>{
               ClassDeclaration::make(
                   "A", nullptr, {},
