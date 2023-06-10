@@ -83,9 +83,11 @@ MemberExprPtr ASTBuilderImpl::emitMemberExpression(VariableExprPtr object,
   return MemberExpr::make(object, member.lexeme());
 }
 
-AssignmentPtr ASTBuilderImpl::emitAssignmentExpression(
-    VariableExprPtr identifier, ExpressionPtr value) {
-  return Assignment::make(identifier->identifier, value);
+AssignmentPtr ASTBuilderImpl::emitAssignmentExpression(ExpressionPtr lhs,
+                                                       ExpressionPtr rhs) {
+  auto identifier = std::dynamic_pointer_cast<VariableExpr>(lhs);
+  assert(identifier != nullptr);
+  return Assignment::make(identifier->identifier, rhs);
 }
 
 CallExprPtr ASTBuilderImpl::emitCallExpression(

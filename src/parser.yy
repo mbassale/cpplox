@@ -42,7 +42,7 @@ using namespace std;
         virtual ArrayLiteralPtr emitArrayLiteral(const std::vector<ExpressionPtr> &elements) = 0;
         virtual ArraySubscriptExprPtr emitArraySubscript(ExpressionPtr array, ExpressionPtr index) = 0;
         virtual VariableExprPtr emitVarExpression(const Token &value) = 0;
-        virtual AssignmentPtr emitAssignmentExpression(VariableExprPtr identifier, ExpressionPtr value) = 0;
+        virtual AssignmentPtr emitAssignmentExpression(ExpressionPtr lhs, ExpressionPtr rhs) = 0;
         virtual CallExprPtr emitCallExpression(ExpressionPtr callee, const std::vector<ExpressionPtr> &arguments) = 0;
         virtual UnaryExprPtr emitUnaryOp(TokenType op, ExpressionPtr rhs) = 0;
         virtual BinaryExprPtr emitBinaryOp(TokenType op, ExpressionPtr lhs, ExpressionPtr rhs) = 0;
@@ -268,6 +268,7 @@ member_expr
 
 assignment_expr 
     : varExpr EQUAL expr { $$ = builder.emitAssignmentExpression($1, $3); }
+    | member_expr EQUAL expr { $$ = builder.emitAssignmentExpression($1, $3); }
 
 call_expr
     : expr LPAREN call_arguments RPAREN { $$ = builder.emitCallExpression($1, $3); }

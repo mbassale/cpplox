@@ -26,8 +26,8 @@ class ASTBuilderImpl : public ASTBuilder {
   VariableExprPtr emitVarExpression(const Token &value) override;
   MemberExprPtr emitMemberExpression(VariableExprPtr object,
                                      const Token &member) override;
-  AssignmentPtr emitAssignmentExpression(VariableExprPtr identifier,
-                                         ExpressionPtr value) override;
+  AssignmentPtr emitAssignmentExpression(ExpressionPtr lhs,
+                                         ExpressionPtr rhs) override;
   CallExprPtr emitCallExpression(
       ExpressionPtr callee,
       const std::vector<ExpressionPtr> &arguments) override;
